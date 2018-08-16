@@ -1,0 +1,28 @@
+dryrun = false
+scanner = "clair"
+failon = "high"
+image_project = "your-project-here"
+binauth_project = "your-project-here"
+
+[checks]
+diy      = true
+nobody   = true
+provenance = true
+snakeoil = true
+
+[server]
+port = 8000
+
+[ejson]
+dir = "/key"
+secrets = "/etc/voucher/secrets.production.ejson"
+
+[clair]
+address = "localhost:6060"
+
+[trusted-builder-identities]
+"email@address.com" = true
+"idcloudbuild.gserviceaccount.com" = true
+
+[trusted-projects]
+trusted-builds = true

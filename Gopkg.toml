@@ -1,0 +1,67 @@
+# Refer to https://github.com/golang/dep/blob/master/docs/Gopkg.toml.md
+# for detailed Gopkg.toml documentation.
+
+required = [
+  "cloud.google.com/go/compute/metadata",
+  "github.com/googleapis/gax-go",
+  "cloud.google.com/go/internal/version",
+  "google.golang.org/grpc",
+  "golang.org/x/oauth2",
+  "github.com/golang/protobuf/proto",
+  "google.golang.org/appengine",
+  "google.golang.org/api/googleapi",
+  "google.golang.org/api/internal",
+  "google.golang.org/api/option",
+  "google.golang.org/api/transport",
+  "google.golang.org/grpc/credentials",
+  "google.golang.org/appengine/socket",
+  "google.golang.org/appengine/internal",
+]
+
+# Add this ignore to ignore dependency resolution error for imports
+# "cloud.google.com/go/devtools"
+ignored = ["cloud.google.com/go/devtools/*"]
+
+[[constraint]]
+  name = "github.com/coreos/clair"
+  version = "v2.0.4"
+
+[[constraint]]
+  name = "github.com/golang/protobuf"
+  version = "v1.1.0"
+
+[[constraint]]
+  name = "github.com/docker/distribution"
+  branch = "master"
+
+[[constraint]]
+  name = "github.com/docker/docker"
+  version = "v17.03.2-ce"
+
+[[constraint]]
+  name = "github.com/gorilla/mux"
+  version = "v1.6.2"
+
+[[override]]
+  name = "github.com/spf13/cast"
+  version = "v1.2.0"
+
+[[constraint]]
+  name = "github.com/spf13/cobra"
+  version = "v0.0.1"
+
+[[constraint]]
+  name = "github.com/spf13/viper"
+  version = "v1.0.2"
+
+[[constraint]]
+  name = "github.com/sirupsen/logrus"
+  version = "v1.0.4"
+
+[[constraint]]
+  name = "github.com/stretchr/testify"
+  version = "v1.2.1"
+
+[[constraint]]
+  branch = "master"
+  name = "golang.org/x/crypto"
