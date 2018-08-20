@@ -94,8 +94,8 @@ func (g *Client) getOccurrenceAttestation(signature string, keyID string) *conta
 
 func (g *Client) getCreateOccurrenceRequest(imageData voucher.ImageData, parentNoteID string, attestation *containeranalysispb.Occurrence_Attestation) *containeranalysispb.CreateOccurrenceRequest {
 	binauthProjectPath := "projects/" + g.binauthProject
-	parentPath := binauthProjectPath + "/notes/" + parentNoteID
-	occurrence := containeranalysispb.Occurrence{NoteName: parentPath, ResourceUrl: g.imageProject, Details: attestation}
+	noteName := binauthProjectPath + "/notes/" + parentNoteID
+	occurrence := containeranalysispb.Occurrence{NoteName: noteName, ResourceUrl: imageData.String(), Details: attestation}
 	req := &containeranalysispb.CreateOccurrenceRequest{Parent: binauthProjectPath, Occurrence: &occurrence}
 	return req
 }
