@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/Shopify/voucher.svg?branch=master)](https://travis-ci.org/Shopify/voucher)
+[![codecov](https://codecov.io/gh/Shopify/voucher/branch/master/graph/badge.svg)](https://codecov.io/gh/Shopify/voucher)
+
 # voucher
 
 Voucher is the missing piece in the binary authorization toolchain which enables you to secure your software supply pipeline. Binary authorization uses an admission controller such as [Kritis](https://grafeas.io/docs/concepts/what-is-kritis/overview.html), which pulls information about a container image from a metadata server such as [Grafeas](https://grafeas.io/) to ensure that the image is not deployed to production unless it has passed an appropriate suite of checks. As running checks on containers during deployment is time consuming and prevents rapid rollout of changes, the checks the admission controller utilizes to verify an image is ready for production should be run at build time. Voucher does exactly that.

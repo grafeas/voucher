@@ -12,7 +12,7 @@ const (
 	testDigest      = "sha256:cb749360c5198a55859a7f335de3cf4e2f64b60886a2098684a2f9c7ffca81f2"
 	testBlobURL     = "https://" + testHostname + "/v2/" + testProject + "/blobs/" + testDigest
 	testManifestURL = "https://" + testHostname + "/v2/" + testProject + "/manifests/" + testDigest
-	testTokenURL    = "https://" + testHostname + "/v2/token?scope=repository%3Aproject%2Fapps%2Fproduction%2Fname%3A%2A&service=gcr.io"
+	testTokenURL    = "https://" + testHostname + "/v2/token?scope=repository%3Atest%2Fproject%3A%2A&service=gcr.io"
 )
 
 func compareStrings(t *testing.T, a, b string) {

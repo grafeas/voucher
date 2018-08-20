@@ -4,8 +4,6 @@ GODEP=dep
 GOPATH?=`echo $$GOPATH`
 GOBUILD=$(GOCMD) build
 GOCLEAN=$(GOCMD) clean
-GOTEST=$(GOCMD) test
-GOTESTARGS?=-race -covermode=atomic
 PACKAGES := cli server
 CODE=./cmd/
 SERVER_NAME=voucher_server
@@ -19,8 +17,11 @@ all: clean deps build
 install:
 	for BINARY_NAME in $(PACKAGES); do cp -v voucher_$$BINARY_NAME $(GOPATH)/bin/voucher_$$BINARY_NAME; done
 
+show-coverage: test
+	go tool cover -html=coverage.txt
+
 test:
-	$(GOTEST) ./... $(GOTESTARGS)
+	./test.sh
 
 clean:
 	$(GOCLEAN)
