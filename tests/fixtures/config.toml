@@ -1,0 +1,24 @@
+dryrun = true
+scanner = "clair"
+failon = "high"
+image_project = "voucher-test-project"
+binauth_project = "voucher-binauth"
+
+[checks]
+diy      = true
+nobody   = true
+provenance = true
+snakeoil = true
+
+[server]
+port = 8000
+require_auth = true
+username = "vouchertester"
+password = "$2a$10$.PaOjV8GdqSHSmUtfolsJeF6LsAq/3CNsFCYGb3IoN/mO9xj1c/yG"
+
+[ejson]
+dir = "../test/fixtures/key"
+secrets = "../test/fixtures/test.ejson"
+
+[clair]
+address = "localhost:6060"

@@ -1,5 +1,9 @@
 package voucher
 
+import (
+	"fmt"
+)
+
 // CheckFactory is a type of function that creates a new Check.
 type CheckFactory func() Check
 
@@ -30,11 +34,20 @@ func RegisterCheckFactory(name string, creator CheckFactory) {
 
 // GetCheckFactories gets new copies of the Checks from their registered
 // CheckCheckFactories.
-func GetCheckFactories(names ...string) map[string]Check {
+func GetCheckFactories(names ...string) (map[string]Check, error) {
 	checks := make(map[string]Check, len(DefaultCheckFactories))
 	for _, name := range names {
 		creator := DefaultCheckFactories.Get(name)
+		if nil == creator {
+			return checks, fmt.Errorf("requested check \"%s\" does not exist", name)
+		}
 		checks[name] = creator()
 	}
-	return checks
+	return checks, nil
+}
+
+// IsCheckFactoryRegistered returns true if the passed CheckFactory was
+// registered.
+func IsCheckFactoryRegistered(name string) bool {
+	return (nil != DefaultCheckFactories.Get(name))
 }

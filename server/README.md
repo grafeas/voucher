@@ -8,6 +8,8 @@ This is a quick guide to the Voucher API, for developers who are looking at buil
 
 Run all of the enabled tests on the image referred to by the passed input.
 
+Depending on the server's configuration, your client may need to use Basic Authentication to access this call.
+
 This call accepts a JSON encoded object with the following fields:
 
 | Field       | Comment                                                                                     |
@@ -42,24 +44,17 @@ The each of the objects in the `results` array are structured as follows:
 | `attested`  | A boolean, true if an attestation was created for the check.                       |
 | `err`       | Any error message or structure that was thrown during the course of the execution. |
 
-### POST /diy
+### POST /{test name here}
 
-Run a "diy" test on the passed input, skipping all other tests.
+Run the test specified in the URL.
 
-The input and output of this API call is identical to that described in [`POST /all`](#post-all).
+For example, if the API call is `POST /diy`, this will run the DIY test and nothing else.
 
-### POST /nobody
+The input and output of this API call is identical to that described in [`POST /all`](#post-all), 
+and like that call, authorization may be handled by Basic Authentication.
 
-Run a "nobody" test on the passed input, skipping all other tests.
-
-The input and output of this API call is identical to that described in [`POST /all`](#post-all).
-
-### POST /snakeoil
-
-Run a "snakeoil" test on the passed input, skipping all other tests.
-
-The input and output of this API call is identical to that described in [`POST /all`](#post-all).
- 
 ### GET /services/ping
 
 This call does nothing more than return a 200 Success status code. It is used to verify that the service is online.
+
+No Authorization header is required.

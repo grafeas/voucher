@@ -2,18 +2,26 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/Shopify/voucher"
 	"github.com/Shopify/voucher/cmd/config"
+	"github.com/gorilla/mux"
 	"github.com/spf13/viper"
 )
 
-func handle(w http.ResponseWriter, r *http.Request, name ...string) (err error) {
-
+func handleChecks(w http.ResponseWriter, r *http.Request, name ...string) {
 	var imageData voucher.ImageData
+	var err error
 
 	defer r.Body.Close()
+
+	if err = isAuthorized(r); nil != err {
+		http.Error(w, "username or password is incorrect", 401)
+		LogError(err)
+		return
+	}
 
 	w.Header().Set("content-type", "application/json")
 
@@ -28,7 +36,12 @@ func handle(w http.ResponseWriter, r *http.Request, name ...string) (err error) 
 
 	metadataClient := config.NewMetadataClient()
 
-	checksuite := config.NewCheckSuite(metadataClient, name...)
+	checksuite, err := config.NewCheckSuite(metadataClient, name...)
+	if nil != err {
+		http.Error(w, "server has been misconfigured", 500)
+		LogError(err)
+		return
+	}
 
 	var results []voucher.CheckResult
 
@@ -42,30 +55,37 @@ func handle(w http.ResponseWriter, r *http.Request, name ...string) (err error) 
 
 	LogResult(checkResponse)
 
-	output, err := json.Marshal(checkResponse)
+	err = json.NewEncoder(w).Encode(checkResponse)
 	if nil != err {
 		// if all else fails
 		http.Error(w, err.Error(), 500)
 		LogError(err)
 		return
 	}
-	w.Write(output)
-	return
 }
-
-// HandleNobody is a request handler that makes the calls to create a "Nobody" attestation
-func HandleNobody(w http.ResponseWriter, r *http.Request) { handle(w, r, "nobody") }
-
-// HandleSnakeoil is a request handler that makes the calls to create a "Snakeoil" attestation
-func HandleSnakeoil(w http.ResponseWriter, r *http.Request) { handle(w, r, "snakeoil") }
 
 // HandleAll is a request handler that makes the calls to create all attestations, this includes DIY, Nobody, Snakeoil
 func HandleAll(w http.ResponseWriter, r *http.Request) {
-	handle(w, r, config.EnabledChecks(voucher.ToMapStringBool(viper.GetStringMap("checks")))...)
+	handleChecks(w, r, config.EnabledChecks(voucher.ToMapStringBool(viper.GetStringMap("checks")))...)
 }
 
-// HandleDIY is a request handler that makes the calls to create a "DIY" attestation
-func HandleDIY(w http.ResponseWriter, r *http.Request) { handle(w, r, "diy") }
+// HandleIndividualCheck is a request handler that executes an individual check and creates an attestation if applicable.
+func HandleIndividualCheck(w http.ResponseWriter, r *http.Request) {
+	variables := mux.Vars(r)
+
+	checkName := variables["check"]
+	if "" == checkName {
+		http.Error(w, "failure", 500)
+		return
+	}
+
+	if voucher.IsCheckFactoryRegistered(checkName) {
+		handleChecks(w, r, checkName)
+		return
+	}
+
+	http.Error(w, fmt.Sprintf("check %s is not available", checkName), 404)
+}
 
 // HandleHealthCheck is a request handler that returns HTTP Status Code 200 when it is called from shopify cloud
 func HandleHealthCheck(w http.ResponseWriter, r *http.Request) { w.WriteHeader(200) }

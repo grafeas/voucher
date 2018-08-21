@@ -43,7 +43,10 @@ func runCheck(name ...string) {
 
 	metadataClient := config.NewMetadataClient()
 
-	checksuite := config.NewCheckSuite(metadataClient, name...)
+	checksuite, err := config.NewCheckSuite(metadataClient, name...)
+	if nil != err {
+		log.Fatalf("could not create CheckSuite: %s", err)
+	}
 
 	if viper.GetBool("dryrun") {
 		results = checksuite.Run(imageData)

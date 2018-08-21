@@ -15,6 +15,8 @@ import (
 )
 
 import (
+	"fmt"
+
 	"github.com/Shopify/voucher"
 	"github.com/Shopify/voucher/clair"
 	"github.com/Shopify/voucher/grafeas"
@@ -63,10 +65,16 @@ func EnabledChecks(checks map[string]bool) (enabledChecks []string) {
 // NewCheckSuite creates a new checks.Suite with the requested
 // Checks, passing any necessary configuration details to the
 // checks.
-func NewCheckSuite(metadataClient voucher.MetadataClient, names ...string) *voucher.Suite {
+func NewCheckSuite(metadataClient voucher.MetadataClient, names ...string) (*voucher.Suite, error) {
 	scanner := newScanner(metadataClient)
 	checksuite := voucher.NewSuite()
-	for name, check := range voucher.GetCheckFactories(names...) {
+
+	checks, err := voucher.GetCheckFactories(names...)
+	if nil != err {
+		return checksuite, fmt.Errorf("can't create check suite: %s", err)
+	}
+
+	for name, check := range checks {
 		if vulCheck, ok := check.(voucher.VulnerabilityCheck); ok {
 			vulCheck.SetScanner(scanner)
 			checksuite.Add(name, vulCheck)
@@ -82,5 +90,5 @@ func NewCheckSuite(metadataClient voucher.MetadataClient, names ...string) *vouc
 		checksuite.Add(name, check)
 	}
 
-	return checksuite
+	return checksuite, nil
 }

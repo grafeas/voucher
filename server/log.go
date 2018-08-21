@@ -25,12 +25,11 @@ func LogRequests(r *http.Request) {
 func LogResult(response voucher.Response) {
 	log.WithFields(log.Fields{
 		"image":   response.Image,
-		"project": response.Project,
 		"results": response.Results,
 	}).Info("Test Status")
 }
 
 // LogError logs server errors to stdout as Error
 func LogError(err error) {
-	log.Error(err, "Server error")
+	log.Errorf("Server error: %s", err)
 }
