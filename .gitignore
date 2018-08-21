@@ -18,3 +18,4 @@ voucher_cli_unix
 voucher_server_unix
 vendor/cloud.google.com/go/devtools/containeranalysis
 vendor/google.golang.org/genproto/googleapis/devtools/containeranalysis/
+coverage.txt
