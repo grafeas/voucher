@@ -1,5 +1,7 @@
 package voucher
 
+import "github.com/docker/distribution/reference"
+
 // Response describes the response from a Check call.
 type Response struct {
 	Image   string        `json:"image"`
@@ -9,8 +11,8 @@ type Response struct {
 
 // NewResponse creates a new Response for the passed ImageData,
 // with the passed results.
-func NewResponse(imageData ImageData, results []CheckResult) (checkResponse Response) {
-	checkResponse.Image = imageData.String()
+func NewResponse(reference reference.Reference, results []CheckResult) (checkResponse Response) {
+	checkResponse.Image = reference.String()
 	checkResponse.Results = results
 	checkResponse.Success = true
 

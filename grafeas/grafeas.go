@@ -2,20 +2,22 @@ package grafeas
 
 import (
 	"errors"
-	"github.com/Shopify/voucher"
+
+	"github.com/docker/distribution/reference"
+	containeranalysispb "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1alpha1"
 )
 
 var errNoOccurrences = errors.New("no occurrences returned for image")
 var errDiscoveriesUnfinished = errors.New("discoveries have not finished processing")
 
-func resourceURL(imageData voucher.ImageData) string {
-	return "resourceUrl=\"https://" + imageData.String() + "\""
+func resourceURL(reference reference.Reference) string {
+	return "resourceUrl=\"https://" + reference.String() + "\""
 }
 
 func projectPath(project string) string {
 	return "projects/" + project
 }
 
-func kindFilterStr(imageData voucher.ImageData, kind voucher.NoteKind) string {
-	return resourceURL(imageData) + " AND kind=\"" + kind.String() + "\""
+func kindFilterStr(reference reference.Reference, kind containeranalysispb.Note_Kind) string {
+	return resourceURL(reference) + " AND kind=\"" + kind.String() + "\""
 }

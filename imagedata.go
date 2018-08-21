@@ -23,5 +23,5 @@ func NewImageData(url string) (ImageData, error) {
 		return imageData, fmt.Errorf("reference %s has no digest", rawRef.String())
 	}
 
-	return ImageData(canonicalRef), nil
+	return canonicalRef, nil
 }
