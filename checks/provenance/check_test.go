@@ -21,7 +21,7 @@ var buildDetailsTestData = &containeranalysispb.BuildDetails{
 		ProjectId: projectTestData,
 		Creator:   builderIdentityTestData,
 		BuiltArtifacts: []*containeranalysispb.Artifact{
-			&containeranalysispb.Artifact{
+			{
 				Id:       imageURLTestData,
 				Checksum: imageSHA256TestData,
 				Names:    []string{"foo", "bar"},

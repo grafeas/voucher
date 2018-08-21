@@ -92,8 +92,6 @@ func (keyring *KeyRing) AddEntities(name string, input openpgp.EntityList) {
 			keyring.keyIds[name] = entity.PrimaryKey.KeyId
 		}
 	}
-
-	return
 }
 
 // NewKeyRing creates a new keyring from the passed EntityList. The keys in

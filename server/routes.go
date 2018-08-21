@@ -32,19 +32,19 @@ func NewRouter() *mux.Router {
 
 // Routes an array of type Route
 var Routes = []Route{
-	Route{
+	{
 		"All",
 		"POST",
 		"/all",
 		HandleAll,
 	},
-	Route{
+	{
 		"Individual Check",
 		"POST",
 		"/{check}",
 		HandleIndividualCheck,
 	},
-	Route{
+	{
 		"healthcheck: /services/ping",
 		"GET",
 		healthCheckPath,

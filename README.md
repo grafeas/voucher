@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/Shopify/voucher.svg?branch=master)](https://travis-ci.org/Shopify/voucher)
 [![codecov](https://codecov.io/gh/Shopify/voucher/branch/master/graph/badge.svg)](https://codecov.io/gh/Shopify/voucher)
+[![Go Report Card](https://goreportcard.com/badge/github.com/Shopify/voucher)](https://goreportcard.com/report/github.com/Shopify/voucher)
 
 # voucher
 

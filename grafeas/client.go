@@ -7,6 +7,7 @@ import (
 	containeranalysis "cloud.google.com/go/devtools/containeranalysis/apiv1alpha1"
 	"github.com/Shopify/voucher"
 	binauth "github.com/Shopify/voucher/grafeas/binauth"
+	"github.com/docker/distribution/reference"
 	containeranalysispb "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1alpha1"
 )
 
@@ -25,8 +26,8 @@ func (g *Client) CanAttest() bool {
 }
 
 // NewPayloadBody returns a payload body appropriate for this MetadataClient.
-func (g *Client) NewPayloadBody(imageData voucher.ImageData) (string, error) {
-	payload, err := binauth.NewPayload(imageData).ToString()
+func (g *Client) NewPayloadBody(reference reference.Canonical) (string, error) {
+	payload, err := binauth.NewPayload(reference).ToString()
 	if err != nil {
 		return "", err
 	}
@@ -34,16 +35,16 @@ func (g *Client) NewPayloadBody(imageData voucher.ImageData) (string, error) {
 }
 
 // GetOccurrencesForImage gets the occurrences
-func (g *Client) GetOccurrencesForImage(imageData voucher.ImageData, kind voucher.NoteKind) (occurrences []voucher.Occurrence, err error) {
+func (g *Client) GetOccurrencesForImage(reference reference.Canonical, kind voucher.NoteKind) (occurrences []voucher.Occurrence, err error) {
 	ctx := context.Background()
 	c, err := containeranalysis.NewClient(ctx)
 	if err != nil {
 		return
 	}
 
-	filterStr := resourceURL(imageData)
+	filterStr := resourceURL(reference)
 	if kind != containeranalysispb.Note_KIND_UNSPECIFIED {
-		filterStr = kindFilterStr(imageData, kind)
+		filterStr = kindFilterStr(reference, kind)
 	}
 
 	project := projectPath(g.imageProject)
@@ -62,7 +63,7 @@ func (g *Client) GetOccurrencesForImage(imageData voucher.ImageData, kind vouche
 
 // AddAttestationOccurrenceToImage adds a new attestation with the passed AttestationPayload
 // to the image described by ImageData.
-func (g *Client) AddAttestationOccurrenceToImage(imageData voucher.ImageData, payload voucher.AttestationPayload) (voucher.Occurrence, error) {
+func (g *Client) AddAttestationOccurrenceToImage(reference reference.Canonical, payload voucher.AttestationPayload) (voucher.Occurrence, error) {
 	if !g.CanAttest() {
 		return nil, errCannotAttest
 	}
@@ -73,7 +74,7 @@ func (g *Client) AddAttestationOccurrenceToImage(imageData voucher.ImageData, pa
 	}
 
 	attestation := g.getOccurrenceAttestation(signed, keyId)
-	occurrenceRequest := g.getCreateOccurrenceRequest(imageData, payload.CheckName, attestation)
+	occurrenceRequest := g.getCreateOccurrenceRequest(reference, payload.CheckName, attestation)
 	ctx := context.Background()
 	c, err := containeranalysis.NewClient(ctx)
 	if err != nil {
@@ -92,10 +93,10 @@ func (g *Client) getOccurrenceAttestation(signature string, keyID string) *conta
 	return &occurrenceAttestation
 }
 
-func (g *Client) getCreateOccurrenceRequest(imageData voucher.ImageData, parentNoteID string, attestation *containeranalysispb.Occurrence_Attestation) *containeranalysispb.CreateOccurrenceRequest {
+func (g *Client) getCreateOccurrenceRequest(reference reference.Reference, parentNoteID string, attestation *containeranalysispb.Occurrence_Attestation) *containeranalysispb.CreateOccurrenceRequest {
 	binauthProjectPath := "projects/" + g.binauthProject
 	noteName := binauthProjectPath + "/notes/" + parentNoteID
-	occurrence := containeranalysispb.Occurrence{NoteName: noteName, ResourceUrl: imageData.String(), Details: attestation}
+	occurrence := containeranalysispb.Occurrence{NoteName: noteName, ResourceUrl: reference.String(), Details: attestation}
 	req := &containeranalysispb.CreateOccurrenceRequest{Parent: binauthProjectPath, Occurrence: &occurrence}
 	return req
 }
