@@ -12,6 +12,9 @@ snakeoil = true
 
 [server]
 port = 8000
+require_auth = true
+username = "username here"
+password = "bcrypt hash of your password"
 
 [ejson]
 dir = "/key"

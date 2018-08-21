@@ -3,7 +3,6 @@ package voucher
 // Response describes the response from a Check call.
 type Response struct {
 	Image   string        `json:"image"`
-	Project string        `json:"project"`
 	Success bool          `json:"success"`
 	Results []CheckResult `json:"results"`
 }

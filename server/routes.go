@@ -39,22 +39,10 @@ var Routes = []Route{
 		HandleAll,
 	},
 	Route{
-		"DIY",
+		"Individual Check",
 		"POST",
-		"/diy",
-		HandleDIY,
-	},
-	Route{
-		"Nobody",
-		"POST",
-		"/nobody",
-		HandleNobody,
-	},
-	Route{
-		"Snakeoil",
-		"POST",
-		"/snakeoil",
-		HandleSnakeoil,
+		"/{check}",
+		HandleIndividualCheck,
 	},
 	Route{
 		"healthcheck: /services/ping",

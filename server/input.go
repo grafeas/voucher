@@ -2,7 +2,6 @@ package server
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"net/http"
 
 	"github.com/Shopify/voucher"
@@ -14,18 +13,9 @@ type inputParams struct {
 }
 
 func handleInput(r *http.Request) (imageData voucher.ImageData, err error) {
-	var body []byte
-
-	// Read body
-	body, err = ioutil.ReadAll(r.Body)
-	if nil != err {
-		return
-	}
-
 	var params inputParams
 
-	// Unmarshal
-	err = json.Unmarshal(body, &params)
+	err = json.NewDecoder(r.Body).Decode(&params)
 	if nil != err {
 		return
 	}
