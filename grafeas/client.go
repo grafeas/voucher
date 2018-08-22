@@ -96,7 +96,8 @@ func (g *Client) getOccurrenceAttestation(signature string, keyID string) *conta
 func (g *Client) getCreateOccurrenceRequest(reference reference.Reference, parentNoteID string, attestation *containeranalysispb.Occurrence_Attestation) *containeranalysispb.CreateOccurrenceRequest {
 	binauthProjectPath := "projects/" + g.binauthProject
 	noteName := binauthProjectPath + "/notes/" + parentNoteID
-	occurrence := containeranalysispb.Occurrence{NoteName: noteName, ResourceUrl: reference.String(), Details: attestation}
+	resourceURL := "https://" + reference.String()
+	occurrence := containeranalysispb.Occurrence{NoteName: noteName, ResourceUrl: resourceURL, Details: attestation}
 	req := &containeranalysispb.CreateOccurrenceRequest{Parent: binauthProjectPath, Occurrence: &occurrence}
 	return req
 }
