@@ -1,8 +1,6 @@
 package voucher
 
-import (
-	"fmt"
-)
+import "fmt"
 
 // AttestationPayload is a structure that contains the Attestation data that we
 // want to create an Occurrence from.
@@ -18,12 +16,9 @@ func (payload *AttestationPayload) Sign(keyring *KeyRing) (string, string, error
 		return "", "", err
 	}
 
-	// create the hex version of the KeyID.
-	keyID := fmt.Sprintf("%#x", signer.PrimaryKey.KeyId)
-
 	signature, err := Sign(signer, payload.Body)
 
-	return signature, keyID, err
+	return signature, fmt.Sprintf("%X", signer.PrimaryKey.Fingerprint), err
 }
 
 // NewAttestationPayload creates a new AttestationPayload for the check with the passed name,

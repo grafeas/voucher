@@ -6,7 +6,7 @@ import (
 )
 
 const snakeoilKeyID = "1E92E2B4BB73E885"
-
+const snakeoilKeyFingerprint = "90E942641C07A4C466BA97161E92E2B4BB73E885"
 const testSignedValue = "test value to sign"
 
 func TestGetKey(t *testing.T) {
