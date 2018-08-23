@@ -10,9 +10,9 @@ import (
 
 // Scanner implements the interface SnakeoilScanner.
 type Scanner struct {
-	hostname string
-	failOn   voucher.Severity
-	auth     voucher.Auth
+	config Config
+	failOn voucher.Severity
+	auth   voucher.Auth
 }
 
 // FailOn sets severity level that a vulnerability must match or exheed to
@@ -35,7 +35,7 @@ func (scanner *Scanner) Scan(i voucher.ImageData) ([]voucher.Vulnerability, erro
 		return vulns, err
 	}
 
-	rawVulns, err := getVulnerabilities(ctx, scanner.hostname, tokenSrc, i)
+	rawVulns, err := getVulnerabilities(ctx, scanner.config, tokenSrc, i)
 	if nil != err {
 		return vulns, err
 	}
@@ -55,11 +55,19 @@ func (scanner *Scanner) Scan(i voucher.ImageData) ([]voucher.Vulnerability, erro
 	return vulns, err
 }
 
+// SetBasicAuth sets the username and password to use for Basic Auth,
+// and enforces the use of Basic Auth for new connections.
+func (scanner *Scanner) SetBasicAuth(username, password string) {
+	scanner.config.Username = username
+	scanner.config.Password = password
+}
+
 // NewScanner creates a new Scanner.
-func NewScanner(hostname string, auth voucher.Auth) *Scanner {
+func NewScanner(config Config, auth voucher.Auth) *Scanner {
 	scanner := new(Scanner)
 
-	scanner.hostname = hostname
+	scanner.config = config
+
 	scanner.auth = auth
 
 	return scanner

@@ -1,6 +1,7 @@
 package voucher
 
 import (
+	"os"
 	"strconv"
 	"testing"
 )
@@ -9,12 +10,28 @@ const snakeoilKeyID = "1E92E2B4BB73E885"
 const snakeoilKeyFingerprint = "90E942641C07A4C466BA97161E92E2B4BB73E885"
 const testSignedValue = "test value to sign"
 
-func TestGetKey(t *testing.T) {
+func newKeyring(t *testing.T) *KeyRing {
+	t.Helper()
 
-	keyring, err := EjsonToKeyRing("tests/fixtures/key", "tests/fixtures/test.ejson")
+	keyring := NewKeyRing()
+
+	keyFile, err := os.Open("tests/fixtures/testkey.asc")
 	if nil != err {
-		t.Fatalf("Failed to get keys from ejson: %s", err)
+		t.Fatalf("failed to open key file: %s", err)
 	}
+
+	defer keyFile.Close()
+
+	err = AddKeyToKeyRingFromReader(keyring, "snakeoil", keyFile)
+	if nil != err {
+		t.Fatalf("Failed to add key to keyring: %s", err)
+	}
+
+	return keyring
+}
+
+func TestGetKey(t *testing.T) {
+	keyring := newKeyring(t)
 
 	entity, err := keyring.GetSignerByName("snakeoil")
 	if nil != err {

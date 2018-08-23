@@ -18,7 +18,7 @@ import (
 var errNoLayers = errors.New("no layers in image, vulnerabilities have not been populated")
 
 // sendLayerToClair sends a layer from the passed repository (with the passed LayerReference).
-func sendLayerToClair(hostname string, tokenSrc oauth2.TokenSource, layerRef LayerReference) (err error) {
+func sendLayerToClair(config Config, tokenSrc oauth2.TokenSource, layerRef LayerReference) (err error) {
 	var token *oauth2.Token
 
 	token, err = tokenSrc.Token()
@@ -38,9 +38,13 @@ func sendLayerToClair(hostname string, tokenSrc oauth2.TokenSource, layerRef Lay
 		return
 	}
 
-	request, err := http.NewRequest(http.MethodPost, "http://"+hostname+"/v1/layers", &buffer)
+	request, err := http.NewRequest(http.MethodPost, "http://"+config.Hostname+"/v1/layers", &buffer)
 	if nil != err {
 		return
+	}
+
+	if config.UseBasicAuth() {
+		config.UpdateRequest(request)
 	}
 
 	resp, err := http.DefaultClient.Do(request)
@@ -62,12 +66,16 @@ func sendLayerToClair(hostname string, tokenSrc oauth2.TokenSource, layerRef Lay
 
 // getLayerFromClair gets the description of the Layer with the passed digest from Clair,
 // using the passed digest.
-func getLayerFromClair(hostname string, digest digest.Digest) (layer v1.Layer, err error) {
-	url := "http://" + hostname + "/v1/layers/" + string(digest) + "?vulnerabilities"
+func getLayerFromClair(config Config, digest digest.Digest) (layer v1.Layer, err error) {
+	url := "http://" + config.Hostname + "/v1/layers/" + string(digest) + "?vulnerabilities"
 
 	request, err := http.NewRequest(http.MethodGet, url, nil)
 	if nil != err {
 		return
+	}
+
+	if config.UseBasicAuth() {
+		config.UpdateRequest(request)
 	}
 
 	resp, err := http.DefaultClient.Do(request)
@@ -94,7 +102,7 @@ func getLayerFromClair(hostname string, digest digest.Digest) (layer v1.Layer, e
 
 // getVulnerabilities gets a map[string]v1.Vulnerability from Clair, so that we can convert
 // them to Voucher Vulnerabilities all at once.
-func getVulnerabilities(ctx context.Context, hostname string, tokenSrc oauth2.TokenSource, image reference.Canonical) (map[string]v1.Vulnerability, error) {
+func getVulnerabilities(ctx context.Context, config Config, tokenSrc oauth2.TokenSource, image reference.Canonical) (map[string]v1.Vulnerability, error) {
 	vulns := make(map[string]v1.Vulnerability)
 	var err error
 
@@ -111,7 +119,7 @@ func getVulnerabilities(ctx context.Context, hostname string, tokenSrc oauth2.To
 		current := imageLayer.Digest
 
 		// send the current layer to Clair
-		if err = sendLayerToClair(hostname, tokenSrc, NewLayerReference(image, current, parent)); nil != err {
+		if err = sendLayerToClair(config, tokenSrc, NewLayerReference(image, current, parent)); nil != err {
 			return vulns, err
 		}
 
@@ -124,7 +132,7 @@ func getVulnerabilities(ctx context.Context, hostname string, tokenSrc oauth2.To
 		// according to the Clair API, we can just get the vulnerabilities from the last
 		// layer checked by Clair. The parent digest would have been updated at the end
 		// of the manifest.Layers loop.
-		if layer, err = getLayerFromClair(hostname, parent); nil != err {
+		if layer, err = getLayerFromClair(config, parent); nil != err {
 			return vulns, err
 		}
 

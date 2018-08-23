@@ -17,8 +17,8 @@ username = "vouchertester"
 password = "$2a$10$.PaOjV8GdqSHSmUtfolsJeF6LsAq/3CNsFCYGb3IoN/mO9xj1c/yG"
 
 [ejson]
-dir = "../test/fixtures/key"
-secrets = "../test/fixtures/test.ejson"
+dir = "../tests/fixtures/key"
+secrets = "../tests/fixtures/test.ejson"
 
 [clair]
 address = "localhost:6060"
