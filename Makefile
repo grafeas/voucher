@@ -8,6 +8,7 @@ PACKAGES := cli server
 CODE=./cmd/
 SERVER_NAME=voucher_server
 CLI_NAME=voucher_cli
+CLIENT_NAME=voucher_client
 BINARY_UNIX=_unix
 
 .PHONY: clean setup deps test build install
@@ -37,10 +38,13 @@ update-deps:
 	$(GOCMD) get github.com/golang/dep/cmd/dep
 	$(GODEP) ensure
 
-build: voucher_cli voucher_server
+build: voucher_cli voucher_server voucher_client
 
 voucher_cli:
 	$(GOBUILD) -o $(CLI_NAME) -v $(CODE)$(CLI_NAME)
+
+voucher_client: $(wildcard cmd/voucher_client/*.go)
+	$(GOBUILD) -o $(CLIENT_NAME) -v $(CODE)$(CLIENT_NAME)
 
 voucher_server:
 	$(GOBUILD) -o $(SERVER_NAME) -v $(CODE)$(SERVER_NAME)

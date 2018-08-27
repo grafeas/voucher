@@ -37,3 +37,12 @@ func GetManifestURI(ref reference.Canonical) string {
 
 	return fmt.Sprintf("https://%s/v2/%s/manifests/%s", hostname, repository, ref.Digest())
 }
+
+// GetTagManifestURI gets a manifest URI based on the passed repository and
+// tag.
+func GetTagManifestURI(ref reference.NamedTagged) string {
+	hostname := reference.Domain(ref)
+	repository := reference.Path(ref)
+
+	return fmt.Sprintf("https://%s/v2/%s/manifests/%s", hostname, repository, ref.Tag())
+}

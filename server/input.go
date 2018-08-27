@@ -7,13 +7,13 @@ import (
 	"github.com/Shopify/voucher"
 )
 
-// inputParams describes the input structure.
-type inputParams struct {
+// VoucherParams describes the input structure.
+type VoucherParams struct {
 	ImageURL string `json:"image_url"`
 }
 
 func handleInput(r *http.Request) (imageData voucher.ImageData, err error) {
-	var params inputParams
+	var params VoucherParams
 
 	err = json.NewDecoder(r.Body).Decode(&params)
 	if nil != err {
