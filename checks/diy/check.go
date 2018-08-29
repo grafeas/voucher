@@ -1,28 +1,36 @@
 package diy
 
 import (
-	voucher "github.com/Shopify/voucher"
+	"context"
+	"time"
+
+	"github.com/Shopify/voucher"
 	"github.com/Shopify/voucher/docker"
 )
 
 // check is a check that verifies if the passed image was built
 // by us.
 type check struct {
+	auth voucher.Auth
+}
+
+// SetAuth sets the authentication system that this check will use
+// for its run.
+func (d *check) SetAuth(auth voucher.Auth) {
+	d.auth = auth
 }
 
 // check checks if an image was built by a trusted source
 func (d *check) Check(i voucher.ImageData) (bool, error) {
-	gcloudToken, err := voucher.GetAccessToken()
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	client, err := voucher.AuthToClient(ctx, d.auth, i)
 	if nil != err {
 		return false, err
 	}
 
-	oauthToken, err := docker.Auth(gcloudToken, i)
-	if nil != err {
-		return false, err
-	}
-
-	_, err = docker.RequestImageConfig(oauthToken, i)
+	_, err = docker.RequestImageConfig(client, i)
 	if nil != err {
 		return false, err
 	}

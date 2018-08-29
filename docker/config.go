@@ -2,18 +2,18 @@ package docker
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/docker/distribution/manifest/schema2"
 	"github.com/docker/distribution/reference"
+	digest "github.com/opencontainers/go-digest"
 )
 
 // RequestImageConfig requests an image configuration from the server, based on the passed
 // reference. Returns an ImageConfig or an error.
-func RequestImageConfig(token OAuthToken, ref reference.Canonical) (ImageConfig, error) {
+func RequestImageConfig(client *http.Client, ref reference.Canonical) (ImageConfig, error) {
 
-	manifest, err := RequestManifest(token, ref)
+	manifest, err := RequestManifest(client, ref)
 	if nil != err {
 		return ImageConfig{}, err
 	}
@@ -22,28 +22,22 @@ func RequestImageConfig(token OAuthToken, ref reference.Canonical) (ImageConfig,
 		return ImageConfig{}, errors.New("image does not have any configuration")
 	}
 
-	configRef, err := reference.WithDigest(ref, manifest.Config.Digest)
-	if nil != err {
-		return ImageConfig{}, fmt.Errorf("could not create configuration reference: %s", err)
-	}
-
-	return RequestConfig(token, configRef)
+	return RequestConfig(client, ref, manifest.Config.Digest)
 }
 
 // RequestConfig requests an image configuration from the server, based on the passed digest.
 // Returns an ImageConfig or an error.
-func RequestConfig(token OAuthToken, ref reference.Canonical) (ImageConfig, error) {
+func RequestConfig(client *http.Client, ref reference.Named, digest digest.Digest) (ImageConfig, error) {
 	var config ImageConfig
 
-	request, err := http.NewRequest(http.MethodGet, GetBlobURI(ref), nil)
+	request, err := http.NewRequest(http.MethodGet, GetBlobURI(ref, digest), nil)
 	if nil != err {
 		return config, err
 	}
 
 	request.Header.Add("Accept", schema2.MediaTypeImageConfig)
-	setBearerToken(request, token)
 
-	err = doDockerCall(request, &config)
+	err = doDockerCall(client, request, &config)
 
 	return config, err
 }

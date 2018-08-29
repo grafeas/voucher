@@ -29,11 +29,11 @@ clean:
 		rm -vrf voucher_$$PACKAGE voucher_$$PACKAGE$(BINARY_UNIX); \
 	done
 
-deps: setup
+deps:
 	wget -P hack/ https://storage.googleapis.com/container-analysis-v1alpha1/containeranalysis-go.tar.gz
 	tar xzvf hack/containeranalysis-go.tar.gz -C vendor
 
-setup:
+update-deps:
 	$(GOCMD) get github.com/golang/dep/cmd/dep
 	$(GODEP) ensure
 

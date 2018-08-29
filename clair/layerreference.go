@@ -5,6 +5,7 @@ import (
 	"github.com/coreos/clair/api/v1"
 	"github.com/docker/distribution/reference"
 	"github.com/opencontainers/go-digest"
+	"golang.org/x/oauth2"
 )
 
 // LayerReference is a structure containing a Layer digest, as well as the repository
@@ -17,7 +18,7 @@ type LayerReference struct {
 
 // GetURI gets the URI that is described in the LayerReference.
 func (ref *LayerReference) GetURI() string {
-	return docker.GetBlobURI(ref.Image)
+	return docker.GetBlobURI(ref.Image, ref.Current)
 }
 
 // GetLayer returns a layer description of the LayerReference.
@@ -31,10 +32,20 @@ func (ref *LayerReference) GetLayer() v1.Layer {
 	}
 }
 
+// NewLayerReference creates a new LayerReference based on the passed Image, and layer digest (the current digest)
+// and that layer's parent digest.
+func NewLayerReference(image reference.Canonical, current, parent digest.Digest) LayerReference {
+	return LayerReference{
+		Image:   image,
+		Current: current,
+		Parent:  parent,
+	}
+}
+
 // AddAuthorization adds a Bearer token to the v1.Layer passed to it and
 // returns a new v1.Layer.
-func AddAuthorization(layer v1.Layer, token string) v1.Layer {
-	layer.Headers["Authorization"] = "Bearer " + token
+func AddAuthorization(layer v1.Layer, token *oauth2.Token) v1.Layer {
+	layer.Headers["Authorization"] = token.Type() + " " + token.AccessToken
 
 	return layer
 }

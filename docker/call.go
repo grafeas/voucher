@@ -5,15 +5,10 @@ import (
 	"net/http"
 )
 
-// setBearerToken sets the Bearer token in the Authorization header.
-func setBearerToken(request *http.Request, token OAuthToken) {
-	request.Header.Set("Authorization", "Bearer "+token.Token)
-}
-
-// doDockerCall executes an API call to Docker, and returns the resulting data.
-// a schema2.Manifest, or an error if there's an issue.
-func doDockerCall(request *http.Request, data interface{}) error {
-	resp, err := http.DefaultClient.Do(request)
+// doDockerCall executes an API call to Docker using the passed http.Client, and unmarshals
+// the resulting data into the passed interface, or returns an error if there's an issue.
+func doDockerCall(client *http.Client, request *http.Request, data interface{}) error {
+	resp, err := client.Do(request)
 	if nil != err {
 		return err
 	}
