@@ -7,8 +7,9 @@ import (
 	"github.com/docker/distribution/reference"
 )
 
-// RequestManifest requests an Manifest for the passed repository, with the passed tag. Returns
-// a schema2.Manifest, or an error if there's an issue.
+// RequestManifest requests an Manifest for the passed canonical image reference (an image URL
+// with a digest specifying the built image). Returns a schema2.Manifest, or an error if
+// there's an issue.
 func RequestManifest(client *http.Client, ref reference.Canonical) (schema2.Manifest, error) {
 	var manifest schema2.Manifest
 

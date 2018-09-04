@@ -12,6 +12,7 @@
 *.out
 
 hack/*
+voucher_client
 voucher_cli
 voucher_server
 voucher_cli_unix
