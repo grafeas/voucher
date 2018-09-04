@@ -10,6 +10,8 @@ import (
 	"golang.org/x/oauth2/google"
 )
 
+const gcrScope = "https://www.googleapis.com/auth/cloud-platform"
+
 // GoogleAuth wraps the Google OAuth2 code.
 type auth struct {
 }
@@ -17,9 +19,8 @@ type auth struct {
 // GetTokenSource gets the default oauth2.TokenSource for connecting to Google's,
 // OAuth2 protected systems, based on the runtime environment, or returns error
 // if there's an issue getting the token source.
-func (a *auth) GetTokenSource(ctx context.Context, reference reference.Named) (oauth2.TokenSource, error) {
-	repository := "repository:" + reference.String() + ":*"
-	source, err := google.DefaultTokenSource(ctx, repository)
+func (a *auth) GetTokenSource(ctx context.Context, ref reference.Named) (oauth2.TokenSource, error) {
+	source, err := google.DefaultTokenSource(ctx, gcrScope)
 	if nil != err {
 		err = fmt.Errorf("failed to get Google Auth token source: %s", err)
 	}
