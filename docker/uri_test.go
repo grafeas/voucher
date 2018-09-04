@@ -36,7 +36,7 @@ func TestGetBaseURI(t *testing.T) {
 		hostname, path := reference.SplitHostname(canonicalRef)
 		compareStrings(t, hostname, "gcr.io")
 		compareStrings(t, path, testProject)
-		compareStrings(t, testBlobURL, GetBlobURI(canonicalRef))
+		compareStrings(t, testBlobURL, GetBlobURI(canonicalRef, canonicalRef.Digest()))
 		compareStrings(t, testManifestURL, GetManifestURI(canonicalRef))
 	} else {
 		t.Fatal("failed to get reference")

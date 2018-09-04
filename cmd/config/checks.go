@@ -24,11 +24,11 @@ import (
 	"github.com/spf13/viper"
 )
 
-func newScanner(metadataClient voucher.MetadataClient) (scanner voucher.VulnerabilityScanner) {
+func newScanner(metadataClient voucher.MetadataClient, auth voucher.Auth) (scanner voucher.VulnerabilityScanner) {
 	scannerName := viper.GetString("scanner")
 	switch scannerName {
 	case "clair", "c":
-		scanner = clair.NewScanner(viper.GetString("clair.address"))
+		scanner = clair.NewScanner(viper.GetString("clair.address"), auth)
 	case "gca", "g":
 		scanner = grafeas.NewScanner(metadataClient)
 	default:
@@ -62,11 +62,36 @@ func EnabledChecks(checks map[string]bool) (enabledChecks []string) {
 	return
 }
 
+// setAuth sets the Auth for the passed Check, if that Check implements
+// AuthorizedCheck.
+func setCheckAuth(check voucher.Check, auth voucher.Auth) {
+	if authCheck, ok := check.(voucher.AuthorizedCheck); ok {
+		authCheck.SetAuth(auth)
+	}
+}
+
+// setCheckScanner sets the scanner on the passed Check, if that Check implements
+// VulnerabilityCheck.
+func setCheckScanner(check voucher.Check, scanner voucher.VulnerabilityScanner) {
+	if vulCheck, ok := check.(voucher.VulnerabilityCheck); ok {
+		vulCheck.SetScanner(scanner)
+	}
+}
+
+// setCheckMetadataClient sets the MetadataClient for the passed Check, if that Check implements
+// MetadataCheck.
+func setCheckMetadataClient(check voucher.Check, metadataClient voucher.MetadataClient) {
+	if metadataCheck, ok := check.(voucher.MetadataCheck); ok {
+		metadataCheck.SetMetadataClient(metadataClient)
+	}
+}
+
 // NewCheckSuite creates a new checks.Suite with the requested
 // Checks, passing any necessary configuration details to the
 // checks.
 func NewCheckSuite(metadataClient voucher.MetadataClient, names ...string) (*voucher.Suite, error) {
-	scanner := newScanner(metadataClient)
+	auth := newAuth()
+	scanner := newScanner(metadataClient, auth)
 	checksuite := voucher.NewSuite()
 
 	checks, err := voucher.GetCheckFactories(names...)
@@ -75,17 +100,9 @@ func NewCheckSuite(metadataClient voucher.MetadataClient, names ...string) (*vou
 	}
 
 	for name, check := range checks {
-		if vulCheck, ok := check.(voucher.VulnerabilityCheck); ok {
-			vulCheck.SetScanner(scanner)
-			checksuite.Add(name, vulCheck)
-			continue
-		}
-
-		if metadataCheck, ok := check.(voucher.MetadataCheck); ok {
-			metadataCheck.SetMetadataClient(metadataClient)
-			checksuite.Add(name, metadataCheck)
-			continue
-		}
+		setCheckAuth(check, auth)
+		setCheckScanner(check, scanner)
+		setCheckMetadataClient(check, metadataClient)
 
 		checksuite.Add(name, check)
 	}
