@@ -20,6 +20,8 @@ var errNoHost = errors.New("cannot create client with empty hostname")
 type VoucherClient struct {
 	Hostname   *url.URL
 	httpClient *http.Client
+	username   string
+	password   string
 }
 
 // Check executes a request to a Voucher server, to the appropriate check URI, and
@@ -41,7 +43,9 @@ func (c *VoucherClient) Check(check string, image reference.Canonical) (voucher.
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-
+	if c.username != "" && c.password != "" {
+		req.SetBasicAuth(c.username, c.password)
+	}
 	resp, err := c.httpClient.Do(req)
 	if nil != err {
 		return checkResp, err
@@ -79,4 +83,10 @@ func NewClient(hostname string, timeout time.Duration) (*VoucherClient, error) {
 	}
 
 	return client, nil
+}
+
+// SetBasicAuth adds the username and password to the VoucherClient struct
+func (c *VoucherClient) SetBasicAuth(username, password string) {
+	c.username = username
+	c.password = password
 }
