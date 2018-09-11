@@ -23,10 +23,15 @@ func LogRequests(r *http.Request) {
 
 // LogResult logs each test run as Info
 func LogResult(response voucher.Response) {
-	log.WithFields(log.Fields{
-		"image":   response.Image,
-		"results": response.Results,
-	}).Info("Test Status")
+	for _, result := range response.Results {
+		log.WithFields(log.Fields{
+			"check":    result.Name,
+			"image":    response.Image,
+			"passed":   result.Success,
+			"attested": result.Attested,
+			"error":    result.Err,
+		}).Info("Check Result")
+	}
 }
 
 // LogError logs server errors to stdout as Error
