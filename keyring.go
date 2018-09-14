@@ -1,18 +1,11 @@
 package voucher
 
 import (
-	"bytes"
-	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 
-	"github.com/Shopify/ejson"
 	"golang.org/x/crypto/openpgp"
 )
-
-var errNoKeys = errors.New("no keys in ejson file")
-var errKeysNotMap = errors.New("keys in ejson is not a map")
 
 // KeyRing wraps an OpenPGP EntityList (which implements openpgp.KeyRing),
 // adding support for determining which key is associated with which check.
@@ -105,9 +98,9 @@ func NewKeyRing() *KeyRing {
 	return keyring
 }
 
-// AddEntitiesToKeyRingFromString imports the PGP keys stored in a string into the
+// AddKeyToKeyRingFromReader imports the PGP keys stored in a Reader into the
 // passed KeyRing.
-func addEntitiesToKeyRingFromReader(keyring *KeyRing, name string, reader io.Reader) error {
+func AddKeyToKeyRingFromReader(keyring *KeyRing, name string, reader io.Reader) error {
 	var err error
 	var newKeyring openpgp.EntityList
 
@@ -119,73 +112,4 @@ func addEntitiesToKeyRingFromReader(keyring *KeyRing, name string, reader io.Rea
 	keyring.AddEntities(name, newKeyring)
 
 	return nil
-}
-
-// EjsonToKeyRing takes an ejson directory path, and an ejson filename, and returns
-// a new KeyRing with the keys located in that file.
-func EjsonToKeyRing(dir, filename string) (*KeyRing, error) {
-	newKeyRing := NewKeyRing()
-	secrets, err := readEjson(dir, filename)
-	if err != nil {
-		return nil, err
-	}
-
-	keys, err := extractKeys(secrets)
-	if err != nil {
-		return nil, err
-	}
-
-	for name, key := range keys {
-		err = addEntitiesToKeyRingFromReader(newKeyRing, name, bytes.NewReader([]byte(key)))
-		if nil != err {
-			return nil, err
-		}
-	}
-
-	return newKeyRing, nil
-}
-
-// readEjson reads from the ejson file and returns a map[string]interface{}.
-func readEjson(dir, filename string) (map[string]interface{}, error) {
-	secrets := make(map[string]interface{})
-
-	decrypted, err := ejson.DecryptFile(filename, dir, "")
-	if err != nil {
-		return nil, err
-	}
-
-	err = json.NewDecoder(bytes.NewReader(decrypted)).Decode(&secrets)
-	if err != nil {
-		return nil, err
-	}
-
-	return secrets, nil
-}
-
-// extractEjsonKeys extracts the OpenPGP keys from the map[string]interface{}
-// containing all secrets, and returns a map[string]string containing the
-// key value pairs. If there's an issue (the environment key doesn't exist, for
-// example), returns an error.
-func extractKeys(secrets map[string]interface{}) (map[string]string, error) {
-	rawKeys, ok := secrets["openpgpkeys"]
-	if !ok {
-		return nil, errNoKeys
-	}
-
-	keysMap, ok := rawKeys.(map[string]interface{})
-	if !ok {
-		return nil, errKeysNotMap
-	}
-
-	keysSecrets := make(map[string]string, len(keysMap))
-
-	for key, rawValue := range keysMap {
-
-		// Only export values that convert to strings properly.
-		if value, ok := rawValue.(string); ok {
-			keysSecrets[key] = value
-		}
-	}
-
-	return keysSecrets, nil
 }

@@ -5,10 +5,7 @@ import "testing"
 func TestAttestationPayload(t *testing.T) {
 	payloadMessage := "test was successful"
 
-	keyring, err := EjsonToKeyRing("tests/fixtures/key", "tests/fixtures/test.ejson")
-	if nil != err {
-		t.Fatalf("Failed to get keys from ejson: %s", err)
-	}
+	keyring := newKeyring(t)
 
 	payload := AttestationPayload{
 		CheckName: "snakeoil",
