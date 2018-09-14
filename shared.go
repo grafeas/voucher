@@ -1,11 +1,10 @@
 package voucher
 
-import (
-	containeranalysispb "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1alpha1"
+// MetadataType is a type which represents a MetadataClient's Occurrence type.
+type MetadataType string
+
+const (
+	VulnerabilityType MetadataType = "vulnerability"
+	DiscoveryType     MetadataType = "discovery"
+	BuildDetailsType  MetadataType = "build details"
 )
-
-// Occurrence is an alias for Google's containeranalysis Occurrence.
-type Occurrence = *containeranalysispb.Occurrence
-
-// NoteKind is an alias for Google's containeranalysis Note_Kind.
-type NoteKind = containeranalysispb.Note_Kind

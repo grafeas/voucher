@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/Shopify/voucher"
-	containeranalysispb "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1alpha1"
 )
 
 // pollForDiscoveries pauses execution until Google Container Analysis has pushed
@@ -17,7 +16,7 @@ func pollForDiscoveries(c voucher.MetadataClient, i voucher.ImageData) error {
 			break
 		}
 
-		discoveries, err := c.GetOccurrencesForImage(i, containeranalysispb.Note_DISCOVERY)
+		discoveries, err := c.GetMetadata(i, voucher.DiscoveryType)
 		if err != nil {
 			return err
 		}

@@ -34,8 +34,8 @@ func (g *Client) NewPayloadBody(reference reference.Canonical) (string, error) {
 	return payload, err
 }
 
-// GetOccurrencesForImage gets the occurrences
-func (g *Client) GetOccurrencesForImage(reference reference.Canonical, kind voucher.NoteKind) (occurrences []voucher.Occurrence, err error) {
+// GetMetadata gets metadata of the requested type for the passed image.
+func (g *Client) GetMetadata(reference reference.Canonical, metadataType voucher.MetadataType) (occurrences []voucher.Occurrence, err error) {
 	ctx := context.Background()
 	c, err := containeranalysis.NewClient(ctx)
 	if err != nil {
@@ -43,6 +43,8 @@ func (g *Client) GetOccurrencesForImage(reference reference.Canonical, kind vouc
 	}
 
 	filterStr := resourceURL(reference)
+
+	kind := getNoteKind(metadataType)
 	if kind != containeranalysispb.Note_KIND_UNSPECIFIED {
 		filterStr = kindFilterStr(reference, kind)
 	}
@@ -61,9 +63,9 @@ func (g *Client) GetOccurrencesForImage(reference reference.Canonical, kind vouc
 	return
 }
 
-// AddAttestationOccurrenceToImage adds a new attestation with the passed AttestationPayload
+// AddAttestationToImage adds a new attestation with the passed AttestationPayload
 // to the image described by ImageData.
-func (g *Client) AddAttestationOccurrenceToImage(reference reference.Canonical, payload voucher.AttestationPayload) (voucher.Occurrence, error) {
+func (g *Client) AddAttestationToImage(reference reference.Canonical, payload voucher.AttestationPayload) (voucher.Occurrence, error) {
 	if !g.CanAttest() {
 		return nil, errCannotAttest
 	}

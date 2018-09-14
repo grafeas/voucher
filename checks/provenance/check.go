@@ -24,7 +24,7 @@ func (p *check) SetMetadataClient(metadataClient voucher.MetadataClient) {
 
 // Check runs the check :)
 func (p *check) Check(i voucher.ImageData) (bool, error) {
-	occurrences, err := p.metadataClient.GetOccurrencesForImage(i, containeranalysispb.Note_BUILD_DETAILS)
+	occurrences, err := p.metadataClient.GetMetadata(i, voucher.BuildDetailsType)
 	if err != nil {
 		return false, err
 	}

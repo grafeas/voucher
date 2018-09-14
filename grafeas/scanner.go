@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/Shopify/voucher"
-	containeranalysispb "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1alpha1"
 )
 
 // Scanner implements voucher.VulnerabilityScanner, and connects to Grafeas
@@ -24,7 +23,7 @@ func (s *Scanner) FailOn(severity voucher.Severity) {
 // GetVulnerabilitiesForImage returns the detected vulnerabilities for the Image
 // described by voucher.ImageData.
 func (s *Scanner) getVulnerabilitiesForImage(i voucher.ImageData) ([]voucher.Vulnerability, error) {
-	occs, err := s.client.GetOccurrencesForImage(i, containeranalysispb.Note_PACKAGE_VULNERABILITY)
+	occs, err := s.client.GetMetadata(i, voucher.VulnerabilityType)
 	vulns := make([]voucher.Vulnerability, 0, len(occs))
 	if nil != err {
 		return vulns, fmt.Errorf("could not get vulnerabilities: %s", err)

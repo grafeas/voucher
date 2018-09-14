@@ -619,6 +619,7 @@
     "github.com/Shopify/ejson",
     "github.com/coreos/clair/api/v1",
     "github.com/coreos/clair/database",
+    "github.com/docker/distribution",
     "github.com/docker/distribution/manifest/schema2",
     "github.com/docker/distribution/reference",
     "github.com/docker/docker/api/types",

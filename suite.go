@@ -84,7 +84,7 @@ func createAttestation(client MetadataClient, result CheckResult) (Occurrence, e
 	}
 
 	attestationPayload := NewAttestationPayload(result.Name, payload)
-	occ, err := client.AddAttestationOccurrenceToImage(result.ImageData, attestationPayload)
+	occ, err := client.AddAttestationToImage(result.ImageData, attestationPayload)
 	return occ, err
 }
 
