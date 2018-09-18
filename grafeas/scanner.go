@@ -23,14 +23,19 @@ func (s *Scanner) FailOn(severity voucher.Severity) {
 // GetVulnerabilitiesForImage returns the detected vulnerabilities for the Image
 // described by voucher.ImageData.
 func (s *Scanner) getVulnerabilitiesForImage(i voucher.ImageData) ([]voucher.Vulnerability, error) {
-	occs, err := s.client.GetMetadata(i, voucher.VulnerabilityType)
-	vulns := make([]voucher.Vulnerability, 0, len(occs))
+	items, err := s.client.GetMetadata(i, voucher.VulnerabilityType)
+	vulns := make([]voucher.Vulnerability, 0, len(items))
 	if nil != err {
 		return vulns, fmt.Errorf("could not get vulnerabilities: %s", err)
 	}
 
-	for _, occ := range occs {
-		vuln := OccurrenceToVulnerability(occ)
+	for _, item := range items {
+		metadataItem, ok := item.(*Item)
+		if !ok {
+			continue
+		}
+
+		vuln := OccurrenceToVulnerability(metadataItem.Occurrence)
 		if voucher.ShouldIncludeVulnerability(vuln, s.failOn) {
 			vulns = append(vulns, vuln)
 		}

@@ -1,9 +1,11 @@
 package server
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/Shopify/voucher"
 	"github.com/Shopify/voucher/cmd/config"
@@ -34,7 +36,10 @@ func handleChecks(w http.ResponseWriter, r *http.Request, name ...string) {
 		return
 	}
 
-	metadataClient := config.NewMetadataClient()
+	context, cancel := context.WithTimeout(context.Background(), 240*time.Second)
+	defer cancel()
+
+	metadataClient := config.NewMetadataClient(context)
 
 	checksuite, err := config.NewCheckSuite(metadataClient, name...)
 	if nil != err {

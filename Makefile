@@ -1,6 +1,7 @@
 # Go parameters
 GOCMD=go
 GODEP=dep
+DOCKER=docker
 GOPATH?=`echo $$GOPATH`
 GOBUILD=$(GOCMD) build
 GOCLEAN=$(GOCMD) clean
@@ -9,9 +10,10 @@ CODE=./cmd/
 SERVER_NAME=voucher_server
 CLI_NAME=voucher_cli
 CLIENT_NAME=voucher_client
+IMAGE_NAME?=voucher
 BINARY_UNIX=_unix
 
-.PHONY: clean setup deps test build install
+.PHONY: clean setup deps test build install voucher_cli
 
 all: clean deps build
 
@@ -48,6 +50,9 @@ voucher_client: $(wildcard cmd/voucher_client/*.go)
 
 voucher_server:
 	$(GOBUILD) -o $(SERVER_NAME) -v $(CODE)$(SERVER_NAME)
+
+container:
+	$(DOCKER) build -t $(IMAGE_NAME) .
 
 # Cross Compilation
 server-linux:

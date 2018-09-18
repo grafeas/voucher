@@ -1,10 +1,12 @@
 package main
 
 import (
-	log "github.com/sirupsen/logrus"
+	"context"
+	"time"
 
 	"github.com/Shopify/voucher"
-	config "github.com/Shopify/voucher/cmd/config"
+	"github.com/Shopify/voucher/cmd/config"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -41,7 +43,10 @@ func runCheck(name ...string) {
 
 	imageData := getImageData()
 
-	metadataClient := config.NewMetadataClient()
+	context, cancel := context.WithTimeout(context.Background(), 240*time.Second)
+	defer cancel()
+
+	metadataClient := config.NewMetadataClient(context)
 
 	checksuite, err := config.NewCheckSuite(metadataClient, name...)
 	if nil != err {

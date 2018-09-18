@@ -1,6 +1,8 @@
 package config
 
 import (
+	"context"
+
 	"github.com/Shopify/voucher"
 	"github.com/Shopify/voucher/grafeas"
 	log "github.com/sirupsen/logrus"
@@ -8,7 +10,7 @@ import (
 )
 
 // NewMetadataClient creates a new MetadataClient.
-func NewMetadataClient() voucher.MetadataClient {
+func NewMetadataClient(ctx context.Context) voucher.MetadataClient {
 	keyring, err := getKeyRing()
 	if nil != err {
 		log.Println("could not load keyring from ejson, continuing without attestation support: ", err)
@@ -16,6 +18,7 @@ func NewMetadataClient() voucher.MetadataClient {
 	}
 
 	return grafeas.NewClient(
+		ctx,
 		viper.GetString("image_project"),
 		viper.GetString("binauth_project"),
 		keyring,

@@ -1,10 +1,10 @@
 package grafeas
 
 import (
-	"strings"
 	"time"
 
 	"github.com/Shopify/voucher"
+	containeranalysispb "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1alpha1"
 )
 
 // pollForDiscoveries pauses execution until Google Container Analysis has pushed
@@ -16,21 +16,24 @@ func pollForDiscoveries(c voucher.MetadataClient, i voucher.ImageData) error {
 			break
 		}
 
-		discoveries, err := c.GetMetadata(i, voucher.DiscoveryType)
+		discoveries, err := c.GetMetadata(i, DiscoveryType)
 		if err != nil {
 			return err
 		}
 
 		if len(discoveries) > 0 {
-			for _, discovery := range discoveries {
-				noteName := strings.Split(discovery.NoteName, "/")
-				noteKind := noteName[len(noteName)-1]
+			for _, discoveryItem := range discoveries {
 
-				if noteKind != "PACKAGE_VULNERABILITY" {
+				item, ok := discoveryItem.(*Item)
+				if !ok {
 					continue
 				}
 
-				if discovery.GetDiscovered().GetOperation().GetDone() {
+				if item.Kind() != "PACKAGE_VULNERABILITY" {
+					continue
+				}
+
+				if containeranalysispb.Discovery_Discovered_FINISHED_SUCCESS == item.Occurrence.GetDiscovered().AnalysisStatus {
 					return nil
 				}
 

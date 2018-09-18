@@ -10,7 +10,7 @@ func getNoteKind(metadataType voucher.MetadataType) containeranalysispb.Note_Kin
 	switch metadataType {
 	case voucher.VulnerabilityType:
 		return containeranalysispb.Note_PACKAGE_VULNERABILITY
-	case voucher.DiscoveryType:
+	case DiscoveryType:
 		return containeranalysispb.Note_DISCOVERY
 	case voucher.BuildDetailsType:
 		return containeranalysispb.Note_BUILD_DETAILS

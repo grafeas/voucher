@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/Shopify/voucher"
+	"github.com/Shopify/voucher/grafeas"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	containeranalysispb "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1alpha1"
@@ -24,17 +25,22 @@ func (p *check) SetMetadataClient(metadataClient voucher.MetadataClient) {
 
 // Check runs the check :)
 func (p *check) Check(i voucher.ImageData) (bool, error) {
-	occurrences, err := p.metadataClient.GetMetadata(i, voucher.BuildDetailsType)
+	items, err := p.metadataClient.GetMetadata(i, voucher.BuildDetailsType)
 	if err != nil {
 		return false, err
 	}
 
 	// there should only be one occurrence
-	if len(occurrences) != 1 {
-		return false, fmt.Errorf("Got %d occurrences for: %s", len(occurrences), i.String())
+	if len(items) != 1 {
+		return false, fmt.Errorf("Got %d items for: %s", len(items), i.String())
 	}
 
-	buildDetails := occurrences[0].GetBuildDetails()
+	item, ok := items[0].(*grafeas.Item)
+	if !ok {
+		return false, fmt.Errorf("response from MetadataClient is not an grafeas.Item")
+	}
+
+	buildDetails := item.Occurrence.GetBuildDetails()
 	if validateProvenance(buildDetails) && validateArtifacts(i, buildDetails) {
 		log.Infof("Validated image provenance and artifacts for: %s", i.String())
 		return true, nil
