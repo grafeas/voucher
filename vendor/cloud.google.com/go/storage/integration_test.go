@@ -67,8 +67,8 @@ var (
 	// of numbers as during recording.
 	rng           *rand.Rand
 	newTestClient func(ctx context.Context, opts ...option.ClientOption) (*Client, error)
-
-	replaying bool
+	replaying     bool
+	testTime      time.Time
 )
 
 func TestMain(m *testing.M) {
@@ -180,6 +180,7 @@ func initUIDsAndRand(t time.Time) {
 	// random numbers from the global source and putting record and replay
 	// out of sync.
 	rng = testutil.NewRand(t)
+	testTime = t
 }
 
 // testConfig returns the Client used to access GCS. testConfig skips
@@ -442,6 +443,16 @@ func TestIntegration_Objects(t *testing.T) {
 		}
 		if got, want := rc.CacheControl(), "public, max-age=60"; got != want {
 			t.Errorf("CacheControl (%q) = %q; want %q", obj, got, want)
+		}
+		// We just wrote these objects, so they should have a recent last-modified time.
+		lm, err := rc.LastModified()
+		// Accept a time within +/- of the test time, to account for natural
+		// variation and the fact that testTime is set at the start of the test run.
+		expectedVariance := 5 * time.Minute
+		if err != nil {
+			t.Errorf("LastModified (%q): got error %v", obj, err)
+		} else if lm.Before(testTime.Add(-expectedVariance)) || lm.After(testTime.Add(expectedVariance)) {
+			t.Errorf("LastModified (%q): got %s, which not the %v from now (%v)", obj, lm, expectedVariance, testTime)
 		}
 		rc.Close()
 
@@ -999,7 +1010,7 @@ func TestIntegration_ValidObjectNames(t *testing.T) {
 	}
 
 	invalidNames := []string{
-		"", // Too short.
+		"",                        // Too short.
 		strings.Repeat("a", 1025), // Too long.
 		"new\nlines",
 		"bad\xffunicode",
@@ -2311,6 +2322,64 @@ func TestIntegration_PredefinedACLs(t *testing.T) {
 	// The composed object still retains the "private" ACL.
 	checkPrefix("Copy dest", oattrs.ACL, 0, "user", RoleOwner)
 	check("Copy dest", oattrs.ACL, 1, AllAuthenticatedUsers, RoleReader)
+}
+
+func TestIntegration_ServiceAccount(t *testing.T) {
+	ctx := context.Background()
+	client := testConfig(ctx, t)
+	defer client.Close()
+
+	s, err := client.ServiceAccount(ctx, testutil.ProjID())
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := "@gs-project-accounts.iam.gserviceaccount.com"
+	if !strings.Contains(s, want) {
+		t.Fatalf("got %v, want to contain %v", s, want)
+	}
+}
+
+func TestIntegration_ReaderAttrs(t *testing.T) {
+	ctx := context.Background()
+	client := testConfig(ctx, t)
+	defer client.Close()
+	bkt := client.Bucket(bucketName)
+
+	const defaultType = "text/plain"
+	obj := "some-object"
+	c := randomContents()
+	if err := writeObject(ctx, bkt.Object(obj), defaultType, c); err != nil {
+		t.Errorf("Write for %v failed with %v", obj, err)
+	}
+	oh := bkt.Object(obj)
+
+	rc, err := oh.NewReader(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	attrs, err := oh.Attrs(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	got := rc.Attrs
+	want := ReaderObjectAttrs{
+		Size:            attrs.Size,
+		ContentType:     attrs.ContentType,
+		ContentEncoding: attrs.ContentEncoding,
+		CacheControl:    attrs.CacheControl,
+		LastModified:    got.LastModified, // ignored, tested separately
+		Generation:      attrs.Generation,
+		Metageneration:  attrs.Metageneration,
+	}
+	if got != want {
+		t.Fatalf("got %v, wanted %v", got, want)
+	}
+
+	if got.LastModified.IsZero() {
+		t.Fatal("LastModified is 0, should be >0")
+	}
 }
 
 type testHelper struct {

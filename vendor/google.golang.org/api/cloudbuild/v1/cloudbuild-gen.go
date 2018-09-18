@@ -492,6 +492,17 @@ type BuildOptions struct {
 	// written when the build is completed.
 	LogStreamingOption string `json:"logStreamingOption,omitempty"`
 
+	// Logging: Option to specify the logging mode, which determines where
+	// the logs are stored.
+	//
+	// Possible values:
+	//   "LOGGING_UNSPECIFIED" - The service determines the logging mode.
+	// The default is `LEGACY`
+	//   "LEGACY" - Stackdriver logging and Cloud Storage logging are
+	// enabled.
+	//   "GCS_ONLY" - Only Cloud Storage logging is enabled.
+	Logging string `json:"logging,omitempty"`
+
 	// MachineType: Compute Engine machine type on which to run the build.
 	//
 	// Possible values:
@@ -735,6 +746,35 @@ type BuildTrigger struct {
 
 	// Id: Output only. Unique identifier of the trigger.
 	Id string `json:"id,omitempty"`
+
+	// IgnoredFiles: ignored_files and included_files are file glob matches
+	// using
+	// http://godoc/pkg/path/filepath#Match extended with support for
+	// "**".
+	//
+	// If ignored_files and changed files are both empty, then they are
+	// not used to determine whether or not to trigger a build.
+	//
+	// If ignored_files is not empty, then we ignore any files that
+	// match
+	// any of the ignored_file globs. If the change has no files that
+	// are
+	// outside of the ignored_files globs, then we do not trigger a build.
+	IgnoredFiles []string `json:"ignoredFiles,omitempty"`
+
+	// IncludedFiles: If any of the files altered in the commit pass the
+	// ignored_files
+	// filter and included_files is empty, then as far as this filter
+	// is
+	// concerned, we should trigger the build.
+	//
+	// If any of the files altered in the commit pass the
+	// ignored_files
+	// filter and included_files is not empty, then we make sure that
+	// at
+	// least one of those files matches a included_files glob. If not,
+	// then we do not trigger a build.
+	IncludedFiles []string `json:"includedFiles,omitempty"`
 
 	// Substitutions: Substitutions data for Build resource.
 	Substitutions map[string]string `json:"substitutions,omitempty"`
@@ -1640,6 +1680,7 @@ func (c *OperationsCancelCall) doRequest(alt string) (*http.Response, error) {
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v1/{+name}:cancel")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
@@ -1786,6 +1827,7 @@ func (c *OperationsGetCall) doRequest(alt string) (*http.Response, error) {
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v1/{+name}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -1962,6 +2004,7 @@ func (c *OperationsListCall) doRequest(alt string) (*http.Response, error) {
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v1/{+name}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -2133,6 +2176,7 @@ func (c *ProjectsBuildsCancelCall) doRequest(alt string) (*http.Response, error)
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v1/projects/{projectId}/builds/{id}:cancel")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
@@ -2281,6 +2325,7 @@ func (c *ProjectsBuildsCreateCall) doRequest(alt string) (*http.Response, error)
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v1/projects/{projectId}/builds")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
@@ -2428,6 +2473,7 @@ func (c *ProjectsBuildsGetCall) doRequest(alt string) (*http.Response, error) {
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v1/projects/{projectId}/builds/{id}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -2599,6 +2645,7 @@ func (c *ProjectsBuildsListCall) doRequest(alt string) (*http.Response, error) {
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v1/projects/{projectId}/builds")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -2806,6 +2853,7 @@ func (c *ProjectsBuildsRetryCall) doRequest(alt string) (*http.Response, error) 
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v1/projects/{projectId}/builds/{id}:retry")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
@@ -2950,6 +2998,7 @@ func (c *ProjectsTriggersCreateCall) doRequest(alt string) (*http.Response, erro
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v1/projects/{projectId}/triggers")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
@@ -3082,6 +3131,7 @@ func (c *ProjectsTriggersDeleteCall) doRequest(alt string) (*http.Response, erro
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v1/projects/{projectId}/triggers/{triggerId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("DELETE", urls, body)
@@ -3232,6 +3282,7 @@ func (c *ProjectsTriggersGetCall) doRequest(alt string) (*http.Response, error) 
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v1/projects/{projectId}/triggers/{triggerId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -3380,6 +3431,7 @@ func (c *ProjectsTriggersListCall) doRequest(alt string) (*http.Response, error)
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v1/projects/{projectId}/triggers")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -3516,6 +3568,7 @@ func (c *ProjectsTriggersPatchCall) doRequest(alt string) (*http.Response, error
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v1/projects/{projectId}/triggers/{triggerId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PATCH", urls, body)
@@ -3660,6 +3713,7 @@ func (c *ProjectsTriggersRunCall) doRequest(alt string) (*http.Response, error) 
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v1/projects/{projectId}/triggers/{triggerId}:run")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)

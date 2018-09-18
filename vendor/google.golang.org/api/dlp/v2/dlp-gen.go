@@ -950,8 +950,8 @@ func (s *GooglePrivacyDlpV2CloudStorageFileSet) MarshalJSON() ([]byte, error) {
 }
 
 // GooglePrivacyDlpV2CloudStorageOptions: Options defining a file or a
-// set of files (path ending with *) within
-// a Google Cloud Storage bucket.
+// set of files within a Google Cloud Storage
+// bucket.
 type GooglePrivacyDlpV2CloudStorageOptions struct {
 	// BytesLimitPerFile: Max number of bytes to scan from a file. If a
 	// scanned file's size is bigger
@@ -970,6 +970,7 @@ type GooglePrivacyDlpV2CloudStorageOptions struct {
 	// specified.
 	BytesLimitPerFilePercent int64 `json:"bytesLimitPerFilePercent,omitempty"`
 
+	// FileSet: The set of one or more files to scan.
 	FileSet *GooglePrivacyDlpV2FileSet `json:"fileSet,omitempty"`
 
 	// FileTypes: List of file type groups to include in the scan.
@@ -2768,9 +2769,9 @@ func (s *GooglePrivacyDlpV2FieldTransformation) MarshalJSON() ([]byte, error) {
 
 // GooglePrivacyDlpV2FileSet: Set of files to scan.
 type GooglePrivacyDlpV2FileSet struct {
-	// Url: The url, in the format `gs://<bucket>/<path>`. Trailing wildcard
-	// in the
-	// path is allowed.
+	// Url: The Cloud Storage url of the file(s) to scan, in the
+	// format
+	// `gs://<bucket>/<path>`. Trailing wildcard in the path is allowed.
 	Url string `json:"url,omitempty"`
 
 	// ForceSendFields is a list of field names (e.g. "Url") to
@@ -4408,11 +4409,11 @@ func (s *GooglePrivacyDlpV2LDiversityResult) MarshalJSON() ([]byte, error) {
 // the
 // [limits](https://cloud.google.com/dlp/limits) page. The artifacts
 // of
-// dictionary creation are stored in the specified GCS location.
-// Consider using
-// `CustomInfoType.Dictionary` for smaller dictionaries that satisfy the
-// size
-// requirements.
+// dictionary creation are stored in the specified Google Cloud
+// Storage
+// location. Consider using `CustomInfoType.Dictionary` for smaller
+// dictionaries
+// that satisfy the size requirements.
 type GooglePrivacyDlpV2LargeCustomDictionaryConfig struct {
 	// BigQueryField: Field in a BigQuery table where each cell represents a
 	// dictionary phrase.
@@ -4422,13 +4423,13 @@ type GooglePrivacyDlpV2LargeCustomDictionaryConfig struct {
 	// of dictionary phrases.
 	CloudStorageFileSet *GooglePrivacyDlpV2CloudStorageFileSet `json:"cloudStorageFileSet,omitempty"`
 
-	// OutputPath: Location to store dictionary artifacts in GCS. These
-	// files will only be
-	// accessible by project owners and the DLP API. If any of these
-	// artifacts
-	// are modified, the dictionary is considered invalid and can no longer
-	// be
-	// used.
+	// OutputPath: Location to store dictionary artifacts in Google Cloud
+	// Storage. These files
+	// will only be accessible by project owners and the DLP API. If any of
+	// these
+	// artifacts are modified, the dictionary is considered invalid and can
+	// no
+	// longer be used.
 	OutputPath *GooglePrivacyDlpV2CloudStoragePath `json:"outputPath,omitempty"`
 
 	// ForceSendFields is a list of field names (e.g. "BigQueryField") to
@@ -5620,7 +5621,11 @@ func (s *GooglePrivacyDlpV2RedactImageResponse) MarshalJSON() ([]byte, error) {
 // GooglePrivacyDlpV2Regex: Message defining a custom regular
 // expression.
 type GooglePrivacyDlpV2Regex struct {
-	// Pattern: Pattern defining the regular expression.
+	// Pattern: Pattern defining the regular expression. Its
+	// syntax
+	// (https://github.com/google/re2/wiki/Syntax) can be found under
+	// the
+	// google/re2 repository on GitHub.
 	Pattern string `json:"pattern,omitempty"`
 
 	// ForceSendFields is a list of field names (e.g. "Pattern") to
@@ -6129,7 +6134,7 @@ type GooglePrivacyDlpV2StoredInfoTypeConfig struct {
 	// DisplayName: Display name of the StoredInfoType (max 256 characters).
 	DisplayName string `json:"displayName,omitempty"`
 
-	// LargeCustomDictionary: StoredInfoType were findings are defined by a
+	// LargeCustomDictionary: StoredInfoType where findings are defined by a
 	// dictionary of phrases.
 	LargeCustomDictionary *GooglePrivacyDlpV2LargeCustomDictionaryConfig `json:"largeCustomDictionary,omitempty"`
 
@@ -6231,11 +6236,8 @@ func (s *GooglePrivacyDlpV2StoredInfoTypeVersion) MarshalJSON() ([]byte, error) 
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// GooglePrivacyDlpV2StoredType: CustomInfoType implementation that
-// loads an
-// existing `StoredInfoType` resource for scanning in
-// `InspectDataSource`. Not
-// currently supported in `InspectContent`.
+// GooglePrivacyDlpV2StoredType: A reference to a StoredInfoType to use
+// with scanning.
 type GooglePrivacyDlpV2StoredType struct {
 	// CreateTime: Timestamp indicating when the version of the
 	// `StoredInfoType` used for
@@ -7164,19 +7166,19 @@ func (s *GoogleRpcStatus) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// GoogleTypeDate: Represents a whole calendar date, e.g. date of birth.
-// The time of day and
-// time zone are either specified elsewhere or are not significant. The
-// date
-// is relative to the Proleptic Gregorian Calendar. The day may be 0
+// GoogleTypeDate: Represents a whole calendar date, for example date of
+// birth. The time of day
+// and time zone are either specified elsewhere or are not significant.
+// The date
+// is relative to the Proleptic Gregorian Calendar. The day can be 0
 // to
-// represent a year and month where the day is not significant, e.g.
-// credit card
-// expiration date. The year may be 0 to represent a month and day
-// independent
-// of year, e.g. anniversary date. Related types are
-// google.type.TimeOfDay
-// and `google.protobuf.Timestamp`.
+// represent a year and month where the day is not significant, for
+// example
+// credit card expiration date. The year can be 0 to represent a month
+// and day
+// independent of year, for example anniversary date. Related types
+// are
+// google.type.TimeOfDay and `google.protobuf.Timestamp`.
 type GoogleTypeDate struct {
 	// Day: Day of month. Must be from 1 to 31 and valid for the year and
 	// month, or 0
@@ -7346,6 +7348,7 @@ func (c *InfoTypesListCall) doRequest(alt string) (*http.Response, error) {
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2/infoTypes")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -7482,6 +7485,7 @@ func (c *OrganizationsDeidentifyTemplatesCreateCall) doRequest(alt string) (*htt
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2/{+parent}/deidentifyTemplates")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
@@ -7614,6 +7618,7 @@ func (c *OrganizationsDeidentifyTemplatesDeleteCall) doRequest(alt string) (*htt
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2/{+name}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("DELETE", urls, body)
@@ -7756,6 +7761,7 @@ func (c *OrganizationsDeidentifyTemplatesGetCall) doRequest(alt string) (*http.R
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2/{+name}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -7853,6 +7859,27 @@ func (r *OrganizationsDeidentifyTemplatesService) List(parent string) *Organizat
 	return c
 }
 
+// OrderBy sets the optional parameter "orderBy": Optional comma
+// separated list of fields to order by,
+// followed by `asc` or `desc` postfix. This list is
+// case-insensitive,
+// default sorting order is ascending, redundant space characters
+// are
+// insignificant.
+//
+// Example: `name asc,update_time, create_time desc`
+//
+// Supported fields are:
+//
+// - `create_time`: corresponds to time the template was created.
+// - `update_time`: corresponds to time the template was last updated.
+// - `name`: corresponds to template's name.
+// - `display_name`: corresponds to template's display name.
+func (c *OrganizationsDeidentifyTemplatesListCall) OrderBy(orderBy string) *OrganizationsDeidentifyTemplatesListCall {
+	c.urlParams_.Set("orderBy", orderBy)
+	return c
+}
+
 // PageSize sets the optional parameter "pageSize": Optional size of the
 // page, can be limited by server. If zero server returns
 // a page of max size 100.
@@ -7915,6 +7942,7 @@ func (c *OrganizationsDeidentifyTemplatesListCall) doRequest(alt string) (*http.
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2/{+parent}/deidentifyTemplates")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -7973,6 +8001,11 @@ func (c *OrganizationsDeidentifyTemplatesListCall) Do(opts ...googleapi.CallOpti
 	//     "parent"
 	//   ],
 	//   "parameters": {
+	//     "orderBy": {
+	//       "description": "Optional comma separated list of fields to order by,\nfollowed by `asc` or `desc` postfix. This list is case-insensitive,\ndefault sorting order is ascending, redundant space characters are\ninsignificant.\n\nExample: `name asc,update_time, create_time desc`\n\nSupported fields are:\n\n- `create_time`: corresponds to time the template was created.\n- `update_time`: corresponds to time the template was last updated.\n- `name`: corresponds to template's name.\n- `display_name`: corresponds to template's display name.",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
 	//     "pageSize": {
 	//       "description": "Optional size of the page, can be limited by server. If zero server returns\na page of max size 100.",
 	//       "format": "int32",
@@ -8084,6 +8117,7 @@ func (c *OrganizationsDeidentifyTemplatesPatchCall) doRequest(alt string) (*http
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2/{+name}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PATCH", urls, body)
@@ -8224,6 +8258,7 @@ func (c *OrganizationsInspectTemplatesCreateCall) doRequest(alt string) (*http.R
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2/{+parent}/inspectTemplates")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
@@ -8355,6 +8390,7 @@ func (c *OrganizationsInspectTemplatesDeleteCall) doRequest(alt string) (*http.R
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2/{+name}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("DELETE", urls, body)
@@ -8496,6 +8532,7 @@ func (c *OrganizationsInspectTemplatesGetCall) doRequest(alt string) (*http.Resp
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2/{+name}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -8592,6 +8629,27 @@ func (r *OrganizationsInspectTemplatesService) List(parent string) *Organization
 	return c
 }
 
+// OrderBy sets the optional parameter "orderBy": Optional comma
+// separated list of fields to order by,
+// followed by `asc` or `desc` postfix. This list is
+// case-insensitive,
+// default sorting order is ascending, redundant space characters
+// are
+// insignificant.
+//
+// Example: `name asc,update_time, create_time desc`
+//
+// Supported fields are:
+//
+// - `create_time`: corresponds to time the template was created.
+// - `update_time`: corresponds to time the template was last updated.
+// - `name`: corresponds to template's name.
+// - `display_name`: corresponds to template's display name.
+func (c *OrganizationsInspectTemplatesListCall) OrderBy(orderBy string) *OrganizationsInspectTemplatesListCall {
+	c.urlParams_.Set("orderBy", orderBy)
+	return c
+}
+
 // PageSize sets the optional parameter "pageSize": Optional size of the
 // page, can be limited by server. If zero server returns
 // a page of max size 100.
@@ -8654,6 +8712,7 @@ func (c *OrganizationsInspectTemplatesListCall) doRequest(alt string) (*http.Res
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2/{+parent}/inspectTemplates")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -8712,6 +8771,11 @@ func (c *OrganizationsInspectTemplatesListCall) Do(opts ...googleapi.CallOption)
 	//     "parent"
 	//   ],
 	//   "parameters": {
+	//     "orderBy": {
+	//       "description": "Optional comma separated list of fields to order by,\nfollowed by `asc` or `desc` postfix. This list is case-insensitive,\ndefault sorting order is ascending, redundant space characters are\ninsignificant.\n\nExample: `name asc,update_time, create_time desc`\n\nSupported fields are:\n\n- `create_time`: corresponds to time the template was created.\n- `update_time`: corresponds to time the template was last updated.\n- `name`: corresponds to template's name.\n- `display_name`: corresponds to template's display name.",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
 	//     "pageSize": {
 	//       "description": "Optional size of the page, can be limited by server. If zero server returns\na page of max size 100.",
 	//       "format": "int32",
@@ -8822,6 +8886,7 @@ func (c *OrganizationsInspectTemplatesPatchCall) doRequest(alt string) (*http.Re
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2/{+name}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PATCH", urls, body)
@@ -8912,9 +8977,11 @@ type OrganizationsStoredInfoTypesCreateCall struct {
 	header_                                       http.Header
 }
 
-// Create: Creates a pre-built StoredInfoType to be used for inspecting
-// storage in
-// InspectDataSource.
+// Create: Creates a pre-built stored infoType to be used for
+// inspection.
+// See https://cloud.google.com/dlp/docs/creating-stored-infotypes
+// to
+// learn more.
 func (r *OrganizationsStoredInfoTypesService) Create(parent string, googleprivacydlpv2createstoredinfotyperequest *GooglePrivacyDlpV2CreateStoredInfoTypeRequest) *OrganizationsStoredInfoTypesCreateCall {
 	c := &OrganizationsStoredInfoTypesCreateCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.parent = parent
@@ -8960,6 +9027,7 @@ func (c *OrganizationsStoredInfoTypesCreateCall) doRequest(alt string) (*http.Re
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2/{+parent}/storedInfoTypes")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
@@ -9008,7 +9076,7 @@ func (c *OrganizationsStoredInfoTypesCreateCall) Do(opts ...googleapi.CallOption
 	}
 	return ret, nil
 	// {
-	//   "description": "Creates a pre-built StoredInfoType to be used for inspecting storage in\nInspectDataSource.",
+	//   "description": "Creates a pre-built stored infoType to be used for inspection.\nSee https://cloud.google.com/dlp/docs/creating-stored-infotypes to\nlearn more.",
 	//   "flatPath": "v2/organizations/{organizationsId}/storedInfoTypes",
 	//   "httpMethod": "POST",
 	//   "id": "dlp.organizations.storedInfoTypes.create",
@@ -9048,7 +9116,10 @@ type OrganizationsStoredInfoTypesDeleteCall struct {
 	header_    http.Header
 }
 
-// Delete: Deletes a StoredInfoType.
+// Delete: Deletes a stored infoType.
+// See https://cloud.google.com/dlp/docs/creating-stored-infotypes
+// to
+// learn more.
 func (r *OrganizationsStoredInfoTypesService) Delete(name string) *OrganizationsStoredInfoTypesDeleteCall {
 	c := &OrganizationsStoredInfoTypesDeleteCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.name = name
@@ -9088,6 +9159,7 @@ func (c *OrganizationsStoredInfoTypesDeleteCall) doRequest(alt string) (*http.Re
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2/{+name}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("DELETE", urls, body)
@@ -9136,7 +9208,7 @@ func (c *OrganizationsStoredInfoTypesDeleteCall) Do(opts ...googleapi.CallOption
 	}
 	return ret, nil
 	// {
-	//   "description": "Deletes a StoredInfoType.",
+	//   "description": "Deletes a stored infoType.\nSee https://cloud.google.com/dlp/docs/creating-stored-infotypes to\nlearn more.",
 	//   "flatPath": "v2/organizations/{organizationsId}/storedInfoTypes/{storedInfoTypesId}",
 	//   "httpMethod": "DELETE",
 	//   "id": "dlp.organizations.storedInfoTypes.delete",
@@ -9174,7 +9246,10 @@ type OrganizationsStoredInfoTypesGetCall struct {
 	header_      http.Header
 }
 
-// Get: Gets a StoredInfoType.
+// Get: Gets a stored infoType.
+// See https://cloud.google.com/dlp/docs/creating-stored-infotypes
+// to
+// learn more.
 func (r *OrganizationsStoredInfoTypesService) Get(name string) *OrganizationsStoredInfoTypesGetCall {
 	c := &OrganizationsStoredInfoTypesGetCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.name = name
@@ -9227,6 +9302,7 @@ func (c *OrganizationsStoredInfoTypesGetCall) doRequest(alt string) (*http.Respo
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2/{+name}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -9275,7 +9351,7 @@ func (c *OrganizationsStoredInfoTypesGetCall) Do(opts ...googleapi.CallOption) (
 	}
 	return ret, nil
 	// {
-	//   "description": "Gets a StoredInfoType.",
+	//   "description": "Gets a stored infoType.\nSee https://cloud.google.com/dlp/docs/creating-stored-infotypes to\nlearn more.",
 	//   "flatPath": "v2/organizations/{organizationsId}/storedInfoTypes/{storedInfoTypesId}",
 	//   "httpMethod": "GET",
 	//   "id": "dlp.organizations.storedInfoTypes.get",
@@ -9313,7 +9389,10 @@ type OrganizationsStoredInfoTypesListCall struct {
 	header_      http.Header
 }
 
-// List: Lists StoredInfoTypes.
+// List: Lists stored infoTypes.
+// See https://cloud.google.com/dlp/docs/creating-stored-infotypes
+// to
+// learn more.
 func (r *OrganizationsStoredInfoTypesService) List(parent string) *OrganizationsStoredInfoTypesListCall {
 	c := &OrganizationsStoredInfoTypesListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.parent = parent
@@ -9382,6 +9461,7 @@ func (c *OrganizationsStoredInfoTypesListCall) doRequest(alt string) (*http.Resp
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2/{+parent}/storedInfoTypes")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -9432,7 +9512,7 @@ func (c *OrganizationsStoredInfoTypesListCall) Do(opts ...googleapi.CallOption) 
 	}
 	return ret, nil
 	// {
-	//   "description": "Lists StoredInfoTypes.",
+	//   "description": "Lists stored infoTypes.\nSee https://cloud.google.com/dlp/docs/creating-stored-infotypes to\nlearn more.",
 	//   "flatPath": "v2/organizations/{organizationsId}/storedInfoTypes",
 	//   "httpMethod": "GET",
 	//   "id": "dlp.organizations.storedInfoTypes.list",
@@ -9502,9 +9582,12 @@ type OrganizationsStoredInfoTypesPatchCall struct {
 	header_                                       http.Header
 }
 
-// Patch: Updates the StoredInfoType by creating a new version. The
+// Patch: Updates the stored infoType by creating a new version. The
 // existing version
 // will continue to be used until the new version is ready.
+// See https://cloud.google.com/dlp/docs/creating-stored-infotypes
+// to
+// learn more.
 func (r *OrganizationsStoredInfoTypesService) Patch(name string, googleprivacydlpv2updatestoredinfotyperequest *GooglePrivacyDlpV2UpdateStoredInfoTypeRequest) *OrganizationsStoredInfoTypesPatchCall {
 	c := &OrganizationsStoredInfoTypesPatchCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.name = name
@@ -9550,6 +9633,7 @@ func (c *OrganizationsStoredInfoTypesPatchCall) doRequest(alt string) (*http.Res
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2/{+name}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PATCH", urls, body)
@@ -9598,7 +9682,7 @@ func (c *OrganizationsStoredInfoTypesPatchCall) Do(opts ...googleapi.CallOption)
 	}
 	return ret, nil
 	// {
-	//   "description": "Updates the StoredInfoType by creating a new version. The existing version\nwill continue to be used until the new version is ready.",
+	//   "description": "Updates the stored infoType by creating a new version. The existing version\nwill continue to be used until the new version is ready.\nSee https://cloud.google.com/dlp/docs/creating-stored-infotypes to\nlearn more.",
 	//   "flatPath": "v2/organizations/{organizationsId}/storedInfoTypes/{storedInfoTypesId}",
 	//   "httpMethod": "PATCH",
 	//   "id": "dlp.organizations.storedInfoTypes.patch",
@@ -9696,6 +9780,7 @@ func (c *ProjectsContentDeidentifyCall) doRequest(alt string) (*http.Response, e
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2/{+parent}/content:deidentify")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
@@ -9845,6 +9930,7 @@ func (c *ProjectsContentInspectCall) doRequest(alt string) (*http.Response, erro
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2/{+parent}/content:inspect")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
@@ -9987,6 +10073,7 @@ func (c *ProjectsContentReidentifyCall) doRequest(alt string) (*http.Response, e
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2/{+parent}/content:reidentify")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
@@ -10129,6 +10216,7 @@ func (c *ProjectsDeidentifyTemplatesCreateCall) doRequest(alt string) (*http.Res
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2/{+parent}/deidentifyTemplates")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
@@ -10261,6 +10349,7 @@ func (c *ProjectsDeidentifyTemplatesDeleteCall) doRequest(alt string) (*http.Res
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2/{+name}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("DELETE", urls, body)
@@ -10403,6 +10492,7 @@ func (c *ProjectsDeidentifyTemplatesGetCall) doRequest(alt string) (*http.Respon
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2/{+name}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -10500,6 +10590,27 @@ func (r *ProjectsDeidentifyTemplatesService) List(parent string) *ProjectsDeiden
 	return c
 }
 
+// OrderBy sets the optional parameter "orderBy": Optional comma
+// separated list of fields to order by,
+// followed by `asc` or `desc` postfix. This list is
+// case-insensitive,
+// default sorting order is ascending, redundant space characters
+// are
+// insignificant.
+//
+// Example: `name asc,update_time, create_time desc`
+//
+// Supported fields are:
+//
+// - `create_time`: corresponds to time the template was created.
+// - `update_time`: corresponds to time the template was last updated.
+// - `name`: corresponds to template's name.
+// - `display_name`: corresponds to template's display name.
+func (c *ProjectsDeidentifyTemplatesListCall) OrderBy(orderBy string) *ProjectsDeidentifyTemplatesListCall {
+	c.urlParams_.Set("orderBy", orderBy)
+	return c
+}
+
 // PageSize sets the optional parameter "pageSize": Optional size of the
 // page, can be limited by server. If zero server returns
 // a page of max size 100.
@@ -10562,6 +10673,7 @@ func (c *ProjectsDeidentifyTemplatesListCall) doRequest(alt string) (*http.Respo
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2/{+parent}/deidentifyTemplates")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -10620,6 +10732,11 @@ func (c *ProjectsDeidentifyTemplatesListCall) Do(opts ...googleapi.CallOption) (
 	//     "parent"
 	//   ],
 	//   "parameters": {
+	//     "orderBy": {
+	//       "description": "Optional comma separated list of fields to order by,\nfollowed by `asc` or `desc` postfix. This list is case-insensitive,\ndefault sorting order is ascending, redundant space characters are\ninsignificant.\n\nExample: `name asc,update_time, create_time desc`\n\nSupported fields are:\n\n- `create_time`: corresponds to time the template was created.\n- `update_time`: corresponds to time the template was last updated.\n- `name`: corresponds to template's name.\n- `display_name`: corresponds to template's display name.",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
 	//     "pageSize": {
 	//       "description": "Optional size of the page, can be limited by server. If zero server returns\na page of max size 100.",
 	//       "format": "int32",
@@ -10731,6 +10848,7 @@ func (c *ProjectsDeidentifyTemplatesPatchCall) doRequest(alt string) (*http.Resp
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2/{+name}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PATCH", urls, body)
@@ -10875,6 +10993,7 @@ func (c *ProjectsDlpJobsCancelCall) doRequest(alt string) (*http.Response, error
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2/{+name}:cancel")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
@@ -11021,6 +11140,7 @@ func (c *ProjectsDlpJobsCreateCall) doRequest(alt string) (*http.Response, error
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2/{+parent}/dlpJobs")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
@@ -11157,6 +11277,7 @@ func (c *ProjectsDlpJobsDeleteCall) doRequest(alt string) (*http.Response, error
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2/{+name}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("DELETE", urls, body)
@@ -11300,6 +11421,7 @@ func (c *ProjectsDlpJobsGetCall) doRequest(alt string) (*http.Response, error) {
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2/{+name}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -11502,6 +11624,7 @@ func (c *ProjectsDlpJobsListCall) doRequest(alt string) (*http.Response, error) 
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2/{+parent}/dlpJobs")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -11693,6 +11816,7 @@ func (c *ProjectsImageRedactCall) doRequest(alt string) (*http.Response, error) 
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2/{+parent}/image:redact")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
@@ -11833,6 +11957,7 @@ func (c *ProjectsInspectTemplatesCreateCall) doRequest(alt string) (*http.Respon
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2/{+parent}/inspectTemplates")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
@@ -11964,6 +12089,7 @@ func (c *ProjectsInspectTemplatesDeleteCall) doRequest(alt string) (*http.Respon
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2/{+name}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("DELETE", urls, body)
@@ -12105,6 +12231,7 @@ func (c *ProjectsInspectTemplatesGetCall) doRequest(alt string) (*http.Response,
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2/{+name}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -12201,6 +12328,27 @@ func (r *ProjectsInspectTemplatesService) List(parent string) *ProjectsInspectTe
 	return c
 }
 
+// OrderBy sets the optional parameter "orderBy": Optional comma
+// separated list of fields to order by,
+// followed by `asc` or `desc` postfix. This list is
+// case-insensitive,
+// default sorting order is ascending, redundant space characters
+// are
+// insignificant.
+//
+// Example: `name asc,update_time, create_time desc`
+//
+// Supported fields are:
+//
+// - `create_time`: corresponds to time the template was created.
+// - `update_time`: corresponds to time the template was last updated.
+// - `name`: corresponds to template's name.
+// - `display_name`: corresponds to template's display name.
+func (c *ProjectsInspectTemplatesListCall) OrderBy(orderBy string) *ProjectsInspectTemplatesListCall {
+	c.urlParams_.Set("orderBy", orderBy)
+	return c
+}
+
 // PageSize sets the optional parameter "pageSize": Optional size of the
 // page, can be limited by server. If zero server returns
 // a page of max size 100.
@@ -12263,6 +12411,7 @@ func (c *ProjectsInspectTemplatesListCall) doRequest(alt string) (*http.Response
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2/{+parent}/inspectTemplates")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -12321,6 +12470,11 @@ func (c *ProjectsInspectTemplatesListCall) Do(opts ...googleapi.CallOption) (*Go
 	//     "parent"
 	//   ],
 	//   "parameters": {
+	//     "orderBy": {
+	//       "description": "Optional comma separated list of fields to order by,\nfollowed by `asc` or `desc` postfix. This list is case-insensitive,\ndefault sorting order is ascending, redundant space characters are\ninsignificant.\n\nExample: `name asc,update_time, create_time desc`\n\nSupported fields are:\n\n- `create_time`: corresponds to time the template was created.\n- `update_time`: corresponds to time the template was last updated.\n- `name`: corresponds to template's name.\n- `display_name`: corresponds to template's display name.",
+	//       "location": "query",
+	//       "type": "string"
+	//     },
 	//     "pageSize": {
 	//       "description": "Optional size of the page, can be limited by server. If zero server returns\na page of max size 100.",
 	//       "format": "int32",
@@ -12431,6 +12585,7 @@ func (c *ProjectsInspectTemplatesPatchCall) doRequest(alt string) (*http.Respons
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2/{+name}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PATCH", urls, body)
@@ -12571,6 +12726,7 @@ func (c *ProjectsJobTriggersCreateCall) doRequest(alt string) (*http.Response, e
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2/{+parent}/jobTriggers")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
@@ -12701,6 +12857,7 @@ func (c *ProjectsJobTriggersDeleteCall) doRequest(alt string) (*http.Response, e
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2/{+name}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("DELETE", urls, body)
@@ -12842,6 +12999,7 @@ func (c *ProjectsJobTriggersGetCall) doRequest(alt string) (*http.Response, erro
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2/{+name}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -12949,10 +13107,12 @@ func (r *ProjectsJobTriggersService) List(parent string) *ProjectsJobTriggersLis
 //
 // Supported fields are:
 //
-// - `create_time`: corresponds to time the triggeredJob was created.
-// - `update_time`: corresponds to time the triggeredJob was last
+// - `create_time`: corresponds to time the JobTrigger was created.
+// - `update_time`: corresponds to time the JobTrigger was last
 // updated.
 // - `name`: corresponds to JobTrigger's name.
+// - `display_name`: corresponds to JobTrigger's display name.
+// - `status`: corresponds to JobTrigger's status.
 func (c *ProjectsJobTriggersListCall) OrderBy(orderBy string) *ProjectsJobTriggersListCall {
 	c.urlParams_.Set("orderBy", orderBy)
 	return c
@@ -13020,6 +13180,7 @@ func (c *ProjectsJobTriggersListCall) doRequest(alt string) (*http.Response, err
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2/{+parent}/jobTriggers")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -13079,7 +13240,7 @@ func (c *ProjectsJobTriggersListCall) Do(opts ...googleapi.CallOption) (*GoogleP
 	//   ],
 	//   "parameters": {
 	//     "orderBy": {
-	//       "description": "Optional comma separated list of triggeredJob fields to order by,\nfollowed by `asc` or `desc` postfix. This list is case-insensitive,\ndefault sorting order is ascending, redundant space characters are\ninsignificant.\n\nExample: `name asc,update_time, create_time desc`\n\nSupported fields are:\n\n- `create_time`: corresponds to time the triggeredJob was created.\n- `update_time`: corresponds to time the triggeredJob was last updated.\n- `name`: corresponds to JobTrigger's name.",
+	//       "description": "Optional comma separated list of triggeredJob fields to order by,\nfollowed by `asc` or `desc` postfix. This list is case-insensitive,\ndefault sorting order is ascending, redundant space characters are\ninsignificant.\n\nExample: `name asc,update_time, create_time desc`\n\nSupported fields are:\n\n- `create_time`: corresponds to time the JobTrigger was created.\n- `update_time`: corresponds to time the JobTrigger was last updated.\n- `name`: corresponds to JobTrigger's name.\n- `display_name`: corresponds to JobTrigger's display name.\n- `status`: corresponds to JobTrigger's status.",
 	//       "location": "query",
 	//       "type": "string"
 	//     },
@@ -13193,6 +13354,7 @@ func (c *ProjectsJobTriggersPatchCall) doRequest(alt string) (*http.Response, er
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2/{+name}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PATCH", urls, body)
@@ -13282,9 +13444,11 @@ type ProjectsStoredInfoTypesCreateCall struct {
 	header_                                       http.Header
 }
 
-// Create: Creates a pre-built StoredInfoType to be used for inspecting
-// storage in
-// InspectDataSource.
+// Create: Creates a pre-built stored infoType to be used for
+// inspection.
+// See https://cloud.google.com/dlp/docs/creating-stored-infotypes
+// to
+// learn more.
 func (r *ProjectsStoredInfoTypesService) Create(parent string, googleprivacydlpv2createstoredinfotyperequest *GooglePrivacyDlpV2CreateStoredInfoTypeRequest) *ProjectsStoredInfoTypesCreateCall {
 	c := &ProjectsStoredInfoTypesCreateCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.parent = parent
@@ -13330,6 +13494,7 @@ func (c *ProjectsStoredInfoTypesCreateCall) doRequest(alt string) (*http.Respons
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2/{+parent}/storedInfoTypes")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
@@ -13378,7 +13543,7 @@ func (c *ProjectsStoredInfoTypesCreateCall) Do(opts ...googleapi.CallOption) (*G
 	}
 	return ret, nil
 	// {
-	//   "description": "Creates a pre-built StoredInfoType to be used for inspecting storage in\nInspectDataSource.",
+	//   "description": "Creates a pre-built stored infoType to be used for inspection.\nSee https://cloud.google.com/dlp/docs/creating-stored-infotypes to\nlearn more.",
 	//   "flatPath": "v2/projects/{projectsId}/storedInfoTypes",
 	//   "httpMethod": "POST",
 	//   "id": "dlp.projects.storedInfoTypes.create",
@@ -13418,7 +13583,10 @@ type ProjectsStoredInfoTypesDeleteCall struct {
 	header_    http.Header
 }
 
-// Delete: Deletes a StoredInfoType.
+// Delete: Deletes a stored infoType.
+// See https://cloud.google.com/dlp/docs/creating-stored-infotypes
+// to
+// learn more.
 func (r *ProjectsStoredInfoTypesService) Delete(name string) *ProjectsStoredInfoTypesDeleteCall {
 	c := &ProjectsStoredInfoTypesDeleteCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.name = name
@@ -13458,6 +13626,7 @@ func (c *ProjectsStoredInfoTypesDeleteCall) doRequest(alt string) (*http.Respons
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2/{+name}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("DELETE", urls, body)
@@ -13506,7 +13675,7 @@ func (c *ProjectsStoredInfoTypesDeleteCall) Do(opts ...googleapi.CallOption) (*G
 	}
 	return ret, nil
 	// {
-	//   "description": "Deletes a StoredInfoType.",
+	//   "description": "Deletes a stored infoType.\nSee https://cloud.google.com/dlp/docs/creating-stored-infotypes to\nlearn more.",
 	//   "flatPath": "v2/projects/{projectsId}/storedInfoTypes/{storedInfoTypesId}",
 	//   "httpMethod": "DELETE",
 	//   "id": "dlp.projects.storedInfoTypes.delete",
@@ -13544,7 +13713,10 @@ type ProjectsStoredInfoTypesGetCall struct {
 	header_      http.Header
 }
 
-// Get: Gets a StoredInfoType.
+// Get: Gets a stored infoType.
+// See https://cloud.google.com/dlp/docs/creating-stored-infotypes
+// to
+// learn more.
 func (r *ProjectsStoredInfoTypesService) Get(name string) *ProjectsStoredInfoTypesGetCall {
 	c := &ProjectsStoredInfoTypesGetCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.name = name
@@ -13597,6 +13769,7 @@ func (c *ProjectsStoredInfoTypesGetCall) doRequest(alt string) (*http.Response, 
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2/{+name}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -13645,7 +13818,7 @@ func (c *ProjectsStoredInfoTypesGetCall) Do(opts ...googleapi.CallOption) (*Goog
 	}
 	return ret, nil
 	// {
-	//   "description": "Gets a StoredInfoType.",
+	//   "description": "Gets a stored infoType.\nSee https://cloud.google.com/dlp/docs/creating-stored-infotypes to\nlearn more.",
 	//   "flatPath": "v2/projects/{projectsId}/storedInfoTypes/{storedInfoTypesId}",
 	//   "httpMethod": "GET",
 	//   "id": "dlp.projects.storedInfoTypes.get",
@@ -13683,7 +13856,10 @@ type ProjectsStoredInfoTypesListCall struct {
 	header_      http.Header
 }
 
-// List: Lists StoredInfoTypes.
+// List: Lists stored infoTypes.
+// See https://cloud.google.com/dlp/docs/creating-stored-infotypes
+// to
+// learn more.
 func (r *ProjectsStoredInfoTypesService) List(parent string) *ProjectsStoredInfoTypesListCall {
 	c := &ProjectsStoredInfoTypesListCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.parent = parent
@@ -13752,6 +13928,7 @@ func (c *ProjectsStoredInfoTypesListCall) doRequest(alt string) (*http.Response,
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2/{+parent}/storedInfoTypes")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -13802,7 +13979,7 @@ func (c *ProjectsStoredInfoTypesListCall) Do(opts ...googleapi.CallOption) (*Goo
 	}
 	return ret, nil
 	// {
-	//   "description": "Lists StoredInfoTypes.",
+	//   "description": "Lists stored infoTypes.\nSee https://cloud.google.com/dlp/docs/creating-stored-infotypes to\nlearn more.",
 	//   "flatPath": "v2/projects/{projectsId}/storedInfoTypes",
 	//   "httpMethod": "GET",
 	//   "id": "dlp.projects.storedInfoTypes.list",
@@ -13872,9 +14049,12 @@ type ProjectsStoredInfoTypesPatchCall struct {
 	header_                                       http.Header
 }
 
-// Patch: Updates the StoredInfoType by creating a new version. The
+// Patch: Updates the stored infoType by creating a new version. The
 // existing version
 // will continue to be used until the new version is ready.
+// See https://cloud.google.com/dlp/docs/creating-stored-infotypes
+// to
+// learn more.
 func (r *ProjectsStoredInfoTypesService) Patch(name string, googleprivacydlpv2updatestoredinfotyperequest *GooglePrivacyDlpV2UpdateStoredInfoTypeRequest) *ProjectsStoredInfoTypesPatchCall {
 	c := &ProjectsStoredInfoTypesPatchCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.name = name
@@ -13920,6 +14100,7 @@ func (c *ProjectsStoredInfoTypesPatchCall) doRequest(alt string) (*http.Response
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2/{+name}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PATCH", urls, body)
@@ -13968,7 +14149,7 @@ func (c *ProjectsStoredInfoTypesPatchCall) Do(opts ...googleapi.CallOption) (*Go
 	}
 	return ret, nil
 	// {
-	//   "description": "Updates the StoredInfoType by creating a new version. The existing version\nwill continue to be used until the new version is ready.",
+	//   "description": "Updates the stored infoType by creating a new version. The existing version\nwill continue to be used until the new version is ready.\nSee https://cloud.google.com/dlp/docs/creating-stored-infotypes to\nlearn more.",
 	//   "flatPath": "v2/projects/{projectsId}/storedInfoTypes/{storedInfoTypesId}",
 	//   "httpMethod": "PATCH",
 	//   "id": "dlp.projects.storedInfoTypes.patch",

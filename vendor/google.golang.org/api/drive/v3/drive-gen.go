@@ -957,6 +957,11 @@ type FileCapabilities struct {
 	// CanDelete: Whether the current user can delete this file.
 	CanDelete bool `json:"canDelete,omitempty"`
 
+	// CanDeleteChildren: Whether the current user can delete children of
+	// this folder. This is false when the item is not a folder. Only
+	// populated for Team Drive items.
+	CanDeleteChildren bool `json:"canDeleteChildren,omitempty"`
+
 	// CanDownload: Whether the current user can download this file.
 	CanDownload bool `json:"canDownload,omitempty"`
 
@@ -967,15 +972,36 @@ type FileCapabilities struct {
 	// this folder. This is always false when the item is not a folder.
 	CanListChildren bool `json:"canListChildren,omitempty"`
 
+	// CanMoveChildrenOutOfTeamDrive: Whether the current user can move
+	// children of this folder outside of the Team Drive. This is false when
+	// the item is not a folder. Only populated for Team Drive items.
+	CanMoveChildrenOutOfTeamDrive bool `json:"canMoveChildrenOutOfTeamDrive,omitempty"`
+
+	// CanMoveChildrenWithinTeamDrive: Whether the current user can move
+	// children of this folder within the Team Drive. This is false when the
+	// item is not a folder. Only populated for Team Drive items.
+	CanMoveChildrenWithinTeamDrive bool `json:"canMoveChildrenWithinTeamDrive,omitempty"`
+
 	// CanMoveItemIntoTeamDrive: Whether the current user can move this item
 	// into a Team Drive. If the item is in a Team Drive, this field is
 	// equivalent to canMoveTeamDriveItem.
 	CanMoveItemIntoTeamDrive bool `json:"canMoveItemIntoTeamDrive,omitempty"`
 
-	// CanMoveTeamDriveItem: Whether the current user can move this Team
-	// Drive item by changing its parent. Note that a request to change the
-	// parent for this item may still fail depending on the new parent that
-	// is being added. Only populated for Team Drive files.
+	// CanMoveItemOutOfTeamDrive: Whether the current user can move this
+	// Team Drive item outside of this Team Drive by changing its parent.
+	// Note that a request to change the parent of the item may still fail
+	// depending on the new parent that is being added. Only populated for
+	// Team Drive items.
+	CanMoveItemOutOfTeamDrive bool `json:"canMoveItemOutOfTeamDrive,omitempty"`
+
+	// CanMoveItemWithinTeamDrive: Whether the current user can move this
+	// Team Drive item within this Team Drive. Note that a request to change
+	// the parent of the item may still fail depending on the new parent
+	// that is being added. Only populated for Team Drive items.
+	CanMoveItemWithinTeamDrive bool `json:"canMoveItemWithinTeamDrive,omitempty"`
+
+	// CanMoveTeamDriveItem: Deprecated - use canMoveItemWithinTeamDrive or
+	// canMoveItemOutOfTeamDrive instead.
 	CanMoveTeamDriveItem bool `json:"canMoveTeamDriveItem,omitempty"`
 
 	// CanReadRevisions: Whether the current user can read the revisions
@@ -989,7 +1015,8 @@ type FileCapabilities struct {
 	CanReadTeamDrive bool `json:"canReadTeamDrive,omitempty"`
 
 	// CanRemoveChildren: Whether the current user can remove children from
-	// this folder. This is always false when the item is not a folder.
+	// this folder. This is always false when the item is not a folder. For
+	// Team Drive items, use canDeleteChildren or canTrashChildren instead.
 	CanRemoveChildren bool `json:"canRemoveChildren,omitempty"`
 
 	// CanRename: Whether the current user can rename this file.
@@ -1001,6 +1028,11 @@ type FileCapabilities struct {
 
 	// CanTrash: Whether the current user can move this file to trash.
 	CanTrash bool `json:"canTrash,omitempty"`
+
+	// CanTrashChildren: Whether the current user can trash children of this
+	// folder. This is false when the item is not a folder. Only populated
+	// for Team Drive items.
+	CanTrashChildren bool `json:"canTrashChildren,omitempty"`
 
 	// CanUntrash: Whether the current user can restore this file from
 	// trash.
@@ -1437,8 +1469,9 @@ type Permission struct {
 
 	// Role: The role granted by this permission. While new values may be
 	// supported in the future, the following are currently allowed:
-	// - organizer
 	// - owner
+	// - organizer
+	// - fileOrganizer
 	// - writer
 	// - commenter
 	// - reader
@@ -1497,6 +1530,7 @@ type PermissionTeamDrivePermissionDetails struct {
 	// Role: The primary role for this user. While new values may be added
 	// in the future, the following are currently possible:
 	// - organizer
+	// - fileOrganizer
 	// - writer
 	// - commenter
 	// - reader
@@ -2021,6 +2055,10 @@ type TeamDriveCapabilities struct {
 	// CanCopy: Whether the current user can copy files in this Team Drive.
 	CanCopy bool `json:"canCopy,omitempty"`
 
+	// CanDeleteChildren: Whether the current user can delete children from
+	// folders in this Team Drive.
+	CanDeleteChildren bool `json:"canDeleteChildren,omitempty"`
+
 	// CanDeleteTeamDrive: Whether the current user can delete this Team
 	// Drive. Attempting to delete the Team Drive may still fail if there
 	// are untrashed items inside the Team Drive.
@@ -2045,8 +2083,8 @@ type TeamDriveCapabilities struct {
 	// resource of files in this Team Drive.
 	CanReadRevisions bool `json:"canReadRevisions,omitempty"`
 
-	// CanRemoveChildren: Whether the current user can remove children from
-	// folders in this Team Drive.
+	// CanRemoveChildren: Deprecated - use canDeleteChildren or
+	// canTrashChildren instead.
 	CanRemoveChildren bool `json:"canRemoveChildren,omitempty"`
 
 	// CanRename: Whether the current user can rename files or folders in
@@ -2060,6 +2098,10 @@ type TeamDriveCapabilities struct {
 	// CanShare: Whether the current user can share files or folders in this
 	// Team Drive.
 	CanShare bool `json:"canShare,omitempty"`
+
+	// CanTrashChildren: Whether the current user can trash children from
+	// folders in this Team Drive.
+	CanTrashChildren bool `json:"canTrashChildren,omitempty"`
 
 	// ForceSendFields is a list of field names (e.g. "CanAddChildren") to
 	// unconditionally include in API requests. By default, fields with
@@ -2287,6 +2329,7 @@ func (c *AboutGetCall) doRequest(alt string) (*http.Response, error) {
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "about")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -2430,6 +2473,7 @@ func (c *ChangesGetStartPageTokenCall) doRequest(alt string) (*http.Response, er
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "changes/startPageToken")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -2638,6 +2682,7 @@ func (c *ChangesListCall) doRequest(alt string) (*http.Response, error) {
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "changes")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -2888,6 +2933,7 @@ func (c *ChangesWatchCall) doRequest(alt string) (*http.Response, error) {
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "changes/watch")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
@@ -3074,6 +3120,7 @@ func (c *ChannelsStopCall) doRequest(alt string) (*http.Response, error) {
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "channels/stop")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
@@ -3172,6 +3219,7 @@ func (c *CommentsCreateCall) doRequest(alt string) (*http.Response, error) {
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}/comments")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
@@ -3301,6 +3349,7 @@ func (c *CommentsDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}/comments/{commentId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("DELETE", urls, body)
@@ -3429,6 +3478,7 @@ func (c *CommentsGetCall) doRequest(alt string) (*http.Response, error) {
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}/comments/{commentId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -3613,6 +3663,7 @@ func (c *CommentsListCall) doRequest(alt string) (*http.Response, error) {
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}/comments")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -3793,6 +3844,7 @@ func (c *CommentsUpdateCall) doRequest(alt string) (*http.Response, error) {
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}/comments/{commentId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PATCH", urls, body)
@@ -3970,6 +4022,7 @@ func (c *FilesCopyCall) doRequest(alt string) (*http.Response, error) {
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}/copy")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
@@ -4209,6 +4262,7 @@ func (c *FilesCreateCall) doRequest(alt string) (*http.Response, error) {
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files")
 	if c.mediaInfo_ != nil {
 		urls = strings.Replace(urls, "https://www.googleapis.com/", "https://www.googleapis.com/upload/", 1)
@@ -4410,6 +4464,7 @@ func (c *FilesDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("DELETE", urls, body)
@@ -4511,6 +4566,7 @@ func (c *FilesEmptyTrashCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/trash")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("DELETE", urls, body)
@@ -4609,6 +4665,7 @@ func (c *FilesExportCall) doRequest(alt string) (*http.Response, error) {
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}/export")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -4758,6 +4815,7 @@ func (c *FilesGenerateIdsCall) doRequest(alt string) (*http.Response, error) {
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/generateIds")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -4916,6 +4974,7 @@ func (c *FilesGetCall) doRequest(alt string) (*http.Response, error) {
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -5177,6 +5236,7 @@ func (c *FilesListCall) doRequest(alt string) (*http.Response, error) {
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -5473,6 +5533,7 @@ func (c *FilesUpdateCall) doRequest(alt string) (*http.Response, error) {
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}")
 	if c.mediaInfo_ != nil {
 		urls = strings.Replace(urls, "https://www.googleapis.com/", "https://www.googleapis.com/upload/", 1)
@@ -5704,6 +5765,7 @@ func (c *FilesWatchCall) doRequest(alt string) (*http.Response, error) {
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}/watch")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
@@ -5917,6 +5979,7 @@ func (c *PermissionsCreateCall) doRequest(alt string) (*http.Response, error) {
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}/permissions")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
@@ -6090,6 +6153,7 @@ func (c *PermissionsDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}/permissions/{permissionId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("DELETE", urls, body)
@@ -6238,6 +6302,7 @@ func (c *PermissionsGetCall) doRequest(alt string) (*http.Response, error) {
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}/permissions/{permissionId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -6433,6 +6498,7 @@ func (c *PermissionsListCall) doRequest(alt string) (*http.Response, error) {
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}/permissions")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -6648,6 +6714,7 @@ func (c *PermissionsUpdateCall) doRequest(alt string) (*http.Response, error) {
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}/permissions/{permissionId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PATCH", urls, body)
@@ -6816,6 +6883,7 @@ func (c *RepliesCreateCall) doRequest(alt string) (*http.Response, error) {
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}/comments/{commentId}/replies")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
@@ -6955,6 +7023,7 @@ func (c *RepliesDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}/comments/{commentId}/replies/{replyId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("DELETE", urls, body)
@@ -7093,6 +7162,7 @@ func (c *RepliesGetCall) doRequest(alt string) (*http.Response, error) {
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}/comments/{commentId}/replies/{replyId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -7279,6 +7349,7 @@ func (c *RepliesListCall) doRequest(alt string) (*http.Response, error) {
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}/comments/{commentId}/replies")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -7464,6 +7535,7 @@ func (c *RepliesUpdateCall) doRequest(alt string) (*http.Response, error) {
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}/comments/{commentId}/replies/{replyId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PATCH", urls, body)
@@ -7610,6 +7682,7 @@ func (c *RevisionsDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}/revisions/{revisionId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("DELETE", urls, body)
@@ -7740,6 +7813,7 @@ func (c *RevisionsGetCall) doRequest(alt string) (*http.Response, error) {
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}/revisions/{revisionId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -7930,6 +8004,7 @@ func (c *RevisionsListCall) doRequest(alt string) (*http.Response, error) {
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}/revisions")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -8103,6 +8178,7 @@ func (c *RevisionsUpdateCall) doRequest(alt string) (*http.Response, error) {
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "files/{fileId}/revisions/{revisionId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PATCH", urls, body)
@@ -8245,6 +8321,7 @@ func (c *TeamdrivesCreateCall) doRequest(alt string) (*http.Response, error) {
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "teamdrives")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
@@ -8369,6 +8446,7 @@ func (c *TeamdrivesDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "teamdrives/{teamDriveId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("DELETE", urls, body)
@@ -8487,6 +8565,7 @@ func (c *TeamdrivesGetCall) doRequest(alt string) (*http.Response, error) {
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "teamdrives/{teamDriveId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -8659,6 +8738,7 @@ func (c *TeamdrivesListCall) doRequest(alt string) (*http.Response, error) {
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "teamdrives")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -8833,6 +8913,7 @@ func (c *TeamdrivesUpdateCall) doRequest(alt string) (*http.Response, error) {
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "teamdrives/{teamDriveId}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PATCH", urls, body)

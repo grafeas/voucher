@@ -59,10 +59,18 @@ func TestManifestStorage(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	testManifestStorage(t, BlobDescriptorCacheProvider(memory.NewInMemoryBlobDescriptorCacheProvider()), EnableDelete, EnableRedirect, Schema1SigningKey(k))
+	testManifestStorage(t, true, BlobDescriptorCacheProvider(memory.NewInMemoryBlobDescriptorCacheProvider()), EnableDelete, EnableRedirect, Schema1SigningKey(k), EnableSchema1)
 }
 
-func testManifestStorage(t *testing.T, options ...RegistryOption) {
+func TestManifestStorageV1Unsupported(t *testing.T) {
+	k, err := libtrust.GenerateECP256PrivateKey()
+	if err != nil {
+		t.Fatal(err)
+	}
+	testManifestStorage(t, false, BlobDescriptorCacheProvider(memory.NewInMemoryBlobDescriptorCacheProvider()), EnableDelete, EnableRedirect, Schema1SigningKey(k))
+}
+
+func testManifestStorage(t *testing.T, schema1Enabled bool, options ...RegistryOption) {
 	repoName, _ := reference.WithName("foo/bar")
 	env := newManifestStoreTestEnv(t, repoName, "thetag", options...)
 	ctx := context.Background()
@@ -112,6 +120,15 @@ func testManifestStorage(t *testing.T, options ...RegistryOption) {
 	_, err = ms.Put(ctx, sm)
 	if err == nil {
 		t.Fatalf("expected errors putting manifest with full verification")
+	}
+
+	// If schema1 is not enabled, do a short version of this test, just checking
+	// if we get the right error when we Put
+	if !schema1Enabled {
+		if err != distribution.ErrSchemaV1Unsupported {
+			t.Fatalf("got the wrong error when schema1 is disabled: %s", err)
+		}
+		return
 	}
 
 	switch err := err.(type) {
@@ -424,9 +441,22 @@ func testOCIManifestStorage(t *testing.T, testname string, includeMediaTypes boo
 		t.Fatalf("%s: unexpected error generating manifest: %v", testname, err)
 	}
 
+	// before putting the manifest test for proper handling of SchemaVersion
+
+	if manifest.(*ocischema.DeserializedManifest).Manifest.SchemaVersion != 2 {
+		t.Fatalf("%s: unexpected error generating default version for oci manifest", testname)
+	}
+	manifest.(*ocischema.DeserializedManifest).Manifest.SchemaVersion = 0
+
 	var manifestDigest digest.Digest
 	if manifestDigest, err = ms.Put(ctx, manifest); err != nil {
-		t.Fatalf("%s: unexpected error putting manifest: %v", testname, err)
+		if err.Error() != "unrecognized manifest schema version 0" {
+			t.Fatalf("%s: unexpected error putting manifest: %v", testname, err)
+		}
+		manifest.(*ocischema.DeserializedManifest).Manifest.SchemaVersion = 2
+		if manifestDigest, err = ms.Put(ctx, manifest); err != nil {
+			t.Fatalf("%s: unexpected error putting manifest: %v", testname, err)
+		}
 	}
 
 	// Also create an image index that contains the manifest

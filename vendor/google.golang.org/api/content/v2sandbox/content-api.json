@@ -15,7 +15,7 @@
   "description": "Manages product items, inventory, and Merchant Center accounts for Google Shopping.",
   "discoveryVersion": "v1",
   "documentationLink": "https://developers.google.com/shopping-content",
-  "etag": "\"J3WqvAcMk4eQjJXvfSI4Yr8VouA/Q431XgB9BfIcyCs-szxnWaghv48\"",
+  "etag": "\"J3WqvAcMk4eQjJXvfSI4Yr8VouA/GgBKM4eW6PbUI0IwUflHrQshXJ4\"",
   "icons": {
     "x16": "https://www.gstatic.com/images/branding/product/1x/googleg_16dp.png",
     "x32": "https://www.gstatic.com/images/branding/product/1x/googleg_32dp.png"
@@ -109,7 +109,7 @@
           ]
         },
         "createrefundinvoice": {
-          "description": "Creates a refund invoice for one or more shipment groups, and triggers a refund for non-facilitated payment orders.",
+          "description": "Creates a refund invoice for one or more shipment groups, and triggers a refund for non-facilitated payment orders. This can only be used for line items that have previously been charged using createChargeInvoice. All amounts (except for the summary) are incremental with respect to the previous invoice.",
           "httpMethod": "POST",
           "id": "content.orderinvoices.createrefundinvoice",
           "parameterOrder": [
@@ -419,6 +419,40 @@
             "https://www.googleapis.com/auth/content"
           ]
         },
+        "canceltestorderbycustomer": {
+          "description": "Sandbox only. Cancels a test order for customer-initiated cancellation.",
+          "httpMethod": "POST",
+          "id": "content.orders.canceltestorderbycustomer",
+          "parameterOrder": [
+            "merchantId",
+            "orderId"
+          ],
+          "parameters": {
+            "merchantId": {
+              "description": "The ID of the account that manages the order. This cannot be a multi-client account.",
+              "format": "uint64",
+              "location": "path",
+              "required": true,
+              "type": "string"
+            },
+            "orderId": {
+              "description": "The ID of the test order to cancel.",
+              "location": "path",
+              "required": true,
+              "type": "string"
+            }
+          },
+          "path": "{merchantId}/testorders/{orderId}/cancelByCustomer",
+          "request": {
+            "$ref": "OrdersCancelTestOrderByCustomerRequest"
+          },
+          "response": {
+            "$ref": "OrdersCancelTestOrderByCustomerResponse"
+          },
+          "scopes": [
+            "https://www.googleapis.com/auth/content"
+          ]
+        },
         "createtestorder": {
           "description": "Sandbox only. Creates a test order.",
           "httpMethod": "POST",
@@ -572,7 +606,7 @@
           ]
         },
         "instorerefundlineitem": {
-          "description": "Notifies that item return and refund was handled directly in store.",
+          "description": "Notifies that item return and refund was handled directly by merchant outside of Google payments processing (e.g. cash refund done in store).",
           "httpMethod": "POST",
           "id": "content.orders.instorerefundlineitem",
           "parameterOrder": [
@@ -701,7 +735,7 @@
           ]
         },
         "refund": {
-          "description": "Refund a portion of the order, up to the full amount paid.",
+          "description": "Deprecated, please use returnRefundLineItem instead.",
           "httpMethod": "POST",
           "id": "content.orders.refund",
           "parameterOrder": [
@@ -1009,6 +1043,7 @@
       }
     }
   },
+  "revision": "20180829",
   "rootUrl": "https://www.googleapis.com/",
   "schemas": {
     "Amount": {
@@ -1079,15 +1114,15 @@
         },
         "customerBalance": {
           "$ref": "Amount",
-          "description": "[required] Customer balance on this invoice. A positive amount means the customer is paying, a negative one means the customer is receiving money. Note: the sum of merchant_balance, customer_balance and google_balance must always be zero."
+          "description": "[required] Customer balance on this invoice. A negative amount means the customer is paying, a positive one means the customer is receiving money. Note: the sum of merchant_balance, customer_balance and google_balance must always be zero.\n\nFurthermore the absolute value of this amount is expected to be equal to the sum of product amount and additional charges, minus promotions."
         },
         "googleBalance": {
           "$ref": "Amount",
-          "description": "[required] Google balance on this invoice. A positive amount means Google is paying, a negative one means Google is receiving money. Note: the sum of merchant_balance, customer_balance and google_balance must always be zero."
+          "description": "[required] Google balance on this invoice. A negative amount means Google is paying, a positive one means Google is receiving money. Note: the sum of merchant_balance, customer_balance and google_balance must always be zero."
         },
         "merchantBalance": {
           "$ref": "Amount",
-          "description": "[required] Merchant balance on this invoice. A positive amount means the merchant is paying, a negative one means the merchant is receiving money. Note: the sum of merchant_balance, customer_balance and google_balance must always be zero."
+          "description": "[required] Merchant balance on this invoice. A negative amount means the merchant is paying, a positive one means the merchant is receiving money. Note: the sum of merchant_balance, customer_balance and google_balance must always be zero."
         },
         "productTotal": {
           "$ref": "Amount",
@@ -2184,6 +2219,27 @@
       },
       "type": "object"
     },
+    "OrdersCancelTestOrderByCustomerRequest": {
+      "id": "OrdersCancelTestOrderByCustomerRequest",
+      "properties": {
+        "reason": {
+          "description": "The reason for the cancellation.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "OrdersCancelTestOrderByCustomerResponse": {
+      "id": "OrdersCancelTestOrderByCustomerResponse",
+      "properties": {
+        "kind": {
+          "default": "content#ordersCancelTestOrderByCustomerResponse",
+          "description": "Identifies what kind of resource this is. Value: the fixed string \"content#ordersCancelTestOrderByCustomerResponse\".",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
     "OrdersCreateTestOrderRequest": {
       "id": "OrdersCreateTestOrderRequest",
       "properties": {
@@ -2479,7 +2535,7 @@
       "properties": {
         "amountPretax": {
           "$ref": "Price",
-          "description": "The amount that is refunded. Optional, but if filled then both amountPretax and amountTax must be set."
+          "description": "The amount that is refunded. If omitted, refundless return is assumed (same as calling returnLineItem method). Optional, but if filled then both amountPretax and amountTax must be set."
         },
         "amountTax": {
           "$ref": "Price",
@@ -2929,7 +2985,7 @@
       "properties": {
         "amountPretax": {
           "$ref": "Price",
-          "description": "The amount that is refunded. Optional, but if filled then both amountPretax and amountTax must be set."
+          "description": "The amount that is refunded. If omitted, refundless return is assumed (same as calling returnLineItem method). Optional, but if filled then both amountPretax and amountTax must be set."
         },
         "amountTax": {
           "$ref": "Price",

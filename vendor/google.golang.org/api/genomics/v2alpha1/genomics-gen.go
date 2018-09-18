@@ -1602,6 +1602,12 @@ func (s *RunPipelineRequest) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
+// RunPipelineResponse: The response to the RunPipeline method, returned
+// in the operation's result
+// field on success.
+type RunPipelineResponse struct {
+}
+
 // RuntimeMetadata: Runtime metadata that will be populated in
 // the
 // runtimeMetadata
@@ -1639,7 +1645,8 @@ func (s *RuntimeMetadata) MarshalJSON() ([]byte, error) {
 // by the worker VM when running the pipeline.
 type Secret struct {
 	// CipherText: The value of the cipherText response from the `encrypt`
-	// method.
+	// method. This field
+	// is intentionally unaudited.
 	CipherText string `json:"cipherText,omitempty"`
 
 	// KeyName: The name of the Cloud KMS key that will be used to decrypt
@@ -2156,6 +2163,7 @@ func (c *PipelinesRunCall) doRequest(alt string) (*http.Response, error) {
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2alpha1/pipelines:run")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
@@ -2283,6 +2291,7 @@ func (c *ProjectsOperationsCancelCall) doRequest(alt string) (*http.Response, er
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2alpha1/{+name}:cancel")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
@@ -2430,6 +2439,7 @@ func (c *ProjectsOperationsGetCall) doRequest(alt string) (*http.Response, error
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2alpha1/{+name}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -2628,6 +2638,7 @@ func (c *ProjectsOperationsListCall) doRequest(alt string) (*http.Response, erro
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2alpha1/{+name}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -2800,6 +2811,7 @@ func (c *WorkersCheckInCall) doRequest(alt string) (*http.Response, error) {
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v2alpha1/workers/{id}:checkIn")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)

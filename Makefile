@@ -13,9 +13,9 @@ CLIENT_NAME=voucher_client
 IMAGE_NAME?=voucher
 BINARY_UNIX=_unix
 
-.PHONY: clean deps setup test build install voucher_cli
+.PHONY: clean setup test build install voucher_cli
 
-all: clean deps build
+all: clean build
 
 install:
 	for BINARY_NAME in $(PACKAGES); do cp -v voucher_$$BINARY_NAME $(GOPATH)/bin/voucher_$$BINARY_NAME; done
@@ -32,7 +32,7 @@ clean:
 		rm -vrf voucher_$$PACKAGE voucher_$$PACKAGE$(BINARY_UNIX); \
 	done
 
-deps:
+update-deps:
 	$(GOCMD) get github.com/golang/dep/cmd/dep
 	$(GODEP) ensure
 
