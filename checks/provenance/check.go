@@ -10,7 +10,7 @@ import (
 	"github.com/Shopify/voucher/grafeas"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	containeranalysispb "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1alpha1"
+	"google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/build"
 )
 
 // check holds the required data for the check
@@ -40,7 +40,7 @@ func (p *check) Check(i voucher.ImageData) (bool, error) {
 		return false, fmt.Errorf("response from MetadataClient is not an grafeas.Item")
 	}
 
-	buildDetails := item.Occurrence.GetBuildDetails()
+	buildDetails := item.Occurrence.GetBuild()
 	if validateProvenance(buildDetails) && validateArtifacts(i, buildDetails) {
 		log.Infof("Validated image provenance and artifacts for: %s", i.String())
 		return true, nil
@@ -49,7 +49,7 @@ func (p *check) Check(i voucher.ImageData) (bool, error) {
 	return false, nil
 }
 
-func validateProvenance(details *containeranalysispb.BuildDetails) (trusted bool) {
+func validateProvenance(details *build.Details) (trusted bool) {
 	// get trusted things
 	trustedBuilderIdentities := voucher.ToMapStringBool(viper.GetStringMap("trusted-builder-identities"))
 	trustedBuilderProjects := voucher.ToMapStringBool(viper.GetStringMap("trusted-projects"))
@@ -80,7 +80,7 @@ func validateProvenance(details *containeranalysispb.BuildDetails) (trusted bool
 	return
 }
 
-func validateArtifacts(i voucher.ImageData, details *containeranalysispb.BuildDetails) (matched bool) {
+func validateArtifacts(i voucher.ImageData, details *build.Details) (matched bool) {
 	// if an artifact built by this Build is the image, validate the SHAs match
 	for _, artifact := range details.Provenance.BuiltArtifacts {
 		if strings.HasSuffix(i.Digest().String(), artifact.Checksum) {

@@ -4,7 +4,6 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/spf13/viper"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -14,21 +13,18 @@ import (
 func isAuthorized(r *http.Request) error {
 
 	// If the server does not require auth, the user is always authorized.
-	if !viper.GetBool("server.require_auth") {
+	if !serverConfig.RequireAuth {
 		return nil
 	}
 
-	configUsername := viper.GetString("server.username")
-	configPassHash := viper.GetString("server.password")
-
-	if configUsername == "" || configPassHash == "" {
+	if serverConfig.Username == "" || serverConfig.PassHash == "" {
 		return errors.New("username or password misconfigured in configuration")
 	}
 
 	username, password, ok := r.BasicAuth()
 	if ok {
-		if username == configUsername {
-			if err := bcrypt.CompareHashAndPassword([]byte(configPassHash), []byte(password)); nil != err {
+		if username == serverConfig.Username {
+			if err := bcrypt.CompareHashAndPassword([]byte(serverConfig.PassHash), []byte(password)); nil != err {
 				return err
 			}
 			return nil

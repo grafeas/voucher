@@ -5,7 +5,8 @@ import (
 
 	"github.com/Shopify/voucher"
 	"github.com/stretchr/testify/assert"
-	containeranalysispb "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1alpha1"
+	"google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/build"
+	"google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/provenance"
 )
 
 var (
@@ -15,12 +16,12 @@ var (
 	projectTestData         = "test"
 )
 
-var buildDetailsTestData = &containeranalysispb.BuildDetails{
-	Provenance: &containeranalysispb.BuildProvenance{
+var buildDetailsTestData = &build.Details{
+	Provenance: &provenance.BuildProvenance{
 		Id:        "foo",
 		ProjectId: projectTestData,
 		Creator:   builderIdentityTestData,
-		BuiltArtifacts: []*containeranalysispb.Artifact{
+		BuiltArtifacts: []*provenance.Artifact{
 			{
 				Id:       imageURLTestData,
 				Checksum: imageSHA256TestData,

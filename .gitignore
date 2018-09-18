@@ -11,12 +11,8 @@
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
-hack/*
+# voucher specific output
 voucher_client
-voucher_cli
-voucher_server
-voucher_cli_unix
-voucher_server_unix
-vendor/cloud.google.com/go/devtools/containeranalysis
-vendor/google.golang.org/genproto/googleapis/devtools/containeranalysis/
+voucher_cli*
+voucher_server*
 coverage.txt

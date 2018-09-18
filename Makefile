@@ -13,7 +13,7 @@ CLIENT_NAME=voucher_client
 IMAGE_NAME?=voucher
 BINARY_UNIX=_unix
 
-.PHONY: clean setup deps test build install voucher_cli
+.PHONY: clean deps setup test build install voucher_cli
 
 all: clean deps build
 
@@ -33,10 +33,6 @@ clean:
 	done
 
 deps:
-	wget -P hack/ https://storage.googleapis.com/container-analysis-v1alpha1/containeranalysis-go.tar.gz
-	tar xzvf hack/containeranalysis-go.tar.gz -C vendor
-
-update-deps:
 	$(GOCMD) get github.com/golang/dep/cmd/dep
 	$(GODEP) ensure
 

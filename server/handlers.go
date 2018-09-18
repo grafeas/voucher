@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/Shopify/voucher"
 	"github.com/Shopify/voucher/cmd/config"
@@ -36,7 +35,7 @@ func handleChecks(w http.ResponseWriter, r *http.Request, name ...string) {
 		return
 	}
 
-	context, cancel := context.WithTimeout(context.Background(), 240*time.Second)
+	context, cancel := context.WithTimeout(context.Background(), serverConfig.TimeoutDuration())
 	defer cancel()
 
 	metadataClient := config.NewMetadataClient(context)

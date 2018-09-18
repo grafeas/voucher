@@ -6,8 +6,11 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var serverConfig *Config
+
 // Serve creates a server on the specified port
-func Serve(port string) {
+func Serve(config *Config) {
+	serverConfig = config
 	router := NewRouter()
-	log.Fatal(http.ListenAndServe(port, router))
+	log.Fatal(http.ListenAndServe(serverConfig.Address(), router))
 }

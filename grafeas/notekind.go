@@ -2,18 +2,26 @@ package grafeas
 
 import (
 	"github.com/Shopify/voucher"
-	containeranalysispb "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1alpha1"
+	"google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/common"
 )
 
 // getNoteKind translates the Voucher MetadataType into a Google Container Analysis NoteKind.
-func getNoteKind(metadataType voucher.MetadataType) containeranalysispb.Note_Kind {
+func getNoteKind(metadataType voucher.MetadataType) common.NoteKind {
 	switch metadataType {
 	case voucher.VulnerabilityType:
-		return containeranalysispb.Note_PACKAGE_VULNERABILITY
-	case DiscoveryType:
-		return containeranalysispb.Note_DISCOVERY
+		return common.NoteKind_VULNERABILITY
 	case voucher.BuildDetailsType:
-		return containeranalysispb.Note_BUILD_DETAILS
+		return common.NoteKind_BUILD
+	case voucher.AttestationType:
+		return common.NoteKind_ATTESTATION
+	case DiscoveryType:
+		return common.NoteKind_DISCOVERY
+	case PackageType:
+		return common.NoteKind_PACKAGE
+	case ImageType:
+		return common.NoteKind_IMAGE
+	case DeploymentType:
+		return common.NoteKind_DEPLOYMENT
 	}
-	return containeranalysispb.Note_KIND_UNSPECIFIED
+	return common.NoteKind_NOTE_KIND_UNSPECIFIED
 }
