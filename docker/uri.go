@@ -1,7 +1,7 @@
 package docker
 
 import (
-	"fmt"
+	"bytes"
 	"net/url"
 
 	"github.com/docker/distribution/reference"
@@ -17,32 +17,48 @@ func GetTokenURI(ref reference.Named) string {
 	query.Set("service", hostname)
 	query.Set("scope", "repository:"+repository+":*")
 
-	return fmt.Sprintf("https://%s/v2/token?%s", hostname, query.Encode())
+	u := createURL(ref, "token")
+	u.RawQuery = query.Encode()
+
+	return u.String()
 }
 
 // GetBlobURI gets a blob URI based on the passed repository and
 // digest.
 func GetBlobURI(ref reference.Named, digest digest.Digest) string {
-	hostname := reference.Domain(ref)
-	repository := reference.Path(ref)
-
-	return fmt.Sprintf("https://%s/v2/%s/blobs/%s", hostname, repository, digest)
+	u := createURL(ref, reference.Path(ref), "blobs", string(digest))
+	return u.String()
 }
 
 // GetManifestURI gets a manifest URI based on the passed repository and
 // digest.
 func GetManifestURI(ref reference.Canonical) string {
-	hostname := reference.Domain(ref)
-	repository := reference.Path(ref)
-
-	return fmt.Sprintf("https://%s/v2/%s/manifests/%s", hostname, repository, ref.Digest())
+	u := createURL(ref, reference.Path(ref), "manifests", string(ref.Digest()))
+	return u.String()
 }
 
 // GetTagManifestURI gets a manifest URI based on the passed repository and
 // tag.
 func GetTagManifestURI(ref reference.NamedTagged) string {
-	hostname := reference.Domain(ref)
-	repository := reference.Path(ref)
+	u := createURL(ref, reference.Path(ref), "manifests", ref.Tag())
+	return u.String()
+}
 
-	return fmt.Sprintf("https://%s/v2/%s/manifests/%s", hostname, repository, ref.Tag())
+func createURL(ref reference.Named, pathSegments ...string) url.URL {
+	hostname := reference.Domain(ref)
+
+	var path bytes.Buffer
+	path.WriteString("/v2")
+
+	for _, pathSegment := range pathSegments {
+		path.WriteString("/")
+		path.WriteString(pathSegment)
+	}
+
+	var u url.URL
+	u.Scheme = "https"
+	u.Host = hostname
+	u.Path = path.String()
+
+	return u
 }
