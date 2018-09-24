@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/Shopify/voucher"
-	"github.com/Shopify/voucher/server"
 	"github.com/docker/distribution/reference"
 )
 
@@ -30,7 +29,7 @@ func (c *VoucherClient) Check(check string, image reference.Canonical) (voucher.
 	var checkResp voucher.Response
 	var buffer bytes.Buffer
 
-	err := json.NewEncoder(&buffer).Encode(server.VoucherParams{
+	err := json.NewEncoder(&buffer).Encode(voucher.Request{
 		ImageURL: image.String(),
 	})
 	if err != nil {
