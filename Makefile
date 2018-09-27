@@ -1,6 +1,7 @@
 # Go parameters
 GOCMD=go
 GODEP=dep
+DOCKER=docker
 GOPATH?=`echo $$GOPATH`
 GOBUILD=$(GOCMD) build
 GOCLEAN=$(GOCMD) clean
@@ -9,11 +10,12 @@ CODE=./cmd/
 SERVER_NAME=voucher_server
 CLI_NAME=voucher_cli
 CLIENT_NAME=voucher_client
+IMAGE_NAME?=voucher
 BINARY_UNIX=_unix
 
-.PHONY: clean setup deps test build install
+.PHONY: clean setup test build install voucher_cli
 
-all: clean deps build
+all: clean build
 
 install:
 	for BINARY_NAME in $(PACKAGES); do cp -v voucher_$$BINARY_NAME $(GOPATH)/bin/voucher_$$BINARY_NAME; done
@@ -30,10 +32,6 @@ clean:
 		rm -vrf voucher_$$PACKAGE voucher_$$PACKAGE$(BINARY_UNIX); \
 	done
 
-deps:
-	wget -P hack/ https://storage.googleapis.com/container-analysis-v1alpha1/containeranalysis-go.tar.gz
-	tar xzvf hack/containeranalysis-go.tar.gz -C vendor
-
 update-deps:
 	$(GOCMD) get github.com/golang/dep/cmd/dep
 	$(GODEP) ensure
@@ -48,6 +46,9 @@ voucher_client: $(wildcard cmd/voucher_client/*.go)
 
 voucher_server:
 	$(GOBUILD) -o $(SERVER_NAME) -v $(CODE)$(SERVER_NAME)
+
+container:
+	$(DOCKER) build -t $(IMAGE_NAME) .
 
 # Cross Compilation
 server-linux:

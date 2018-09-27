@@ -1,6 +1,6 @@
 // Package jobs provides access to the Cloud Talent Solution API.
 //
-// See https://cloud.google.com/job-discovery/docs
+// See https://cloud.google.com/talent-solution/job-search/docs/
 //
 // Usage example:
 //
@@ -392,7 +392,13 @@ type CommuteInfo struct {
 	// calculation.
 	JobLocation *Location `json:"jobLocation,omitempty"`
 
-	// TravelDuration: Travel time to reach the job.
+	// TravelDuration: The number of seconds required to travel to the job
+	// location from the
+	// query location. A duration of 0 seconds indicates that the job is
+	// not
+	// reachable within the requested duration, but was returned as part of
+	// an
+	// expanded query.
 	TravelDuration string `json:"travelDuration,omitempty"`
 
 	// ForceSendFields is a list of field names (e.g. "JobLocation") to
@@ -1403,11 +1409,11 @@ type HistogramFacets struct {
 	// allowed.
 	CustomAttributeHistogramFacets []*CustomAttributeHistogramRequest `json:"customAttributeHistogramFacets,omitempty"`
 
-	// SimpleHistogramFacets: Optional. Specifies the simple type of
-	// histogram facets, for example,
-	// `COMPANY_SIZE`, `EMPLOYMENT_TYPE` etc. This field is equivalent
-	// to
-	// GetHistogramRequest.
+	// SimpleHistogramFacets: Optional.
+	//
+	// Specifies the simple type of histogram facets, for
+	// example,
+	// `COMPANY_SIZE`, `EMPLOYMENT_TYPE` etc.
 	//
 	// Possible values:
 	//   "SEARCH_TYPE_UNSPECIFIED" - The default value if search type is not
@@ -3622,41 +3628,46 @@ type SearchJobsRequest struct {
 	// "relevance desc".
 	//
 	// Supported options are:
-	//   * "relevance desc": By relevance descending, as determined by the
+	//
+	// * "relevance desc": By relevance descending, as determined by the
 	// API
-	//     algorithms. Relevance thresholding of query results is only
+	// algorithms. Relevance thresholding of query results is only
 	// available
-	//     with this ordering.
-	//   * "posting_publish_time desc": By Job.posting_publish_time
-	//     descending.
-	//   * "posting_update_time desc": By Job.posting_update_time
+	// with this ordering.
+	// * "posting_publish_time desc": By Job.posting_publish_time
 	// descending.
-	//   * "title": By Job.title ascending.
-	//   * "title desc": By Job.title descending.
-	//   * "annualized_base_compensation": By job's
-	//     CompensationInfo.annualized_base_compensation ascending. If
+	// * "posting_update_time desc": By Job.posting_update_time
+	// descending.
+	// * "title": By Job.title ascending.
+	// * "title desc": By Job.title descending.
+	// * "annualized_base_compensation": By
 	// job's
-	//     annualized base compensation is unspecified, they are put at the
-	// end of
-	//     search result.
-	//   * "annualized_base_compensation desc": By job's
-	//     CompensationInfo.annualized_base_compensation descending. If
+	// CompensationInfo.annualized_base_compensation_range ascending.
+	// Jobs
+	// whose annualized base compensation is unspecified are put at the end
+	// of
+	// search results.
+	// * "annualized_base_compensation desc": By
 	// job's
-	//     annualized base compensation is unspecified, they are put at the
-	// end of
-	//     search result.
-	//   * "annualized_total_compensation": By job's
-	//     CompensationInfo.annualized_total_compensation ascending. If
+	// CompensationInfo.annualized_base_compensation_range descending.
+	// Jobs
+	// whose annualized base compensation is unspecified are put at the end
+	// of
+	// search results.
+	// * "annualized_total_compensation": By
 	// job's
-	//     annualized total compensation is unspecified, they are put at the
-	// end
-	//     of search result.
-	//   * "annualized_total_compensation desc": By job's
-	//     CompensationInfo.annualized_total_compensation descending. If
+	// CompensationInfo.annualized_total_compensation_range ascending.
+	// Jobs
+	// whose annualized base compensation is unspecified are put at the end
+	// of
+	// search results.
+	// * "annualized_total_compensation desc": By
 	// job's
-	//     annualized total compensation is unspecified, they are put at the
-	// end
-	//     of search result.
+	// CompensationInfo.annualized_total_compensation_range descending.
+	// Jobs
+	// whose annualized base compensation is unspecified are put at the end
+	// of
+	// search results.
 	OrderBy string `json:"orderBy,omitempty"`
 
 	// PageSize: Optional.
@@ -3775,9 +3786,9 @@ type SearchJobsResponse struct {
 	// see enable_precise_result_size.
 	EstimatedTotalSize int64 `json:"estimatedTotalSize,omitempty"`
 
-	// HistogramResults: The histogram results that match with
+	// HistogramResults: The histogram results that match
 	// specified
-	// SearchJobsRequest.histogram_request.
+	// SearchJobsRequest.histogram_facets.
 	HistogramResults *HistogramResults `json:"histogramResults,omitempty"`
 
 	// LocationFilters: The location filters that the service applied to the
@@ -4190,6 +4201,7 @@ func (c *ProjectsCompleteCall) doRequest(alt string) (*http.Response, error) {
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v3/{+name}:complete")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -4365,6 +4377,7 @@ func (c *ProjectsCompaniesCreateCall) doRequest(alt string) (*http.Response, err
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v3/{+parent}/companies")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
@@ -4494,6 +4507,7 @@ func (c *ProjectsCompaniesDeleteCall) doRequest(alt string) (*http.Response, err
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v3/{+name}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("DELETE", urls, body)
@@ -4634,6 +4648,7 @@ func (c *ProjectsCompaniesGetCall) doRequest(alt string) (*http.Response, error)
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v3/{+name}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -4801,6 +4816,7 @@ func (c *ProjectsCompaniesListCall) doRequest(alt string) (*http.Response, error
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v3/{+parent}/companies")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -4975,6 +4991,7 @@ func (c *ProjectsCompaniesPatchCall) doRequest(alt string) (*http.Response, erro
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v3/{+name}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PATCH", urls, body)
@@ -5111,6 +5128,7 @@ func (c *ProjectsJobsBatchDeleteCall) doRequest(alt string) (*http.Response, err
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v3/{+parent}/jobs:batchDelete")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
@@ -5251,6 +5269,7 @@ func (c *ProjectsJobsCreateCall) doRequest(alt string) (*http.Response, error) {
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v3/{+parent}/jobs")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
@@ -5384,6 +5403,7 @@ func (c *ProjectsJobsDeleteCall) doRequest(alt string) (*http.Response, error) {
 	reqHeaders.Set("User-Agent", c.s.userAgent())
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v3/{+name}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("DELETE", urls, body)
@@ -5526,6 +5546,7 @@ func (c *ProjectsJobsGetCall) doRequest(alt string) (*http.Response, error) {
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v3/{+name}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -5726,6 +5747,7 @@ func (c *ProjectsJobsListCall) doRequest(alt string) (*http.Response, error) {
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v3/{+parent}/jobs")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -5912,6 +5934,7 @@ func (c *ProjectsJobsPatchCall) doRequest(alt string) (*http.Response, error) {
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v3/{+name}")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("PATCH", urls, body)
@@ -6053,6 +6076,7 @@ func (c *ProjectsJobsSearchCall) doRequest(alt string) (*http.Response, error) {
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v3/{+parent}/jobs:search")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
@@ -6224,6 +6248,7 @@ func (c *ProjectsJobsSearchForAlertCall) doRequest(alt string) (*http.Response, 
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v3/{+parent}/jobs:searchForAlert")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)

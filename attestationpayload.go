@@ -3,7 +3,7 @@ package voucher
 import "fmt"
 
 // AttestationPayload is a structure that contains the Attestation data that we
-// want to create an Occurrence from.
+// want to create an MetadataItem from.
 type AttestationPayload struct {
 	CheckName string
 	Body      string

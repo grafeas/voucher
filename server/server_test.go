@@ -26,8 +26,13 @@ func TestMain(m *testing.M) {
 
 	config.InitConfig()
 
-	viper.Set("server.username", testUsername)
-	viper.Set("server.password", testPasswordHash)
+	serverConfig = &Config{
+		Port:        viper.GetInt("server.port"),
+		Timeout:     viper.GetInt("server.timeout"),
+		RequireAuth: true,
+		Username:    testUsername,
+		PassHash:    testPasswordHash,
+	}
 
 	os.Exit(m.Run())
 }

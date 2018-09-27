@@ -7,9 +7,10 @@ import (
 	"strings"
 
 	"github.com/Shopify/voucher"
+	"github.com/Shopify/voucher/grafeas"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	containeranalysispb "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1alpha1"
+	"google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/build"
 )
 
 // check holds the required data for the check
@@ -24,17 +25,22 @@ func (p *check) SetMetadataClient(metadataClient voucher.MetadataClient) {
 
 // Check runs the check :)
 func (p *check) Check(i voucher.ImageData) (bool, error) {
-	occurrences, err := p.metadataClient.GetOccurrencesForImage(i, containeranalysispb.Note_BUILD_DETAILS)
+	items, err := p.metadataClient.GetMetadata(i, voucher.BuildDetailsType)
 	if err != nil {
 		return false, err
 	}
 
 	// there should only be one occurrence
-	if len(occurrences) != 1 {
-		return false, fmt.Errorf("Got %d occurrences for: %s", len(occurrences), i.String())
+	if len(items) != 1 {
+		return false, fmt.Errorf("Got %d items for: %s", len(items), i.String())
 	}
 
-	buildDetails := occurrences[0].GetBuildDetails()
+	item, ok := items[0].(*grafeas.Item)
+	if !ok {
+		return false, fmt.Errorf("response from MetadataClient is not an grafeas.Item")
+	}
+
+	buildDetails := item.Occurrence.GetBuild()
 	if validateProvenance(buildDetails) && validateArtifacts(i, buildDetails) {
 		log.Infof("Validated image provenance and artifacts for: %s", i.String())
 		return true, nil
@@ -43,7 +49,7 @@ func (p *check) Check(i voucher.ImageData) (bool, error) {
 	return false, nil
 }
 
-func validateProvenance(details *containeranalysispb.BuildDetails) (trusted bool) {
+func validateProvenance(details *build.Details) (trusted bool) {
 	// get trusted things
 	trustedBuilderIdentities := voucher.ToMapStringBool(viper.GetStringMap("trusted-builder-identities"))
 	trustedBuilderProjects := voucher.ToMapStringBool(viper.GetStringMap("trusted-projects"))
@@ -74,7 +80,7 @@ func validateProvenance(details *containeranalysispb.BuildDetails) (trusted bool
 	return
 }
 
-func validateArtifacts(i voucher.ImageData, details *containeranalysispb.BuildDetails) (matched bool) {
+func validateArtifacts(i voucher.ImageData, details *build.Details) (matched bool) {
 	// if an artifact built by this Build is the image, validate the SHAs match
 	for _, artifact := range details.Provenance.BuiltArtifacts {
 		if strings.HasSuffix(i.Digest().String(), artifact.Checksum) {

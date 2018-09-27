@@ -5,6 +5,6 @@ package voucher
 type MetadataClient interface {
 	CanAttest() bool
 	NewPayloadBody(ImageData) (string, error)
-	GetOccurrencesForImage(ImageData, NoteKind) ([]Occurrence, error)
-	AddAttestationOccurrenceToImage(ImageData, AttestationPayload) (Occurrence, error)
+	GetMetadata(ImageData, MetadataType) ([]MetadataItem, error)
+	AddAttestationToImage(ImageData, AttestationPayload) (MetadataItem, error)
 }

@@ -1,5 +1,47 @@
 # Changes
 
+## v0.28.0
+
+- bigtable:
+  - Emulator returns Unimplemented for snapshot RPCs.
+- bigquery:
+  - Support zero-length repeated, nested fields.
+- cloud assets:
+  - Add v1beta client.
+- datastore:
+  - Don't nil out transaction ID on retry.
+- firestore:
+  - BREAKING CHANGE: When watching a query with Query.Snapshots, QuerySnapshotIterator.Next
+  returns a QuerySnapshot which contains read time, result size, change list and the DocumentIterator
+  (previously, QuerySnapshotIterator.Next returned just the DocumentIterator). See: https://godoc.org/cloud.google.com/go/firestore#Query.Snapshots.
+  - Add array-contains operator.
+- IAM:
+  - Add iam/credentials/apiv1 client.
+- pubsub:
+  - Canceling the context passed to Subscription.Receive causes Receive to return when
+  processing finishes on all messages currently in progress, even if new messages are arriving.
+- redis:
+  - Add redis/apiv1 client.
+- storage:
+  - Add Reader.Attrs.
+  - Deprecate several Reader getter methods: please use Reader.Attrs for these instead.
+  - Add ObjectHandle.Bucket and ObjectHandle.Object methods.
+
+## v0.27.0
+
+- bigquery:
+  - Allow modification of encryption configuration and partitioning options to a table via the Update call.
+  - Add a SchemaFromJSON function that converts a JSON table schema.
+- bigtable:
+  - Restore cbt count functionality.
+- containeranalysis:
+  - Add v1beta client.
+- spanner:
+  - Fix a case where an iterator might not be closed correctly.
+- storage:
+  - Add ServiceAccount method https://godoc.org/cloud.google.com/go/storage#Client.ServiceAccount.
+  - Add a method to Reader that returns the parsed value of the Last-Modified header.
+
 ## v0.26.0
 
 - bigquery:

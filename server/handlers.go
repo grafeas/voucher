@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -34,7 +35,10 @@ func handleChecks(w http.ResponseWriter, r *http.Request, name ...string) {
 		return
 	}
 
-	metadataClient := config.NewMetadataClient()
+	context, cancel := context.WithTimeout(context.Background(), serverConfig.TimeoutDuration())
+	defer cancel()
+
+	metadataClient := config.NewMetadataClient(context)
 
 	checksuite, err := config.NewCheckSuite(metadataClient, name...)
 	if nil != err {

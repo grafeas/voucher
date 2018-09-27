@@ -177,6 +177,10 @@ func NewApp(ctx context.Context, config *configuration.Configuration) *App {
 
 	options = append(options, storage.Schema1SigningKey(app.trustKey))
 
+	if config.Compatibility.Schema1.Enabled {
+		options = append(options, storage.EnableSchema1)
+	}
+
 	if config.HTTP.Host != "" {
 		u, err := url.Parse(config.HTTP.Host)
 		if err != nil {
@@ -303,7 +307,7 @@ func NewApp(ctx context.Context, config *configuration.Configuration) *App {
 
 	authType := config.Auth.Type()
 
-	if authType != "" {
+	if authType != "" && !strings.EqualFold(authType, "none") {
 		accessController, err := auth.GetAccessController(config.Auth.Type(), config.Auth.Parameters())
 		if err != nil {
 			panic(fmt.Sprintf("unable to configure authorization (%s): %v", authType, err))
@@ -702,7 +706,7 @@ func (app *App) dispatcher(dispatch dispatchFunc) http.Handler {
 			}
 
 			// assign and decorate the authorized repository with an event bridge.
-			context.Repository, context.App.repoRemover = notifications.Listen(
+			context.Repository, context.RepositoryRemover = notifications.Listen(
 				repository,
 				context.App.repoRemover,
 				app.eventBridge(context, r))
@@ -876,7 +880,7 @@ func (app *App) eventBridge(ctx *Context, r *http.Request) notifications.Listene
 	}
 	request := notifications.NewRequestRecord(dcontext.GetRequestID(ctx), r)
 
-	return notifications.NewBridge(ctx.urlBuilder, app.events.source, actor, request, app.events.sink)
+	return notifications.NewBridge(ctx.urlBuilder, app.events.source, actor, request, app.events.sink, app.Config.Notifications.EventConfig.IncludeReferences)
 }
 
 // nameRequired returns true if the route requires a name.

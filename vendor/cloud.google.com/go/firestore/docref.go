@@ -102,6 +102,7 @@ func (d *DocumentRef) Get(ctx context.Context) (*DocumentSnapshot, error) {
 //     "google.golang.org/genproto/googleapis/type/latlng". You should always use
 //     a pointer to a LatLng.
 //   - Slices convert to Array.
+//   - *firestore.DocumentRef converts to Reference.
 //   - Maps and structs convert to Map.
 //   - nils of any type convert to Null.
 //
@@ -417,17 +418,6 @@ func (s sentinel) String() string {
 	default:
 		return "<?sentinel?>"
 	}
-}
-
-func isStructOrStructPtr(x interface{}) bool {
-	v := reflect.ValueOf(x)
-	if v.Kind() == reflect.Struct {
-		return true
-	}
-	if v.Kind() == reflect.Ptr && v.Elem().Kind() == reflect.Struct {
-		return true
-	}
-	return false
 }
 
 // An Update describes an update to a value referred to by a path.

@@ -79,6 +79,26 @@ func (t testPropagator) SpanContextToRequest(sc trace.SpanContext, req *http.Req
 	req.Header.Set("trace", hex.EncodeToString(buf.Bytes()))
 }
 
+func TestTransport_RoundTrip_Race(t *testing.T) {
+	// This tests that we don't modify the request in accordance with the
+	// specification for http.RoundTripper.
+	// We attempt to trigger a race by reading the request from a separate
+	// goroutine. If the request is modified by Transport, this should trigger
+	// the race detector.
+
+	transport := &testTransport{ch: make(chan *http.Request, 1)}
+	rt := &Transport{
+		Propagation: &testPropagator{},
+		Base:        transport,
+	}
+	req, _ := http.NewRequest("GET", "http://foo.com", nil)
+	go func() {
+		fmt.Println(*req)
+	}()
+	rt.RoundTrip(req)
+	_ = <-transport.ch
+}
+
 func TestTransport_RoundTrip(t *testing.T) {
 	ctx := context.Background()
 	ctx, parent := trace.StartSpan(ctx, "parent")
@@ -500,16 +520,16 @@ func TestStatusUnitTest(t *testing.T) {
 		in   int
 		want trace.Status
 	}{
-		{200, trace.Status{Code: trace.StatusCodeOK, Message: `"OK"`}},
-		{204, trace.Status{Code: trace.StatusCodeOK, Message: `"OK"`}},
-		{100, trace.Status{Code: trace.StatusCodeUnknown, Message: `"UNKNOWN"`}},
-		{500, trace.Status{Code: trace.StatusCodeUnknown, Message: `"UNKNOWN"`}},
-		{404, trace.Status{Code: trace.StatusCodeNotFound, Message: `"NOT_FOUND"`}},
-		{600, trace.Status{Code: trace.StatusCodeUnknown, Message: `"UNKNOWN"`}},
-		{401, trace.Status{Code: trace.StatusCodeUnauthenticated, Message: `"UNAUTHENTICATED"`}},
-		{403, trace.Status{Code: trace.StatusCodePermissionDenied, Message: `"PERMISSION_DENIED"`}},
-		{301, trace.Status{Code: trace.StatusCodeOK, Message: `"OK"`}},
-		{501, trace.Status{Code: trace.StatusCodeUnimplemented, Message: `"UNIMPLEMENTED"`}},
+		{200, trace.Status{Code: trace.StatusCodeOK, Message: `OK`}},
+		{204, trace.Status{Code: trace.StatusCodeOK, Message: `OK`}},
+		{100, trace.Status{Code: trace.StatusCodeUnknown, Message: `UNKNOWN`}},
+		{500, trace.Status{Code: trace.StatusCodeUnknown, Message: `UNKNOWN`}},
+		{404, trace.Status{Code: trace.StatusCodeNotFound, Message: `NOT_FOUND`}},
+		{600, trace.Status{Code: trace.StatusCodeUnknown, Message: `UNKNOWN`}},
+		{401, trace.Status{Code: trace.StatusCodeUnauthenticated, Message: `UNAUTHENTICATED`}},
+		{403, trace.Status{Code: trace.StatusCodePermissionDenied, Message: `PERMISSION_DENIED`}},
+		{301, trace.Status{Code: trace.StatusCodeOK, Message: `OK`}},
+		{501, trace.Status{Code: trace.StatusCodeUnimplemented, Message: `UNIMPLEMENTED`}},
 	}
 
 	for _, tt := range tests {

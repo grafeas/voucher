@@ -738,8 +738,8 @@ func (c *CseListCall) ImgColorType(imgColorType string) *CseListCall {
 }
 
 // ImgDominantColor sets the optional parameter "imgDominantColor":
-// Returns images of a specific dominant color: yellow, green, teal,
-// blue, purple, pink, white, gray, black and brown.
+// Returns images of a specific dominant color: red, orange, yellow,
+// green, teal, blue, purple, pink, white, gray, black and brown.
 //
 // Possible values:
 //   "black" - black
@@ -747,8 +747,10 @@ func (c *CseListCall) ImgColorType(imgColorType string) *CseListCall {
 //   "brown" - brown
 //   "gray" - gray
 //   "green" - green
+//   "orange" - orange
 //   "pink" - pink
 //   "purple" - purple
+//   "red" - red
 //   "teal" - teal
 //   "white" - white
 //   "yellow" - yellow
@@ -980,6 +982,7 @@ func (c *CseListCall) doRequest(alt string) (*http.Response, error) {
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v1")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -1121,15 +1124,17 @@ func (c *CseListCall) Do(opts ...googleapi.CallOption) (*Search, error) {
 	//       "type": "string"
 	//     },
 	//     "imgDominantColor": {
-	//       "description": "Returns images of a specific dominant color: yellow, green, teal, blue, purple, pink, white, gray, black and brown.",
+	//       "description": "Returns images of a specific dominant color: red, orange, yellow, green, teal, blue, purple, pink, white, gray, black and brown.",
 	//       "enum": [
 	//         "black",
 	//         "blue",
 	//         "brown",
 	//         "gray",
 	//         "green",
+	//         "orange",
 	//         "pink",
 	//         "purple",
+	//         "red",
 	//         "teal",
 	//         "white",
 	//         "yellow"
@@ -1140,8 +1145,10 @@ func (c *CseListCall) Do(opts ...googleapi.CallOption) (*Search, error) {
 	//         "brown",
 	//         "gray",
 	//         "green",
+	//         "orange",
 	//         "pink",
 	//         "purple",
+	//         "red",
 	//         "teal",
 	//         "white",
 	//         "yellow"
@@ -1502,8 +1509,8 @@ func (c *CseSiterestrictListCall) ImgColorType(imgColorType string) *CseSiterest
 }
 
 // ImgDominantColor sets the optional parameter "imgDominantColor":
-// Returns images of a specific dominant color: yellow, green, teal,
-// blue, purple, pink, white, gray, black and brown.
+// Returns images of a specific dominant color: red, orange, yellow,
+// green, teal, blue, purple, pink, white, gray, black and brown.
 //
 // Possible values:
 //   "black" - black
@@ -1511,8 +1518,10 @@ func (c *CseSiterestrictListCall) ImgColorType(imgColorType string) *CseSiterest
 //   "brown" - brown
 //   "gray" - gray
 //   "green" - green
+//   "orange" - orange
 //   "pink" - pink
 //   "purple" - purple
+//   "red" - red
 //   "teal" - teal
 //   "white" - white
 //   "yellow" - yellow
@@ -1743,6 +1752,7 @@ func (c *CseSiterestrictListCall) doRequest(alt string) (*http.Response, error) 
 	}
 	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v1/siterestrict")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("GET", urls, body)
@@ -1884,15 +1894,17 @@ func (c *CseSiterestrictListCall) Do(opts ...googleapi.CallOption) (*Search, err
 	//       "type": "string"
 	//     },
 	//     "imgDominantColor": {
-	//       "description": "Returns images of a specific dominant color: yellow, green, teal, blue, purple, pink, white, gray, black and brown.",
+	//       "description": "Returns images of a specific dominant color: red, orange, yellow, green, teal, blue, purple, pink, white, gray, black and brown.",
 	//       "enum": [
 	//         "black",
 	//         "blue",
 	//         "brown",
 	//         "gray",
 	//         "green",
+	//         "orange",
 	//         "pink",
 	//         "purple",
+	//         "red",
 	//         "teal",
 	//         "white",
 	//         "yellow"
@@ -1903,8 +1915,10 @@ func (c *CseSiterestrictListCall) Do(opts ...googleapi.CallOption) (*Search, err
 	//         "brown",
 	//         "gray",
 	//         "green",
+	//         "orange",
 	//         "pink",
 	//         "purple",
+	//         "red",
 	//         "teal",
 	//         "white",
 	//         "yellow"

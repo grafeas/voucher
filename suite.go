@@ -52,13 +52,13 @@ func (cs *Suite) Run(imageData ImageData) []CheckResult {
 
 // Attest runs through the passed []CheckResult and if a CheckResult is marked as successful,
 // runs the CreateAttestion function in the Check corresponding to that CheckResult. Each
-// CheckResult is updated with the Occurrence (or error) and the resulting []CheckResult is
+// CheckResult is updated with the details (or error) and the resulting []CheckResult is
 // returned.
 func (cs *Suite) Attest(metadataClient MetadataClient, results []CheckResult) []CheckResult {
 	for i, result := range results {
 		if result.Success {
-			occ, err := createAttestation(metadataClient, result)
-			results[i].Occurrence = occ
+			details, err := createAttestation(metadataClient, result)
+			results[i].Details = details
 			if nil == err {
 				results[i].Attested = true
 			} else {
@@ -77,14 +77,14 @@ func (cs *Suite) RunAndAttest(metadataClient MetadataClient, imageData ImageData
 
 // createAttestation generates an attestation for the image Check described by CheckResult.
 // That attestation is then added to the metadata server the MetadataClient is connected to.
-func createAttestation(client MetadataClient, result CheckResult) (Occurrence, error) {
+func createAttestation(client MetadataClient, result CheckResult) (MetadataItem, error) {
 	payload, err := client.NewPayloadBody(result.ImageData)
 	if err != nil {
 		return nil, err
 	}
 
 	attestationPayload := NewAttestationPayload(result.Name, payload)
-	occ, err := client.AddAttestationOccurrenceToImage(result.ImageData, attestationPayload)
+	occ, err := client.AddAttestationToImage(result.ImageData, attestationPayload)
 	return occ, err
 }
 

@@ -277,6 +277,19 @@ type AuditLog struct {
 	//     "shelves/SHELF_ID/books/BOOK_ID"
 	ResourceName string `json:"resourceName,omitempty"`
 
+	// ResourceOriginalState: The resource's original state before mutation.
+	// Present only for
+	// operations which have successfully modified the targeted
+	// resource(s).
+	// In general, this field should contain all changed fields, except
+	// those
+	// that are already been included in `request`, `response`, `metadata`
+	// or
+	// `service_data` fields.
+	// When the JSON object represented here has a proto equivalent,
+	// the proto name will be indicated in the `@type` property.
+	ResourceOriginalState googleapi.RawMessage `json:"resourceOriginalState,omitempty"`
+
 	// Response: The operation response. This may not include all response
 	// elements,
 	// such as those that are too large, privacy-sensitive, or
@@ -1132,6 +1145,111 @@ func (s *ExponentialBuckets) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// HttpRequest: A common proto for logging HTTP requests. Only contains
+// semantics
+// defined by the HTTP specification. Product-specific
+// logging
+// information MUST be defined in a separate message.
+type HttpRequest struct {
+	// CacheFillBytes: The number of HTTP response bytes inserted into
+	// cache. Set only when a
+	// cache fill was attempted.
+	CacheFillBytes int64 `json:"cacheFillBytes,omitempty,string"`
+
+	// CacheHit: Whether or not an entity was served from cache
+	// (with or without validation).
+	CacheHit bool `json:"cacheHit,omitempty"`
+
+	// CacheLookup: Whether or not a cache lookup was attempted.
+	CacheLookup bool `json:"cacheLookup,omitempty"`
+
+	// CacheValidatedWithOriginServer: Whether or not the response was
+	// validated with the origin server before
+	// being served from cache. This field is only meaningful if `cache_hit`
+	// is
+	// True.
+	CacheValidatedWithOriginServer bool `json:"cacheValidatedWithOriginServer,omitempty"`
+
+	// Latency: The request processing latency on the server, from the time
+	// the request was
+	// received until the response was sent.
+	Latency string `json:"latency,omitempty"`
+
+	// Protocol: Protocol used for the request. Examples: "HTTP/1.1",
+	// "HTTP/2", "websocket"
+	Protocol string `json:"protocol,omitempty"`
+
+	// Referer: The referer URL of the request, as defined in
+	// [HTTP/1.1 Header
+	// Field
+	// Definitions](http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.h
+	// tml).
+	Referer string `json:"referer,omitempty"`
+
+	// RemoteIp: The IP address (IPv4 or IPv6) of the client that issued the
+	// HTTP
+	// request. Examples: "192.168.1.1", "FE80::0202:B3FF:FE1E:8329".
+	RemoteIp string `json:"remoteIp,omitempty"`
+
+	// RequestMethod: The request method. Examples: "GET", "HEAD",
+	// "PUT", "POST".
+	RequestMethod string `json:"requestMethod,omitempty"`
+
+	// RequestSize: The size of the HTTP request message in bytes, including
+	// the request
+	// headers and the request body.
+	RequestSize int64 `json:"requestSize,omitempty,string"`
+
+	// RequestUrl: The scheme (http, https), the host name, the path and the
+	// query
+	// portion of the URL that was requested.
+	// Example: "http://example.com/some/info?color=red".
+	RequestUrl string `json:"requestUrl,omitempty"`
+
+	// ResponseSize: The size of the HTTP response message sent back to the
+	// client, in bytes,
+	// including the response headers and the response body.
+	ResponseSize int64 `json:"responseSize,omitempty,string"`
+
+	// ServerIp: The IP address (IPv4 or IPv6) of the origin server that the
+	// request was
+	// sent to.
+	ServerIp string `json:"serverIp,omitempty"`
+
+	// Status: The response code indicating the status of
+	// response.
+	// Examples: 200, 404.
+	Status int64 `json:"status,omitempty"`
+
+	// UserAgent: The user agent sent by the client. Example:
+	// "Mozilla/4.0 (compatible; MSIE 6.0; Windows 98; Q312461; .NET
+	// CLR 1.0.3705)".
+	UserAgent string `json:"userAgent,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "CacheFillBytes") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "CacheFillBytes") to
+	// include in API requests with the JSON null value. By default, fields
+	// with empty values are omitted from API requests. However, any field
+	// with an empty value appearing in NullFields will be sent to the
+	// server as null. It is an error if a field in this list has a
+	// non-empty value. This may be used to include null fields in Patch
+	// requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *HttpRequest) MarshalJSON() ([]byte, error) {
+	type NoMethod HttpRequest
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
 // LinearBuckets: Describing buckets with constant width.
 type LinearBuckets struct {
 	// NumFiniteBuckets: The number of finite buckets. With the underflow
@@ -1193,6 +1311,11 @@ func (s *LinearBuckets) UnmarshalJSON(data []byte) error {
 
 // LogEntry: An individual log entry.
 type LogEntry struct {
+	// HttpRequest: Optional. Information about the HTTP request associated
+	// with this
+	// log entry, if applicable.
+	HttpRequest *HttpRequest `json:"httpRequest,omitempty"`
+
 	// InsertId: A unique ID for the log entry used for deduplication. If
 	// omitted,
 	// the implementation will generate one based on operation_id.
@@ -1254,7 +1377,17 @@ type LogEntry struct {
 	// omitted, defaults to operation start time.
 	Timestamp string `json:"timestamp,omitempty"`
 
-	// ForceSendFields is a list of field names (e.g. "InsertId") to
+	// Trace: Optional. Resource name of the trace associated with the log
+	// entry, if any.
+	// If it contains a relative resource name, the name is assumed to be
+	// relative
+	// to `//tracing.googleapis.com`.
+	// Example:
+	// `projects/my-projectid/traces/06796866738c859f2f19b7cfb321482
+	// 4`
+	Trace string `json:"trace,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "HttpRequest") to
 	// unconditionally include in API requests. By default, fields with
 	// empty values are omitted from API requests. However, any non-pointer,
 	// non-interface field appearing in ForceSendFields will be sent to the
@@ -1262,10 +1395,10 @@ type LogEntry struct {
 	// used to include empty fields in Patch requests.
 	ForceSendFields []string `json:"-"`
 
-	// NullFields is a list of field names (e.g. "InsertId") to include in
-	// API requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
+	// NullFields is a list of field names (e.g. "HttpRequest") to include
+	// in API requests with the JSON null value. By default, fields with
+	// empty values are omitted from API requests. However, any field with
+	// an empty value appearing in NullFields will be sent to the server as
 	// null. It is an error if a field in this list has a non-empty value.
 	// This may be used to include null fields in Patch requests.
 	NullFields []string `json:"-"`
@@ -2409,7 +2542,8 @@ type RequestMetadata struct {
 	//     The request was made by the Google API client for Python.
 	// +   `Cloud SDK Command Line Tool apitools-client/1.0 gcloud/0.9.62`:
 	//     The request was made by the Google Cloud SDK CLI (gcloud).
-	// +   `AppEngine-Google; (+http://code.google.com/appengine; appid:
+	// +   `AppEngine-Google; (+http://code.google.com/appengine;
+	// appid:
 	// s~my-project`:
 	//     The request was made from the `my-project` App Engine app.
 	// NOLINT
@@ -2581,6 +2715,15 @@ type ResourceLocation struct {
 	//     "us-east1"
 	//     "nam3"
 	CurrentLocations []string `json:"currentLocations,omitempty"`
+
+	// OriginalLocations: The locations of a resource prior to the execution
+	// of the operation.
+	// For example:
+	//
+	//     "europe-west1-a"
+	//     "us-east1"
+	//     "nam3"
+	OriginalLocations []string `json:"originalLocations,omitempty"`
 
 	// ForceSendFields is a list of field names (e.g. "CurrentLocations") to
 	// unconditionally include in API requests. By default, fields with
@@ -2895,6 +3038,7 @@ func (c *ServicesAllocateQuotaCall) doRequest(alt string) (*http.Response, error
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v1/services/{serviceName}:allocateQuota")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
@@ -3052,6 +3196,7 @@ func (c *ServicesCheckCall) doRequest(alt string) (*http.Response, error) {
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v1/services/{serviceName}:check")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
@@ -3195,6 +3340,7 @@ func (c *ServicesEndReconciliationCall) doRequest(alt string) (*http.Response, e
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v1/services/{serviceName}:endReconciliation")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
@@ -3345,6 +3491,7 @@ func (c *ServicesReleaseQuotaCall) doRequest(alt string) (*http.Response, error)
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v1/services/{serviceName}:releaseQuota")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
@@ -3499,6 +3646,7 @@ func (c *ServicesReportCall) doRequest(alt string) (*http.Response, error) {
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v1/services/{serviceName}:report")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)
@@ -3675,6 +3823,7 @@ func (c *ServicesStartReconciliationCall) doRequest(alt string) (*http.Response,
 	}
 	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
+	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v1/services/{serviceName}:startReconciliation")
 	urls += "?" + c.urlParams_.Encode()
 	req, _ := http.NewRequest("POST", urls, body)

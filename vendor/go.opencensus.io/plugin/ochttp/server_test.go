@@ -65,11 +65,14 @@ func TestHandlerStatsCollection(t *testing.T) {
 			body := bytes.NewBuffer(make([]byte, test.reqSize))
 			r := httptest.NewRequest(test.method, test.target, body)
 			w := httptest.NewRecorder()
+			mux := http.NewServeMux()
+			mux.Handle("/request/", httpHandler(test.statusCode, test.respSize))
 			h := &Handler{
-				Handler: httpHandler(test.statusCode, test.respSize),
+				Handler: mux,
+				StartOptions: trace.StartOptions{
+					Sampler: trace.NeverSample(),
+				},
 			}
-			h.StartOptions.Sampler = trace.NeverSample()
-
 			for i := 0; i < test.count; i++ {
 				h.ServeHTTP(w, r)
 				totalCount++
@@ -287,11 +290,11 @@ func TestEnsureTrackingResponseWriterSetsStatusCode(t *testing.T) {
 		res  *http.Response
 		want trace.Status
 	}{
-		{res: &http.Response{StatusCode: 200}, want: trace.Status{Code: trace.StatusCodeOK, Message: `"OK"`}},
-		{res: &http.Response{StatusCode: 500}, want: trace.Status{Code: trace.StatusCodeUnknown, Message: `"UNKNOWN"`}},
-		{res: &http.Response{StatusCode: 403}, want: trace.Status{Code: trace.StatusCodePermissionDenied, Message: `"PERMISSION_DENIED"`}},
-		{res: &http.Response{StatusCode: 401}, want: trace.Status{Code: trace.StatusCodeUnauthenticated, Message: `"UNAUTHENTICATED"`}},
-		{res: &http.Response{StatusCode: 429}, want: trace.Status{Code: trace.StatusCodeResourceExhausted, Message: `"RESOURCE_EXHAUSTED"`}},
+		{res: &http.Response{StatusCode: 200}, want: trace.Status{Code: trace.StatusCodeOK, Message: `OK`}},
+		{res: &http.Response{StatusCode: 500}, want: trace.Status{Code: trace.StatusCodeUnknown, Message: `UNKNOWN`}},
+		{res: &http.Response{StatusCode: 403}, want: trace.Status{Code: trace.StatusCodePermissionDenied, Message: `PERMISSION_DENIED`}},
+		{res: &http.Response{StatusCode: 401}, want: trace.Status{Code: trace.StatusCodeUnauthenticated, Message: `UNAUTHENTICATED`}},
+		{res: &http.Response{StatusCode: 429}, want: trace.Status{Code: trace.StatusCodeResourceExhausted, Message: `RESOURCE_EXHAUSTED`}},
 	}
 
 	for _, tt := range tests {

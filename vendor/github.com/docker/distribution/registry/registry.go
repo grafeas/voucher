@@ -8,6 +8,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"rsc.io/letsencrypt"
@@ -27,6 +29,9 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/yvasiyarov/gorelic"
 )
+
+// this channel gets notified when process receives signal. It is global to ease unit testing
+var quit = make(chan os.Signal, 1)
 
 // ServeCmd is a cobra command for running the registry.
 var ServeCmd = &cobra.Command{
@@ -195,7 +200,29 @@ func (registry *Registry) ListenAndServe() error {
 		dcontext.GetLogger(registry.app).Infof("listening on %v", ln.Addr())
 	}
 
-	return registry.server.Serve(ln)
+	if config.HTTP.DrainTimeout == 0 {
+		return registry.server.Serve(ln)
+	}
+
+	// setup channel to get notified on SIGTERM signal
+	signal.Notify(quit, syscall.SIGTERM)
+	serveErr := make(chan error)
+
+	// Start serving in goroutine and listen for stop signal in main thread
+	go func() {
+		serveErr <- registry.server.Serve(ln)
+	}()
+
+	select {
+	case err := <-serveErr:
+		return err
+	case <-quit:
+		dcontext.GetLogger(registry.app).Info("stopping server gracefully. Draining connections for ", config.HTTP.DrainTimeout)
+		// shutdown the server with a grace period of configured timeout
+		c, cancel := context.WithTimeout(context.Background(), config.HTTP.DrainTimeout)
+		defer cancel()
+		return registry.server.Shutdown(c)
+	}
 }
 
 func configureReporting(app *handlers.App) http.Handler {
@@ -237,13 +264,6 @@ func configureReporting(app *handlers.App) http.Handler {
 // configureLogging prepares the context with a logger using the
 // configuration.
 func configureLogging(ctx context.Context, config *configuration.Configuration) (context.Context, error) {
-	if config.Log.Level == "" && config.Log.Formatter == "" {
-		// If no config for logging is set, fallback to deprecated "Loglevel".
-		log.SetLevel(logLevel(config.Loglevel))
-		ctx = dcontext.WithLogger(ctx, dcontext.GetLogger(ctx))
-		return ctx, nil
-	}
-
 	log.SetLevel(logLevel(config.Log.Level))
 
 	formatter := config.Log.Formatter

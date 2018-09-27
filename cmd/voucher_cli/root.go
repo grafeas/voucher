@@ -1,10 +1,12 @@
 package main
 
 import (
-	log "github.com/sirupsen/logrus"
+	"context"
+	"time"
 
 	"github.com/Shopify/voucher"
-	config "github.com/Shopify/voucher/cmd/config"
+	"github.com/Shopify/voucher/cmd/config"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -41,7 +43,10 @@ func runCheck(name ...string) {
 
 	imageData := getImageData()
 
-	metadataClient := config.NewMetadataClient()
+	context, cancel := context.WithTimeout(context.Background(), time.Duration(viper.GetInt("timeout"))*time.Second)
+	defer cancel()
+
+	metadataClient := config.NewMetadataClient(context)
 
 	checksuite, err := config.NewCheckSuite(metadataClient, name...)
 	if nil != err {
@@ -75,12 +80,14 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&config.FileName, "config", "c", "", "path to config")
 	rootCmd.PersistentFlags().StringP("image", "i", "", "path of image to check")
 	rootCmd.MarkPersistentFlagRequired("image")
-	rootCmd.PersistentFlags().StringP("scanner", "", "scanner", "vulnerability scanner to utilize")
+	rootCmd.PersistentFlags().StringP("scanner", "", "", "vulnerability scanner to utilize")
 	viper.BindPFlag("scanner", rootCmd.PersistentFlags().Lookup("scanner"))
-	rootCmd.PersistentFlags().StringP("failon", "", "failon", "minimum vulnerability severity to fail on")
+	rootCmd.PersistentFlags().StringP("failon", "", "", "minimum vulnerability severity to fail on")
 	viper.BindPFlag("failon", rootCmd.PersistentFlags().Lookup("failon"))
 	rootCmd.PersistentFlags().BoolP("dryrun", "", false, "only run tests, do not push any attestations")
 	viper.BindPFlag("dryrun", rootCmd.PersistentFlags().Lookup("dryrun"))
+	rootCmd.PersistentFlags().IntP("timeout", "", 240, "number of seconds that should be dedicated to a Voucher call")
+	viper.BindPFlag("timeout", rootCmd.PersistentFlags().Lookup("timeout"))
 
 	log.SetFormatter(&log.TextFormatter{})
 }
