@@ -10,7 +10,7 @@ RUN apk --no-cache add \
     make all
 
 # Final build
-FROM alpine:3.7
+FROM alpine:3.8
 
 COPY --from=builder /go/src/github.com/Shopify/voucher/voucher_server /usr/local/bin/voucher_server
 COPY --from=builder /go/src/github.com/Shopify/voucher/entrypoint.sh /usr/local/entrypoint.sh
