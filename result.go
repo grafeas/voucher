@@ -5,10 +5,10 @@ package voucher
 // Succes will be true, Attested will be false. Err will contain the first error to
 // occur.
 type CheckResult struct {
-	ImageData ImageData    `json:"-"`
-	Name      string       `json:"name"`
-	Err       string       `json:"error,omitempty"`
-	Success   bool         `json:"success"`
-	Attested  bool         `json:"attested"`
-	Details   MetadataItem `json:"details,omitempty"`
+	ImageData ImageData   `json:"-"`
+	Name      string      `json:"name"`
+	Err       string      `json:"error,omitempty"`
+	Success   bool        `json:"success"`
+	Attested  bool        `json:"attested"`
+	Details   interface{} `json:"details,omitempty"`
 }
