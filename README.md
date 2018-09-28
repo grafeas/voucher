@@ -6,7 +6,7 @@
 
 Voucher is the missing piece in the binary authorization toolchain which enables you to secure your software supply pipeline. Binary authorization uses an admission controller such as [Kritis](https://grafeas.io/docs/concepts/what-is-kritis/overview.html), which pulls information about a container image from a metadata server such as [Grafeas](https://grafeas.io/) to ensure that the image is not deployed to production unless it has passed an appropriate suite of checks. As running checks on containers during deployment is time consuming and prevents rapid rollout of changes, the checks the admission controller utilizes to verify an image is ready for production should be run at build time. Voucher does exactly that.
 
-Voucher was designed to be called from your CI/DC pipeline, after an image is built, but before that image is deployed to production. Voucher pulls the newly built image from your image registry; runs it through all of the checks that were requested, and generates attestations for every check that the image passes. Those attestations (openpgpg signatures of container digests) are then pushed to the metadata server, where Kritis can verify them.
+Voucher was designed to be called from your CI/DC pipeline, after an image is built, but before that image is deployed to production. Voucher pulls the newly built image from your image registry; runs it through all of the checks that were requested, and generates attestations for every check that the image passes. Those attestations (OpenPGP signatures of container digests) are then pushed to the metadata server, where Kritis can verify them.
 
 Voucher presently includes the following checks:
 
@@ -15,7 +15,7 @@ Voucher presently includes the following checks:
 | `diy`        | Can the image be downloaded from our container registry?                       |
 | `nobody`     | Was the image built to run as a user who is not root?                          |
 | `snakeoil`   | Is the image free of known security issues?                                    |
-| `provenance` | Was the image built by us or a trusted system?                             |
+| `provenance` | Was the image built by us or a trusted system?                                 |
 
 ## Installing voucher
 
@@ -39,31 +39,49 @@ $ go get -u github.com/Shopify/voucher/cmd/voucher_cli
 
 This will download and install the voucher binary into `$GOPATH/bin` directory.
 
-## Configuration
+### Voucher Client
 
-An example configuration file can be found in the [config directory](config/voucher.toml).
+Voucher Client is a tool for connecting to a running Voucher server.
+
+Install the client, `voucher_client`, by running:
+
+```shell
+$ go get -u github.com/Shopify/voucher/cmd/voucher_client
+```
+
+This will download and install the voucher client into `$GOPATH/bin` directory.
+
+## Setup and Configuration
+
+See the [Tutorial](TUTORIAL.md) for more thorough setup instructions.
+
+### Configuration Reference
+
+An example configuration file can be found in the [config directory](config/config.toml).
 
 The configuration can be written as a toml, json, or yaml file, and you can specify the path to the configuration file using "-c".
 
 Below are the configuration options for Voucher:
 
-| Group     | Key               | Description                                                                            |
-| :-------- | :---------------  | :------------------------------------------------------------------------------------- |
-|           | `dryrun`          | When set, don't create attestations.                                                   |
-|           | `scanner`         | The vulnerability scanner to use ("clair" or "gca").                                   |
-|           | `failon`          | The minimum vulnerability to fail on. Discussed below.                                 |
-|           | `image_project`   | The project in the metadata server that image information is stored.                   |
-|           | `binauth_project` | The project in the metadata server that the binauth information is stored.             |
-| `checks`  | (test name here)  | A test that is active when running "all" tests.                                        |
-| `server`  | `port`            | The port that the server can be reached on.                                            |
-| `server`  | `require_auth`    | Require the use of Basic Auth, with the username and password from the configuration.  |
-| `server`  | `username`        | The username that Voucher server users must use.                                       |
-| `server`  | `password`        | A password hashed with the bcrypt algorithm, for use with the username.                |
-| `ejson`   | `dir`             | The path to the ejson keys directory.                                                  |
-| `ejson`   | `secrets`         | The path to the ejson secrets.                                                         |
-| `clair`   | `address`         | The hostname that Clair exists at.                                                     |
+| Group     | Key               | Description                                                                                |
+| :-------- | :---------------  | :----------------------------------------------------------------------------------------- |
+|           | `dryrun`          | When set, don't create attestations.                                                       |
+|           | `scanner`         | The vulnerability scanner to use ("clair" or "gca").                                       |
+|           | `failon`          | The minimum vulnerability to fail on. Discussed below.                                     |
+|           | `image_project`   | The project in the metadata server that image information is stored.                       |
+|           | `binauth_project` | The project in the metadata server that the binauth information is stored.                 |
+|           | `timeout`         | The nubmer of seconds to spend checking an image, before failing (voucher standalone only).|
+| `checks`  | (test name here)  | A test that is active when running "all" tests.                                            |
+| `server`  | `port`            | The port that the server can be reached on.                                                |
+| `server`  | `timeout`         | The nubmer of seconds to spend checking an image, before failing.                          |
+| `server`  | `require_auth`    | Require the use of Basic Auth, with the username and password from the configuration.      |
+| `server`  | `username`        | The username that Voucher server users must use.                                           |
+| `server`  | `password`        | A password hashed with the bcrypt algorithm, for use with the username.                    |
+| `ejson`   | `dir`             | The path to the ejson keys directory.                                                      |
+| `ejson`   | `secrets`         | The path to the ejson secrets.                                                             |
+| `clair`   | `address`         | The hostname that Clair exists at.                                                         |
 
-Configuration options can be overriden at runtime by setting the appropriate flag. For example, if you set the "port" flag when running `voucher_server`, that value will override whatever is in the configuration.
+Configuration options can be overridden at runtime by setting the appropriate flag. For example, if you set the "port" flag when running `voucher_server`, that value will override whatever is in the configuration.
 
 ### Scanner
 
@@ -124,8 +142,9 @@ $ voucher_cli <test to run> --image <image to check> [other options]
 | `--config`  | `-c`             | The path to a configuration file that should be used.                      |
 | `--dryrun`  |                  | When set, don't create attestations.                                       |
 | `--scanner` |                  | The vulnerability scanner to use ("clair" or "gca").                       |
-| `--failon`  |                  | The minimum vulnerability to fail on. Discussed below.                     |
+| `--failon`  |                  | The minimum vulnerability to fail on. Discussed above.                     |
 | `--image`   | `-i`             | The image to check and attest.                                             |
+| `--timeout` |                  | The number of seconds to spend checking an image, before failing.          |
 
 For example:
 
@@ -143,7 +162,7 @@ $ voucher_cli diy --image gcr.io/path/to/image@sha256:ab7524b7375fbf09b3784f0bbd
 
 This would run the "diy" test.
 
-### Using voucher server to check an image
+### Using Voucher Server to check an image
 
 You can run Voucher in server mode by launching `voucher_server`, using the following syntax:
 
@@ -157,6 +176,7 @@ $ voucher_server [--port <port number>]
 | :--------   | :--------------- | :------------------------------------------------------------------------- |
 | `--config`  | `-c`             | The path to a configuration file that should be used.                      |
 | `--port`    | `-p`             | Set the port to listen on.                                                 |
+| `--timeout` |                  | The number of seconds to spend checking an image, before failing.          |
 
 For example:
 
@@ -207,3 +227,37 @@ The response will be something along the following lines:
 ```
 
 More details about Voucher server can be read in the [API documentation](server/README.md).
+
+### Using Voucher Client to check an image with an existing Voucher Server
+
+While you can use `curl` to make API calls against Voucher, you can also use `voucher_client` to save from making HTTP requests by hand. Unlike the other Voucher tools, `voucher_client` will look up the appropriate canonical version of an image reference if passed a tagged image reference.
+
+```shell
+$ voucher_client [--voucher <server> --check <check to run>] <image path>
+```
+
+`voucher_client` supports the following flags:
+
+| Flag        | Short Flag       | Description                                                                |
+| :--------   | :--------------- | :------------------------------------------------------------------------- |
+| `--check`   | `-c`             | The Check to run on the image ("all" for all checks).                      |
+| `--voucher` | `-v`             | The voucher server to connect to.                                          |
+
+For example:
+
+```shell
+$ voucher_client -v http://localhost:8000 gcr.io/path/to/image:latest
+```
+
+The output will be something along the following lines:
+
+```json
+ - Attesting image: gcr.io/path/to/image@sha256:ab7524b7375fbf09b3784f0bbd9cb2505700dd05e03ce5f5e6d262bf2f5ac51c
+   ✗ nobody failed
+   ✗ snakeoil failed, err: vulnernable to 1 vulnerabilities: CVE-2018-12345 (high)
+   ✓ diy succeeded, but wasn't attested, err: rpc error: code = AlreadyExists desc = Requested entity already exists
+```
+
+## Extending Voucher
+
+- [Adding new Checks](/checks/README.md)

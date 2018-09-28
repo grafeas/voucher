@@ -1,8 +1,8 @@
 # Voucher Checks
 
-Adding new checks follows the same pattern that adding new SQL drivers works. Checks are located in the same directory as this README, `checks`, in their own package. While the Check's package does not need to match the name of the check, it helps with organization if it does.
+Adding new checks follows the same pattern that adding new SQL drivers uses. Checks are located in the same directory as this README, `/checks`, in their own package. While the Check's package does not need to match the name of the check, it helps with organization if it does.
 
-The check name itself, which is set when registering the Check for use, will also be used to enable/disable that check, 
+The check name itself, which is set when registering the Check for use, will also be used to enable/disable that check, and to co-ordinate which PGP key to use when attesting images.
 
 Below is an example of a Check, "examplecheck", which we will step through. This Check would logically be found at `config/examplecheck/check.go`.
 
@@ -18,7 +18,7 @@ type check struct {
 }
 
 // Check if the image described by ImageData is good enough for our purposes.
-func (n *check) Check(i voucher.ImageData) (bool, error) {
+func (c *check) Check(i voucher.ImageData) (bool, error) {
     ok := isImageGood(i)
 	return ok, nil
 }
@@ -45,8 +45,8 @@ As you can see, Check has only one method, also called Check.
 This is the method where the test itself should run.
 
 ```golang
-// Check if the image described by ImageData is good enough for our purposes.
-func (n *check) Check(i voucher.ImageData) (bool, error) {
+// Check if the image described by ImageData is acceptable for our purposes.
+func (c *check) Check(i voucher.ImageData) (bool, error) {
     ok := isImageGood(i)
 	return ok, nil
 }
@@ -55,6 +55,48 @@ func (n *check) Check(i voucher.ImageData) (bool, error) {
 In our example, the function `isImageGood()` is called, and it returns a boolean.
 
 If you have a Check which might fail with an error, you should return `false, err` rather than just returning the error and not worrying about the boolean value.
+
+### AuthorizedChecks
+
+Some checks require authenticating against the Docker registry. These checks should implement AuthorizedCheck, which requires a new method:
+
+```golang
+type AuthCheck interface {
+	Check
+	SetAuth(Auth)
+}
+```
+
+For example, with a check with an `auth` field, you could implement:
+
+```golang
+func (c *check) SetAuth(auth voucher.Auth) {
+    c.auth = auth
+}
+```
+
+Checks that implement AuthorizedCheck will automatically have their `SetAuth` method called with a usable Auth. AuthorizedChecks can also be MetadataChecks.
+
+### MetadataChecks
+
+Some checks require interacting with the MetadataClient. These checks should implement MetadataCheck, which requires a new method:
+
+```golang
+type MetadataCheck interface {
+	Check
+	SetMetadataClient(MetadataClient)
+}
+```
+
+For example, if your check has a `metadataClient` field, you could write:
+
+```golang
+func (c *check) SetMetadataClient(client voucher.MetadataClient) {
+    c.metadataClient = client
+}
+```
+
+Checks that implement MetadataCheck will automatically have their `SetMetadataClient` method called with the configured MetadataClient. MetadataChecks can also be AuthorizedChecks.
 
 ## Implement the CheckFactory
 
