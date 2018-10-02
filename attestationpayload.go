@@ -11,6 +11,10 @@ type AttestationPayload struct {
 
 // Sign takes a keyring and signs the body of the payload with it, returning that as a string.
 func (payload *AttestationPayload) Sign(keyring *KeyRing) (string, string, error) {
+	if nil == keyring {
+		return "", "", fmt.Errorf("cannot sign attestation payload: %s", errEmptyKeyring)
+	}
+
 	signer, err := keyring.GetSignerByName(payload.CheckName)
 	if nil != err {
 		return "", "", err

@@ -24,7 +24,7 @@ show-coverage: test
 	go tool cover -html=coverage.txt
 
 test:
-	./test.sh
+	go test ./... -race -coverprofile=coverage.txt -covermode=atomic
 
 clean:
 	$(GOCLEAN)

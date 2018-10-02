@@ -25,7 +25,11 @@ func (d *check) Check(i voucher.ImageData) (bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
-	client, err := voucher.AuthToClient(ctx, d.auth, i)
+	if nil == d.auth {
+		return false, voucher.ErrNoAuth
+	}
+
+	client, err := d.auth.ToClient(ctx, i)
 	if nil != err {
 		return false, err
 	}

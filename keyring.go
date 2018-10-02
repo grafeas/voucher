@@ -1,11 +1,17 @@
 package voucher
 
 import (
+	"errors"
 	"fmt"
 	"io"
 
 	"golang.org/x/crypto/openpgp"
+	"golang.org/x/crypto/openpgp/packet"
 )
+
+var errEmptyKeyring = errors.New("keyring is empty")
+var errNoKeysInEjson = errors.New("no keys in ejson file")
+var errKeysNotMap = errors.New("keys in ejson is not a map")
 
 // KeyRing wraps an OpenPGP EntityList (which implements openpgp.KeyRing),
 // adding support for determining which key is associated with which check.
@@ -18,9 +24,6 @@ type KeyRing struct {
 
 // KeysById returns the set of keys that have the given key id.
 func (keyring *KeyRing) KeysById(id uint64) []openpgp.Key {
-	if nil == keyring {
-		return nil
-	}
 	return keyring.entities.KeysById(id)
 }
 
@@ -29,56 +32,32 @@ func (keyring *KeyRing) KeysById(id uint64) []openpgp.Key {
 // The requiredUsage is expressed as the bitwise-OR of
 // packet.KeyFlag* values.
 func (keyring *KeyRing) KeysByIdUsage(id uint64, requiredUsage byte) []openpgp.Key {
-	if nil == keyring {
-		return nil
-	}
 	return keyring.entities.KeysByIdUsage(id, requiredUsage)
 }
 
 // DecryptionKeys returns all private keys that are valid for
 // decryption.
 func (keyring *KeyRing) DecryptionKeys() []openpgp.Key {
-	if nil == keyring {
-		return nil
-	}
 	return keyring.entities.DecryptionKeys()
-}
-
-// getSigner gets the first available signing Entity with the passed id.
-func (keyring *KeyRing) getSigner(id uint64) (*openpgp.Entity, error) {
-	if nil == keyring {
-		return nil, fmt.Errorf("keyring is empty")
-	}
-
-	for _, entity := range keyring.entities {
-		if nil != entity.PrimaryKey {
-			if id == entity.PrimaryKey.KeyId {
-				return entity, nil
-			}
-		}
-	}
-
-	return nil, fmt.Errorf("no signing entity exists for id \"%#x\"", id)
 }
 
 // GetSignerByName gets the first available signing key associated with the passed name.
 func (keyring *KeyRing) GetSignerByName(name string) (*openpgp.Entity, error) {
-	if nil != keyring {
-		keyID := keyring.keyIds[name]
-		if 0 != keyID {
-			return keyring.getSigner(keyID)
+	keyID := keyring.keyIds[name]
+
+	// ensure we only get PGP keys that are specifically configured for signing.
+	for _, key := range keyring.KeysByIdUsage(keyID, packet.KeyFlagSign) {
+		if nil != key.PublicKey && keyID == key.PublicKey.KeyId && nil != key.Entity {
+			return key.Entity, nil
 		}
 	}
+
 	return nil, fmt.Errorf("no signing entity exists for check name \"%s\"", name)
 }
 
 // AddEntities adds new keys from the passed EntityList to the keyring for
 // use.
 func (keyring *KeyRing) AddEntities(name string, input openpgp.EntityList) {
-	if nil == keyring {
-		keyring = NewKeyRing()
-	}
-
 	for _, entity := range input {
 		if nil != entity.PrimaryKey {
 			keyring.entities = append(keyring.entities, entity)

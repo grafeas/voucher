@@ -1,63 +1,94 @@
 package voucher
 
 import (
+	"bytes"
 	"os"
 	"strconv"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const snakeoilKeyID = "1E92E2B4BB73E885"
 const snakeoilKeyFingerprint = "90E942641C07A4C466BA97161E92E2B4BB73E885"
 const testSignedValue = "test value to sign"
 
-func newKeyring(t *testing.T) *KeyRing {
+func newTestKeyRing(t *testing.T) *KeyRing {
 	t.Helper()
+
+	require := require.New(t)
 
 	keyring := NewKeyRing()
 
-	keyFile, err := os.Open("tests/fixtures/testkey.asc")
-	if nil != err {
-		t.Fatalf("failed to open key file: %s", err)
-	}
-
+	keyFile, err := os.Open("testdata/testkey.asc")
+	require.NoErrorf(err, "failed to open key file: %s", err)
 	defer keyFile.Close()
 
 	err = AddKeyToKeyRingFromReader(keyring, "snakeoil", keyFile)
-	if nil != err {
-		t.Fatalf("Failed to add key to keyring: %s", err)
-	}
+	require.NoErrorf(err, "Failed to add key to keyring: %s", err)
 
 	return keyring
 }
 
-func TestGetKey(t *testing.T) {
-	keyring := newKeyring(t)
+func getTestKeyID(t *testing.T) uint64 {
+	t.Helper()
 
-	entity, err := keyring.GetSignerByName("snakeoil")
-	if nil != err {
-		t.Fatalf("Failed to get signing key from KeyRing: %s", err)
-	}
-
-	if nil == entity.PrimaryKey {
-		t.Fatalf("Failed to get private key from KeyRing.")
-	}
+	require := require.New(t)
 
 	keyID, err := strconv.ParseUint(snakeoilKeyID, 16, 64)
-	if nil != err {
-		t.Fatalf("Failed to convert snakeoilKeyID to uint: %s", err)
-	}
+	require.NoErrorf(err, "Failed to convert snakeoilKeyID to uint: %s", err)
 
-	if entity.PrimaryKey.KeyId != keyID {
-		t.Fatalf("Failed to get same key ID from KeyRing: \n%d vs \n%d", entity.PrimaryKey.KeyId, keyID)
-	}
+	return keyID
+}
+
+func TestGetKeyAndSign(t *testing.T) {
+	require := require.New(t)
+
+	keyring := newTestKeyRing(t)
+
+	entity, err := keyring.GetSignerByName("snakeoil")
+	require.NoErrorf(err, "Failed to get signing key from KeyRing: %s", err)
+	require.NotNilf(entity.PrimaryKey, "Failed to get private key from KeyRing.")
+
+	keyID := getTestKeyID(t)
+	require.Equal(entity.PrimaryKey.KeyId, keyID)
 
 	signedValue, err := Sign(entity, testSignedValue)
-	if nil != err {
-		t.Fatalf("Failed to sign message: %s", err)
-	}
+	require.NoErrorf(err, "Failed to sign message: %s", err)
 
 	_, err = Verify(keyring, signedValue)
-	if nil != err {
-		t.Fatalf("Failed to verify signed message: %s", err)
+	require.NoErrorf(err, "Failed to verify signed message: %s", err)
+}
+
+func TestOpenpgpKeyRing(t *testing.T) {
+	assert := assert.New(t)
+
+	keyring := newTestKeyRing(t)
+
+	keyID := getTestKeyID(t)
+
+	keys := keyring.KeysById(keyID)
+
+	assert.Lenf(keys, 1, "incorrect number of keys returned by KeysByID")
+
+	for _, key := range keys {
+		assert.Equal(key.PublicKey.KeyId, keyID, "returned key that shouldn't have been, key ID is %X, should be %s", key.PublicKey.Fingerprint, snakeoilKeyFingerprint)
+	}
+
+	encKeys := keyring.DecryptionKeys()
+	assert.Lenf(encKeys, 0, "too many keys returned by DecryptionKeys")
+}
+
+func TestBadAddKey(t *testing.T) {
+	assert := assert.New(t)
+
+	buffer := bytes.Buffer{}
+
+	keyring := newTestKeyRing(t)
+
+	err := AddKeyToKeyRingFromReader(keyring, "badkey", &buffer)
+	if assert.Error(err) {
+		assert.Equal(err.Error(), "openpgp: invalid argument: no armored data found")
 	}
 }

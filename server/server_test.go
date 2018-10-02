@@ -9,6 +9,8 @@ import (
 
 	"github.com/Shopify/voucher/cmd/config"
 	"github.com/spf13/viper"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var testParams = []byte(`
@@ -22,7 +24,7 @@ const testPassword = "testingvoucher"
 const testPasswordHash = "$2a$10$.PaOjV8GdqSHSmUtfolsJeF6LsAq/3CNsFCYGb3IoN/mO9xj1c/yG"
 
 func TestMain(m *testing.M) {
-	config.FileName = "../tests/fixtures/config.toml"
+	config.FileName = "../testdata/config.toml"
 
 	config.InitConfig()
 
@@ -39,9 +41,7 @@ func TestMain(m *testing.M) {
 
 func TestGoodAuthentication(t *testing.T) {
 	req, err := http.NewRequest(http.MethodPost, "/all", bytes.NewReader(testParams))
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
 	req.SetBasicAuth(testUsername, testPassword)
 
@@ -50,18 +50,12 @@ func TestGoodAuthentication(t *testing.T) {
 
 	handler.ServeHTTP(recorder, req)
 
-	// Check the status code is not 401 Unauthorized
-	if status := recorder.Code; status == http.StatusUnauthorized {
-		t.Errorf("%s handler returned wrong status code: got %v, shouldn't have",
-			"/all", status)
-	}
+	assert.Equal(t, recorder.Code, http.StatusOK)
 }
 
 func TestBadAuthentication(t *testing.T) {
 	req, err := http.NewRequest(http.MethodPost, "/all", bytes.NewReader(testParams))
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
 	router := NewRouter()
 
@@ -71,10 +65,7 @@ func TestBadAuthentication(t *testing.T) {
 	router.ServeHTTP(recorder, req)
 
 	// Check if the status code is not 401 Unauthorized
-	if status := recorder.Code; status != http.StatusUnauthorized {
-		t.Errorf("%s handler returned wrong status code: got %v wanted %v",
-			"/all", status, http.StatusUnauthorized)
-	}
+	assert.Equal(t, recorder.Code, http.StatusUnauthorized)
 }
 
 func TestInvalidJSON(t *testing.T) {
@@ -95,28 +86,20 @@ func TestInvalidJSON(t *testing.T) {
 		}
 
 		req, err := http.NewRequest(route.Method, path, bytes.NewReader(invalidJSON))
-		if err != nil {
-			t.Fatal(err)
-		}
+		require.NoError(t, err)
 
 		req.SetBasicAuth(testUsername, testPassword)
 
 		recorder := httptest.NewRecorder()
 		router.ServeHTTP(recorder, req)
 
-		// Check the status code is 422 Unprocessable Entity
-		if status := recorder.Code; status != http.StatusUnprocessableEntity {
-			t.Errorf("%s handler returned wrong status code: got %v wanted %v",
-				path, status, http.StatusUnprocessableEntity)
-		}
+		assert.Equal(t, recorder.Code, http.StatusUnprocessableEntity)
 	}
 }
 
 func TestHandlerStatus(t *testing.T) {
 	req, err := http.NewRequest(http.MethodGet, healthCheckPath, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
 	router := NewRouter()
 
@@ -124,8 +107,5 @@ func TestHandlerStatus(t *testing.T) {
 	router.ServeHTTP(recorder, req)
 
 	// Check the status code is what we expect
-	if status := recorder.Code; status != http.StatusOK {
-		t.Errorf("handler for health check failed: returned wrong status code: got %v wanted %v",
-			status, http.StatusOK)
-	}
+	assert.Equal(t, recorder.Code, http.StatusOK, "handler for health check failed")
 }

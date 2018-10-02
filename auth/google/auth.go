@@ -3,6 +3,7 @@ package google
 import (
 	"context"
 	"fmt"
+	"net/http"
 
 	"github.com/Shopify/voucher"
 	"github.com/docker/distribution/reference"
@@ -27,6 +28,18 @@ func (a *auth) GetTokenSource(ctx context.Context, ref reference.Named) (oauth2.
 
 	return source, err
 
+}
+
+// ToClient returns a new http.Client with the authentication details setup by
+// Auth.GetTokenSource.
+func (a *auth) ToClient(ctx context.Context, image reference.Named) (*http.Client, error) {
+	tokenSource, err := a.GetTokenSource(ctx, image)
+	if nil != err {
+		return nil, err
+	}
+
+	client := oauth2.NewClient(ctx, tokenSource)
+	return client, nil
 }
 
 // NewAuth returns a new voucher.Auth to access Google specific resources.

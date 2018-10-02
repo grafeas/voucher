@@ -5,6 +5,7 @@ import (
 
 	"github.com/Shopify/voucher"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/build"
 	"google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/provenance"
 )
@@ -34,9 +35,8 @@ var buildDetailsTestData = &build.Details{
 
 func TestArtifactIsImage(t *testing.T) {
 	imageDataTestData, err := voucher.NewImageData(imageURLTestData)
-	if err != nil {
-		return
-	}
+	require.NoError(t, err)
+
 	assert := assert.New(t)
 	result := validateArtifacts(imageDataTestData, buildDetailsTestData)
 	assert.True(result)

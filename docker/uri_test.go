@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	"github.com/docker/distribution/reference"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -15,31 +17,19 @@ const (
 	testTokenURL    = "https://" + testHostname + "/v2/token?scope=repository%3Atest%2Fproject%3A%2A&service=gcr.io"
 )
 
-func compareStrings(t *testing.T, a, b string) {
-	t.Helper()
-
-	if a != b {
-		t.Errorf("Passed Strings don't match:\n========\n%s\n========\n%s\n========\n", a, b)
-	}
-}
-
 func TestGetBaseURI(t *testing.T) {
 	named, err := reference.ParseNamed(testHostname + "/" + testProject + "@" + testDigest)
-	if nil != err {
-		t.Fatalf("failed to parse uri: %s", err)
-	}
+	require.NoError(t, err, "failed to parse uri: %s", err)
 
-	compareStrings(t, testTokenURL, GetTokenURI(named))
+	assert.Equal(t, testTokenURL, GetTokenURI(named))
 
-	if canonicalRef, ok := named.(reference.Canonical); ok {
-		compareStrings(t, string(canonicalRef.Digest()), testDigest)
-		hostname, path := reference.SplitHostname(canonicalRef)
-		compareStrings(t, hostname, "gcr.io")
-		compareStrings(t, path, testProject)
-		compareStrings(t, testBlobURL, GetBlobURI(canonicalRef, canonicalRef.Digest()))
-		compareStrings(t, testManifestURL, GetManifestURI(canonicalRef))
-	} else {
-		t.Fatal("failed to get reference")
-	}
+	canonicalRef, ok := named.(reference.Canonical)
+	require.True(t, ok)
 
+	assert.Equal(t, string(canonicalRef.Digest()), testDigest)
+	hostname, path := reference.SplitHostname(canonicalRef)
+	assert.Equal(t, hostname, "gcr.io")
+	assert.Equal(t, path, testProject)
+	assert.Equal(t, testBlobURL, GetBlobURI(canonicalRef, canonicalRef.Digest()))
+	assert.Equal(t, testManifestURL, GetManifestURI(canonicalRef))
 }

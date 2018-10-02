@@ -4,9 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
-const responseJson = `{
+const responseJSON = `{
 	"image": "",
 	"success": true,
 	"results": [
@@ -26,11 +28,8 @@ const responseJson = `{
 func TestUnmarshalResponse(t *testing.T) {
 	response := Response{}
 
-	buf := bytes.NewBufferString(responseJson)
+	buf := bytes.NewBufferString(responseJSON)
 
 	err := json.NewDecoder(buf).Decode(&response)
-
-	if nil != err {
-		t.Fatalf("failed to unmarshal valid data: %s", err)
-	}
+	assert.NoErrorf(t, err, "failed to unmarshal valid data: %s", err)
 }

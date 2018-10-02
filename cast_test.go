@@ -2,6 +2,8 @@ package voucher
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var testExpectedMap = map[string]bool{
@@ -23,8 +25,6 @@ func TestToMapStringBool(t *testing.T) {
 	convert := ToMapStringBool(testGoodMap)
 
 	for key, value := range convert {
-		if testExpectedMap[key] != value {
-			t.Errorf("Value for key %s is not %v (should be %v)", key, value, testExpectedMap[key])
-		}
+		assert.Equalf(t, testExpectedMap[key], value, "Value for key %s is not %v (should be %v)", key, value, testExpectedMap[key])
 	}
 }

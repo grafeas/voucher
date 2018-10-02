@@ -405,7 +405,10 @@
 [[projects]]
   digest = "1:bc2a12c8863e1080226b7bc69192efd6c37aaa9b85cec508b0a8f54fabb9bd9f"
   name = "github.com/stretchr/testify"
-  packages = ["assert"]
+  packages = [
+    "assert",
+    "require",
+  ]
   pruneopts = ""
   revision = "f35b8ab0b5a2cef36673838d662e249dd9c94686"
   version = "v1.2.2"
@@ -641,6 +644,7 @@
     "github.com/Shopify/ejson",
     "github.com/coreos/clair/api/v1",
     "github.com/coreos/clair/database",
+    "github.com/docker/distribution",
     "github.com/docker/distribution/manifest/schema2",
     "github.com/docker/distribution/reference",
     "github.com/docker/docker/api/types",
@@ -653,6 +657,7 @@
     "github.com/spf13/pflag",
     "github.com/spf13/viper",
     "github.com/stretchr/testify/assert",
+    "github.com/stretchr/testify/require",
     "golang.org/x/crypto/bcrypt",
     "golang.org/x/crypto/openpgp",
     "golang.org/x/crypto/openpgp/armor",

@@ -28,6 +28,10 @@ var signConfig = packet.Config{
 
 // Sign creates the signature for the attestation
 func Sign(signer *openpgp.Entity, msg string) (string, error) {
+	if nil == signer {
+		return "", fmt.Errorf("nil cannot be used as a signer")
+	}
+
 	buf := new(bytes.Buffer)
 
 	armor, err := armor.Encode(buf, openpgp.SignatureType, make(map[string]string))
@@ -61,6 +65,10 @@ func Sign(signer *openpgp.Entity, msg string) (string, error) {
 // Verify verifies a signed message's signature, and returns the message
 // that was signed as well as an error if applicable.
 func Verify(keyring openpgp.KeyRing, signed string) (string, error) {
+	if nil == keyring {
+		return "", fmt.Errorf("cannot verify signature: %s", errEmptyKeyring)
+	}
+
 	armoredBlock, err := armor.Decode(bytes.NewBufferString(signed))
 	if nil != err {
 		return "", fmt.Errorf("could not decode armor: %s", err)
