@@ -28,45 +28,29 @@ func isDone(item *Item) bool {
 	return false
 }
 
+const attempts = 5
+const sleep = time.Second * 10
+
 // pollForDiscoveries pauses execution until Google Container Analysis has pushed
 // the Vulnerability information to the server.
-func pollForDiscoveries(c voucher.MetadataClient, i voucher.ImageData) error {
-	attempts := 6
-	for {
-		if attempts < 0 {
-			break
-		}
-
-		discoveries, err := c.GetMetadata(i, DiscoveryType)
+func pollForDiscoveries(c voucher.MetadataClient, img voucher.ImageData) error {
+	for i := 0; i < attempts; i++ {
+		discoveries, err := c.GetMetadata(img, DiscoveryType)
 		if err != nil {
 			return err
 		}
-
 		if len(discoveries) > 0 {
 			for _, discoveryItem := range discoveries {
-
 				item, ok := discoveryItem.(*Item)
-				if !ok {
+				if !ok || !isVulnerabilityDiscovery(item) {
 					continue
 				}
-
-				if !isVulnerabilityDiscovery(item) {
-					continue
-				}
-
 				if isDone(item) {
 					return nil
 				}
-				// TODO: add logging here.
-				time.Sleep(time.Second * 10)
-				attempts--
-				break
 			}
-		} else {
-			// TODO: add logging here as well.
-			time.Sleep(time.Second * 5)
 		}
-
+		time.Sleep(sleep)
 	}
 	return errDiscoveriesUnfinished
 }
