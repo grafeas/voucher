@@ -680,7 +680,9 @@
     "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/provenance",
     "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/vulnerability",
     "google.golang.org/grpc",
+    "google.golang.org/grpc/codes",
     "google.golang.org/grpc/credentials",
+    "google.golang.org/grpc/status",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

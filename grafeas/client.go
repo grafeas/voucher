@@ -9,7 +9,6 @@ import (
 	binauth "github.com/Shopify/voucher/grafeas/binauth"
 	"github.com/docker/distribution/reference"
 	"google.golang.org/api/iterator"
-	"google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/attestation"
 	"google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/common"
 	grafeaspb "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/grafeas"
 )
@@ -89,48 +88,22 @@ func (g *Client) AddAttestationToImage(reference reference.Canonical, payload vo
 		return nil, err
 	}
 
-	attestation := g.getOccurrenceAttestation(signed, keyID)
+	attestation := newOccurrenceAttestation(signed, keyID)
 	occurrenceRequest := g.getCreateOccurrenceRequest(reference, payload.CheckName, attestation)
 	c, err := containeranalysis.NewGrafeasV1Beta1Client(g.ctx)
 	if err != nil {
 		return nil, err
 	}
 	occ, err := c.CreateOccurrence(g.ctx, occurrenceRequest)
-
 	item := new(Item)
 	item.Occurrence = occ
 
+	if isAttestionExistsErr(err) {
+		err = nil
+		item.Occurrence = nil
+	}
+
 	return item, err
-}
-
-func (g *Client) getOccurrenceAttestation(signature string, keyID string) *grafeaspb.Occurrence_Attestation {
-	pgpKeyID := attestation.PgpSignedAttestation_PgpKeyId{
-		PgpKeyId: keyID,
-	}
-
-	pgpSignedAttestation := attestation.PgpSignedAttestation{
-		Signature:   signature,
-		ContentType: attestation.PgpSignedAttestation_SIMPLE_SIGNING_JSON,
-		KeyId:       &pgpKeyID,
-	}
-
-	attestationPgpSignedAttestation := attestation.Attestation_PgpSignedAttestation{
-		PgpSignedAttestation: &pgpSignedAttestation,
-	}
-
-	newAttestation := attestation.Attestation{
-		Signature: &attestationPgpSignedAttestation,
-	}
-
-	details := attestation.Details{
-		Attestation: &newAttestation,
-	}
-
-	occurrenceAttestation := grafeaspb.Occurrence_Attestation{
-		Attestation: &details,
-	}
-
-	return &occurrenceAttestation
 }
 
 func (g *Client) getCreateOccurrenceRequest(reference reference.Reference, parentNoteID string, attestation *grafeaspb.Occurrence_Attestation) *grafeaspb.CreateOccurrenceRequest {

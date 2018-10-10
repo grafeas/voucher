@@ -28,7 +28,7 @@ func TestAttestationPayload(t *testing.T) {
 }
 
 func TestAttestationPayloadWithEmptyKeyRing(t *testing.T) {
-	var keyring *KeyRing = nil
+	var keyring *KeyRing
 
 	payload := AttestationPayload{
 		CheckName: "snakeoil",

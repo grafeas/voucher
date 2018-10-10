@@ -10,8 +10,6 @@ import (
 )
 
 var errEmptyKeyring = errors.New("keyring is empty")
-var errNoKeysInEjson = errors.New("no keys in ejson file")
-var errKeysNotMap = errors.New("keys in ejson is not a map")
 
 // KeyRing wraps an OpenPGP EntityList (which implements openpgp.KeyRing),
 // adding support for determining which key is associated with which check.
