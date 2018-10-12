@@ -27,6 +27,17 @@ func (cs *Suite) Get(name string) (Check, error) {
 	return nil, ErrNoCheck
 }
 
+// runner runs the passed check against the passed ImageData, and pushes results to the
+// CheckResults channel.
+func runner(name string, check Check, imageData ImageData, resultsChan chan CheckResult) {
+	ok, err := check.Check(imageData)
+	if err == nil {
+		resultsChan <- CheckResult{Name: name, Err: "", Success: ok, ImageData: imageData}
+	} else {
+		resultsChan <- CheckResult{Name: name, Err: err.Error(), Success: false, ImageData: imageData}
+	}
+}
+
 // Run executes each of the Checks specified by the activeChecks parameter.
 //
 // For example, if a Suite has the "diy" and "nobody" tests, calling
@@ -38,14 +49,17 @@ func (cs *Suite) Get(name string) (Check, error) {
 // Run returns a []CheckResult with a CheckResult for each Check that was run.
 func (cs *Suite) Run(imageData ImageData) []CheckResult {
 	results := make([]CheckResult, 0, len(cs.checks))
+	resultsChan := make(chan CheckResult, len(cs.checks))
+	defer close(resultsChan)
+
 	for name, check := range cs.checks {
-		ok, err := check.Check(imageData)
-		if err == nil {
-			results = append(results, CheckResult{Name: name, Err: "", Success: ok, ImageData: imageData})
-		} else {
-			results = append(results, CheckResult{Name: name, Err: err.Error(), Success: false, ImageData: imageData})
-		}
+		go runner(name, check, imageData, resultsChan)
 	}
+
+	for range cs.checks {
+		results = append(results, <-resultsChan)
+	}
+
 	return results
 }
 
