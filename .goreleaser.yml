@@ -1,0 +1,35 @@
+project_name: voucher
+before:
+   hooks:
+     - make update-deps
+builds:
+  - main: ./cmd/voucher_cli
+    binary: voucher_cli
+    env:
+      - CGO_ENABLED=0
+  - main: ./cmd/voucher_server
+    binary: voucher_server
+    env:
+      - CGO_ENABLED=0
+  - main: ./cmd/voucher_client
+    binary: voucher_client
+    env:
+      - CGO_ENABLED=0
+archive:
+  replacements:
+    darwin: Darwin
+    linux: Linux
+    windows: Windows
+    amd64: x86_64
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ .Tag }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+release:
+  disable: true

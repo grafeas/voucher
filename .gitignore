@@ -12,10 +12,8 @@
 *.out
 
 # voucher specific output
-voucher_client
-voucher_cli
-voucher_server
-voucher_client_*
-voucher_cli_*
-voucher_server_*
 coverage.txt
+
+# build output
+dist
+build
