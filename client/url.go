@@ -12,6 +12,9 @@ func toVoucherURL(voucherURL *url.URL, checkname string) string {
 		return "/" + checkname
 	}
 
-	voucherURL.Path = path.Join(voucherURL.Path, checkname)
-	return voucherURL.String()
+	// Copy our URL, so we are not modifying the original.
+	newVoucherURL := (*voucherURL)
+
+	newVoucherURL.Path = path.Join(newVoucherURL.Path, checkname)
+	return newVoucherURL.String()
 }
