@@ -254,9 +254,7 @@ More details about Voucher server can be read in the [API documentation](server/
 
 ### Configuration
 
-An example configuration file can be found in the [config directory](config/config.toml).
-
-The configuration can be written as a toml, json, or yaml file, and you can specify the path to the configuration file using "-c".
+The configuration for Voucher Client can be written as a toml, json, or yaml file, and you can specify the path to the configuration file using "-c". By default, the configuration is expected to be located at `~/.voucher{.yaml,.toml,.json}`. 
 
 Below are the configuration options for Voucher Standalone and Server:
 
@@ -268,6 +266,15 @@ Below are the configuration options for Voucher Standalone and Server:
 | `password`  | Password to authenticate against Voucher with.                                             |
 
 Configuration options can be overridden at runtime by setting the appropriate flag. For example, if you set the "port" flag when running `voucher_server`, that value will override whatever is in the configuration.
+
+Here is an example (yaml encoded) configuration file:
+
+```yaml
+---
+hostname: "https://my-voucher-server"
+username: "<username>"
+password: "<password>"
+```
 
 ### Using Voucher Client
 
