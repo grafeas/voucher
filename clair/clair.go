@@ -38,7 +38,7 @@ func sendLayerToClair(config Config, tokenSrc oauth2.TokenSource, layerRef Layer
 		return
 	}
 
-	request, err := http.NewRequest(http.MethodPost, "http://"+config.Hostname+"/v1/layers", &buffer)
+	request, err := http.NewRequest(http.MethodPost, GetNewLayerURI(config.Hostname), &buffer)
 	if nil != err {
 		return
 	}
@@ -67,9 +67,7 @@ func sendLayerToClair(config Config, tokenSrc oauth2.TokenSource, layerRef Layer
 // getLayerFromClair gets the description of the Layer with the passed digest from Clair,
 // using the passed digest.
 func getLayerFromClair(config Config, digest digest.Digest) (layer v1.Layer, err error) {
-	url := "http://" + config.Hostname + "/v1/layers/" + string(digest) + "?vulnerabilities"
-
-	request, err := http.NewRequest(http.MethodGet, url, nil)
+	request, err := http.NewRequest(http.MethodGet, GetLayerURI(config.Hostname, digest), nil)
 	if nil != err {
 		return
 	}

@@ -85,23 +85,23 @@ The configuration can be written as a toml, json, or yaml file, and you can spec
 
 Below are the configuration options for Voucher Standalone and Server:
 
-| Group     | Key               | Description                                                                                |
-| :-------- | :---------------  | :----------------------------------------------------------------------------------------- |
-|           | `dryrun`          | When set, don't create attestations.                                                       |
-|           | `scanner`         | The vulnerability scanner to use ("clair" or "gca").                                       |
-|           | `failon`          | The minimum vulnerability to fail on. Discussed below.                                     |
-|           | `image_project`   | The project in the metadata server that image information is stored.                       |
-|           | `binauth_project` | The project in the metadata server that the binauth information is stored.                 |
-|           | `timeout`         | The number of seconds to spend checking an image, before failing (voucher standalone only).|
-| `checks`  | (test name here)  | A test that is active when running "all" tests.                                            |
-| `server`  | `port`            | The port that the server can be reached on.                                                |
-| `server`  | `timeout`         | The number of seconds to spend checking an image, before failing.                          |
-| `server`  | `require_auth`    | Require the use of Basic Auth, with the username and password from the configuration.      |
-| `server`  | `username`        | The username that Voucher server users must use.                                           |
-| `server`  | `password`        | A password hashed with the bcrypt algorithm, for use with the username.                    |
-| `ejson`   | `dir`             | The path to the ejson keys directory.                                                      |
-| `ejson`   | `secrets`         | The path to the ejson secrets.                                                             |
-| `clair`   | `address`         | The hostname that Clair exists at.                                                         |
+| Group     | Key               | Description                                                                                           |
+| :-------- | :---------------  | :---------------------------------------------------------------------------------------------------- |
+|           | `dryrun`          | When set, don't create attestations.                                                                  |
+|           | `scanner`         | The vulnerability scanner to use ("clair" or "gca").                                                  |
+|           | `failon`          | The minimum vulnerability to fail on. Discussed below.                                                |
+|           | `image_project`   | The project in the metadata server that image information is stored.                                  |
+|           | `binauth_project` | The project in the metadata server that the binauth information is stored.                            |
+|           | `timeout`         | The number of seconds to spend checking an image, before failing (voucher standalone only).           |
+| `checks`  | (test name here)  | A test that is active when running "all" tests.                                                       |
+| `server`  | `port`            | The port that the server can be reached on.                                                           |
+| `server`  | `timeout`         | The number of seconds to spend checking an image, before failing.                                     |
+| `server`  | `require_auth`    | Require the use of Basic Auth, with the username and password from the configuration.                 |
+| `server`  | `username`        | The username that Voucher server users must use.                                                      |
+| `server`  | `password`        | A password hashed with the bcrypt algorithm, for use with the username.                               |
+| `ejson`   | `dir`             | The path to the ejson keys directory.                                                                 |
+| `ejson`   | `secrets`         | The path to the ejson secrets.                                                                        |
+| `clair`   | `address`         | The hostname that Clair exists at. If "http://" or "https://" is omitted, this will default to HTTPS. |
 
 Configuration options can be overridden at runtime by setting the appropriate flag. For example, if you set the "port" flag when running `voucher_server`, that value will override whatever is in the configuration.
 
