@@ -22,7 +22,7 @@
 - [Voucher Client](#voucher-client)
   - [Configuration](#configuration)
   - [Using Voucher Client](#using-voucher-client)
-- [Extending Voucher](#extending-voucher)
+- [Contributing](#contributing)
 
 ## Introduction
 
@@ -107,9 +107,9 @@ Configuration options can be overridden at runtime by setting the appropriate fl
 
 #### Scanner
 
-The `scanner` option in the configuration is used to select the Vulnerability scanner. 
+The `scanner` option in the configuration is used to select the Vulnerability scanner.
 
-This option supports two values: 
+This option supports two values:
 
 - `c` or `clair` to use an instance of CoreOS's Clair.
 - `g` or `gca` to use Google Container Analysis.
@@ -145,7 +145,7 @@ provenance = false
 snakeoil = true
 ```
 
-With this configuration, the "diy", "nobody", and "snakeoil" checks would run when running "all" checks. The "provenance" check will be ignored unless called directly. 
+With this configuration, the "diy", "nobody", and "snakeoil" checks would run when running "all" checks. The "provenance" check will be ignored unless called directly.
 
 ### Running Voucher
 
@@ -234,7 +234,7 @@ The response will be something along the following lines:
             "success": true,
             "attested": true
         },
-        {   
+        {
             "name": "diy",
             "success": true,
             "attested": true
@@ -254,7 +254,7 @@ More details about Voucher server can be read in the [API documentation](server/
 
 ### Configuration
 
-The configuration for Voucher Client can be written as a toml, json, or yaml file, and you can specify the path to the configuration file using "-c". By default, the configuration is expected to be located at `~/.voucher{.yaml,.toml,.json}`. 
+The configuration for Voucher Client can be written as a toml, json, or yaml file, and you can specify the path to the configuration file using "-c". By default, the configuration is expected to be located at `~/.voucher{.yaml,.toml,.json}`.
 
 Below are the configuration options for Voucher Standalone and Server:
 
@@ -267,7 +267,7 @@ Below are the configuration options for Voucher Standalone and Server:
 
 Configuration options can be overridden at runtime by setting the appropriate flag. For example, if you set the "port" flag when running `voucher_server`, that value will override whatever is in the configuration.
 
-Here is an example (yaml encoded) configuration file:
+ Here is an example (yaml encoded) configuration file:
 
 ```yaml
 ---
@@ -290,7 +290,7 @@ $ voucher_client [--voucher <server> --check <check to run>] <image path>
 | :--------   | :--------------- | :------------------------------------------------------------------------- |
 | `--config`  |                  | The path to your configuration file, (default is $HOME/.voucher.yaml)      |
 | `--check`   | `-c`             | The Check to run on the image ("all" for all checks).                      |
-| `--voucher` | `-v`             | The Voucher server to connect to.                                          | 
+| `--voucher` | `-v`             | The Voucher server to connect to.                                          |
 | `--username`|                  | Username to authenticate against Voucher with.                             |
 | `--password`|                  | Password to authenticate against Voucher with.                             |
 | `--timeout` | `-t`             | The number of seconds to wait before failing (defaults to 240).            |
@@ -310,6 +310,6 @@ The output will be something along the following lines:
    ✓ diy succeeded, but wasn't attested, err: rpc error: code = AlreadyExists desc = Requested entity already exists
 ```
 
-## Extending Voucher
+## Contributing
 
-- [Adding new Checks](/checks/README.md)
+Please refer to the [Contributing document](CONTRIBUTING.md) if you are interested in contributing to voucher!
