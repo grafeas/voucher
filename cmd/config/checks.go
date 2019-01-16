@@ -57,11 +57,20 @@ func setCheckMetadataClient(check voucher.Check, metadataClient voucher.Metadata
 	}
 }
 
+// setCheckValidRepos sets the valid repos list for the passed Check, if
+// that Check is a RepoValidatorCheck.
+func setCheckValidRepos(check voucher.Check, validRepos []string) {
+	if validRepoCheck, ok := check.(voucher.RepoValidatorCheck); ok {
+		validRepoCheck.SetValidRepos(validRepos)
+	}
+}
+
 // NewCheckSuite creates a new checks.Suite with the requested
 // Checks, passing any necessary configuration details to the
 // checks.
 func NewCheckSuite(metadataClient voucher.MetadataClient, names ...string) (*voucher.Suite, error) {
 	auth := newAuth()
+	repos := validRepos()
 	scanner := newScanner(metadataClient, auth)
 	checksuite := voucher.NewSuite()
 
@@ -74,6 +83,7 @@ func NewCheckSuite(metadataClient voucher.MetadataClient, names ...string) (*vou
 		setCheckAuth(check, auth)
 		setCheckScanner(check, scanner)
 		setCheckMetadataClient(check, metadataClient)
+		setCheckValidRepos(check, repos)
 
 		checksuite.Add(name, check)
 	}

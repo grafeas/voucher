@@ -16,6 +16,9 @@ func TestDIYCheck(t *testing.T) {
 
 	diyCheck := new(check)
 	diyCheck.SetAuth(vtesting.NewAuth(server))
+	diyCheck.SetValidRepos([]string{
+		i.Name(),
+	})
 
 	pass, err := diyCheck.Check(i)
 
@@ -23,10 +26,25 @@ func TestDIYCheck(t *testing.T) {
 	assert.True(t, pass, "check failed when it should have passed")
 }
 
+func TestDIYCheckWithInvalidRepo(t *testing.T) {
+	i := vtesting.NewTestReference(t)
+
+	diyCheck := new(check)
+
+	// run check without setting up valid repos.
+	pass, err := diyCheck.Check(i)
+
+	assert.Equal(t, err, ErrNotFromRepo, "check should have failed due to image not being from a valid repo, but didn't")
+	assert.False(t, pass, "check passed when it should have failed due to image being from an invalid repo")
+}
+
 func TestDIYCheckWithNoAuth(t *testing.T) {
 	i := vtesting.NewTestReference(t)
 
 	diyCheck := new(check)
+	diyCheck.SetValidRepos([]string{
+		i.Name(),
+	})
 
 	// run check without setting up Auth.
 	pass, err := diyCheck.Check(i)
@@ -40,10 +58,13 @@ func TestFailingDIYCheck(t *testing.T) {
 
 	auth := vtesting.NewAuth(server)
 
+	i := vtesting.NewBadTestReference(t)
+
 	diyCheck := new(check)
 	diyCheck.SetAuth(auth)
-
-	i := vtesting.NewBadTestReference(t)
+	diyCheck.SetValidRepos([]string{
+		i.Name(),
+	})
 
 	pass, err := diyCheck.Check(i)
 

@@ -3,6 +3,9 @@ scanner = "clair"
 failon = "high"
 image_project = "your-project-here"
 binauth_project = "your-project-here"
+valid_repos = [
+    "gcr.io/path/to/my/project",
+]
 
 [checks]
 diy      = true
