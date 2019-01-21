@@ -15,6 +15,7 @@
   - [Configuration](#configuration)
     - [Scanner](#scanner)
     - [Fail-On: Failing on vulnerabilities](#fail-on-failing-on-vulnerabilities)
+    - [Valid Repos](#valid-repos)
     - [Enabling Checks](#enabling-checks)
   - [Running Voucher](#running-voucher)
     - [Using voucher standalone to check an image](#using-voucher-standalone-to-check-an-image)
@@ -90,6 +91,7 @@ Below are the configuration options for Voucher Standalone and Server:
 |           | `dryrun`          | When set, don't create attestations.                                                                  |
 |           | `scanner`         | The vulnerability scanner to use ("clair" or "gca").                                                  |
 |           | `failon`          | The minimum vulnerability to fail on. Discussed below.                                                |
+|           | `valid_repos`     | A list of repos that are owned by your team/organization.                                             |
 |           | `image_project`   | The project in the metadata server that image information is stored.                                  |
 |           | `binauth_project` | The project in the metadata server that the binauth information is stored.                            |
 |           | `timeout`         | The number of seconds to spend checking an image, before failing (voucher standalone only).           |
@@ -130,6 +132,25 @@ This option supports the following:
 - "critical"
 
 For example, if you set `failon` to "high", only "high" and "critical" vulnerabilities will prevent the image from being attested. A value of "low" will cause "low", "medium", "unknown", "high", and "critical" vulnerabilities to prevent the image from being attested failure.
+
+#### Valid Repos
+
+The `valid_repos` option in the configuration is used to limit which repositories images must be from to pass the DIY check.
+
+This option takes a list of repos, which are compared against the repos that images live in. An image will pass if it starts with any of the items in the list.
+
+For example:
+
+```json
+{
+    "valid_repos": [
+        "gcr.io/team-images/",
+        "gcr.io/external-images/specific-project",
+    ]
+}
+```
+
+Will allow images that start with `gcr.io/team-images/` and `gcr.io/external-images/specific-project/` to pass the DIY check, while blocking other `gcr.io/external-images/`.
 
 #### Enabling Checks
 
