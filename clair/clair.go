@@ -2,14 +2,13 @@ package clair
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
 
-	"github.com/Shopify/voucher/docker"
-	"github.com/coreos/clair/api/v1"
+	v1 "github.com/coreos/clair/api/v1"
+	"github.com/docker/distribution/manifest/schema2"
 	"github.com/docker/distribution/reference"
 	digest "github.com/opencontainers/go-digest"
 	"golang.org/x/oauth2"
@@ -98,24 +97,16 @@ func getLayerFromClair(config Config, digest digest.Digest) (layer v1.Layer, err
 	return
 }
 
-// getVulnerabilities gets a map[string]v1.Vulnerability from Clair, so that we can convert
+// getClairVulnerabilities gets a map[string]v1.Vulnerability from Clair, so that we can convert
 // them to Voucher Vulnerabilities all at once.
-func getVulnerabilities(ctx context.Context, config Config, tokenSrc oauth2.TokenSource, image reference.Canonical) (map[string]v1.Vulnerability, error) {
+func getClairVulnerabilities(manifest schema2.Manifest, config Config, tokenSrc oauth2.TokenSource, image reference.Canonical) (map[string]v1.Vulnerability, error) {
 	vulns := make(map[string]v1.Vulnerability)
 	var err error
-
-	client := oauth2.NewClient(ctx, tokenSrc)
-
-	manifest, err := docker.RequestManifest(client, image)
-	if nil != err {
-		return vulns, err
-	}
 
 	parent := digest.Digest("")
 
 	for _, imageLayer := range manifest.Layers {
 		current := imageLayer.Digest
-
 		// send the current layer to Clair
 		if err = sendLayerToClair(config, tokenSrc, NewLayerReference(image, current, parent)); nil != err {
 			return vulns, err

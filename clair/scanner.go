@@ -2,10 +2,13 @@ package clair
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/Shopify/voucher"
+	"github.com/Shopify/voucher/docker"
+	"github.com/docker/distribution/manifest/schema2"
+	"github.com/docker/distribution/reference"
+	"golang.org/x/oauth2"
 )
 
 // Scanner implements the interface SnakeoilScanner.
@@ -35,24 +38,17 @@ func (scanner *Scanner) Scan(i voucher.ImageData) ([]voucher.Vulnerability, erro
 		return vulns, err
 	}
 
-	rawVulns, err := getVulnerabilities(ctx, scanner.config, tokenSrc, i)
+	manifest, err := getDockerManifest(ctx, tokenSrc, i)
 	if nil != err {
 		return vulns, err
 	}
 
-	vulns = make([]voucher.Vulnerability, 0, len(rawVulns))
-	for _, rawVuln := range rawVulns {
-		if "" == rawVuln.Name {
-			fmt.Println("Empty Vulnerability???")
-			continue
-		}
-		vuln := vulnerabilityToVoucherVulnerability(rawVuln)
-		if voucher.ShouldIncludeVulnerability(vuln, scanner.failOn) {
-			vulns = append(vulns, vuln)
-		}
+	clairVulns, err := getClairVulnerabilities(manifest, scanner.config, tokenSrc, i)
+	if nil != err {
+		return vulns, err
 	}
 
-	return vulns, err
+	return convertToVoucherVulnerabilities(clairVulns, scanner.failOn), nil
 }
 
 // SetBasicAuth sets the username and password to use for Basic Auth,
@@ -71,4 +67,9 @@ func NewScanner(config Config, auth voucher.Auth) *Scanner {
 	scanner.auth = auth
 
 	return scanner
+}
+
+func getDockerManifest(ctx context.Context, tokenSrc oauth2.TokenSource, image reference.Canonical) (schema2.Manifest, error) {
+	client := oauth2.NewClient(ctx, tokenSrc)
+	return docker.RequestManifest(client, image)
 }
