@@ -106,12 +106,12 @@ func (g *Client) AddAttestationToImage(reference reference.Canonical, payload vo
 	return item, err
 }
 
-func (g *Client) getCreateOccurrenceRequest(reference reference.Reference, parentNoteID string, attestation *grafeaspb.Occurrence_Attestation) *grafeaspb.CreateOccurrenceRequest {
+func (g *Client) getCreateOccurrenceRequest(reference reference.Canonical, parentNoteID string, attestation *grafeaspb.Occurrence_Attestation) *grafeaspb.CreateOccurrenceRequest {
 	binauthProjectPath := "projects/" + g.binauthProject
 	noteName := binauthProjectPath + "/notes/" + parentNoteID
 
 	resource := grafeaspb.Resource{
-		Uri: "https://" + reference.String(),
+		Uri: "https://" + reference.Name() + "@" + reference.Digest().String(),
 	}
 
 	occurrence := grafeaspb.Occurrence{NoteName: noteName, Resource: &resource, Details: attestation}
