@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/Shopify/voucher"
@@ -50,11 +52,15 @@ func (c *VoucherClient) Check(check string, image reference.Canonical) (voucher.
 		return checkResp, err
 	}
 
-	err = json.NewDecoder(resp.Body).Decode(&checkResp)
-	if nil != err {
+	if !strings.Contains(resp.Header.Get("Content-Type"), "application/json") {
+		b, err := ioutil.ReadAll(resp.Body)
+		if nil == err {
+			err = fmt.Errorf("failed to get response: %s", strings.TrimSpace(string(b)))
+		}
 		return checkResp, err
 	}
 
+	err = json.NewDecoder(resp.Body).Decode(&checkResp)
 	return checkResp, err
 }
 
