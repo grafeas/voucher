@@ -12,6 +12,10 @@ import (
 	dockerTypes "github.com/docker/docker/api/types"
 )
 
+// RateLimitOutput is the data that is returned when we similuate a Docker
+// registry call that has been rate limited.
+const RateLimitOutput = "<html><body>Rate Limited</body></html>"
+
 // dockerAPIMock mocks the Docker API.
 type dockerAPIMock struct {
 }
@@ -22,10 +26,13 @@ func (mock *dockerAPIMock) ServeHTTP(writer http.ResponseWriter, req *http.Reque
 	switch req.URL.Path {
 	case "/v2/path/to/image/manifests/latest", "/v2/path/to/image/manifests/sha256:b148c8af52ba402ed7dd98d73f5a41836ece508d1f4704b274562ac0c9b3b7da":
 		writer.Header().Set("Docker-Content-Digest", "sha256:b148c8af52ba402ed7dd98d73f5a41836ece508d1f4704b274562ac0c9b3b7da")
-		respond(writer, schema2.MediaTypeManifest, NewTestManifest())
+		jsonRespond(writer, schema2.MediaTypeManifest, NewTestManifest())
+		return
+	case "/v2/path/to/ratelimited/manifests/latest", "/v2/path/to/ratelimited/manifests/sha256:b148c8af52ba402ed7dd98d73f5a41836ece508d1f4704b274562ac0c9b3b7da":
+		rawRespond(writer, "text/html", RateLimitOutput)
 		return
 	case "/v2/path/to/image/blobs/sha256:b5b2b2c507a0944348e0303114d8d93aaaa081732b86451d9bce1f432a537bc7":
-		respond(writer, schema2.MediaTypeImageConfig, NewTestImageConfig())
+		jsonRespond(writer, schema2.MediaTypeImageConfig, NewTestImageConfig())
 		return
 	case "/v2/path/to/bad/image/manifests/latest", "/v2/path/to/bad/image/manifests/sha256:bad8c8af52ba402ed7dd98d73f5a41836ece508d1f4704b274562ac0c9b3b7da":
 		http.Error(writer, "image doesn't exist", 404)
@@ -43,11 +50,23 @@ func NewTestDockerServer(t *testing.T) *httptest.Server {
 	return server
 }
 
-// respond wraps the appropriate http.ResponseWriter calls to return data to the testing client.
-// If an error occurs, it will call http.Error on the writer.
-func respond(writer http.ResponseWriter, content string, v interface{}) {
+// jsonRespond wraps the appropriate http.ResponseWriter calls to return
+// JSON encoded data to the testing client. If an error occurs, it will call
+// http.Error on the writer.
+func jsonRespond(writer http.ResponseWriter, content string, v interface{}) {
 	writer.Header().Set("Content-Type", content)
 	err := json.NewEncoder(writer).Encode(v)
+	if nil != err {
+		http.Error(writer, fmt.Sprintf("failed to handle request: %s", err), 500)
+	}
+}
+
+// rawRespond wraps the appropriate http.ResponseWriter calls to return raw
+// (unmarshaled) data to the testing client.  If an error occurs, it will call
+// http.Error on the writer.
+func rawRespond(writer http.ResponseWriter, content, body string) {
+	writer.Header().Set("Content-Type", content)
+	_, err := fmt.Fprintln(writer, body)
 	if nil != err {
 		http.Error(writer, fmt.Sprintf("failed to handle request: %s", err), 500)
 	}

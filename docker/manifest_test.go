@@ -30,3 +30,14 @@ func TestRequestBadManifest(t *testing.T) {
 	assert.NotNilf(t, err, "should have failed to get manifest, but didn't")
 	assert.Contains(t, err.Error(), "failed to load resource with status \"404 Not Found\":")
 }
+
+func TestRateLimitedBadManifest(t *testing.T) {
+	ref := vtesting.NewRateLimitedTestReference(t)
+
+	client, server := PrepareDockerTest(t, ref)
+	defer server.Close()
+
+	_, err := RequestManifest(client, ref)
+	assert.NotNilf(t, err, "should have failed to get manifest, but didn't")
+	assert.Contains(t, err.Error(), "failed to load resource with status \"200 OK\": "+vtesting.RateLimitOutput)
+}

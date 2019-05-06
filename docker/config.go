@@ -37,7 +37,7 @@ func RequestConfig(client *http.Client, ref reference.Named, digest digest.Diges
 
 	request.Header.Add("Accept", schema2.MediaTypeImageConfig)
 
-	err = doDockerCall(client, request, &config)
+	err = doDockerCall(client, request, schema2.MediaTypeImageConfig, &config)
 
 	return config, err
 }

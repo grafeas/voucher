@@ -25,6 +25,16 @@ func NewBadTestReference(t *testing.T) reference.Canonical {
 	return parseReference(t, "localhost/path/to/bad/image@sha256:bad8c8af52ba402ed7dd98d73f5a41836ece508d1f4704b274562ac0c9b3b7da")
 }
 
+// NewRateLimitedTestReference creates a new reference to be used to test
+// the handling of Rate Limited docker calls.
+// The returned response from calling this reference cannot be parsed by a
+// JSON decoder and should result in an error.
+func NewRateLimitedTestReference(t *testing.T) reference.Canonical {
+	t.Helper()
+
+	return parseReference(t, "localhost/path/to/ratelimited@sha256:b148c8af52ba402ed7dd98d73f5a41836ece508d1f4704b274562ac0c9b3b7da")
+}
+
 // parseReference parses the passed reference and returns it (or fails)
 func parseReference(t *testing.T, name string) reference.Canonical {
 	t.Helper()

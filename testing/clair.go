@@ -38,12 +38,12 @@ func (mock *clairAPIMock) ServeHTTP(writer http.ResponseWriter, req *http.Reques
 		mock.layerVulns[current] = mock.layerVulns[parent]
 		mock.layerVulns[current] = append(mock.layerVulns[current], mock.vulns[current]...)
 
-		respond(writer, jsonContentType, "okay")
+		jsonRespond(writer, jsonContentType, "okay")
 		return
 	default:
 		for key := range mock.layerVulns {
 			if "/v1/layers/"+key == req.URL.Path {
-				respond(writer, jsonContentType, createClairLayers(mock.layerVulns[key]))
+				jsonRespond(writer, jsonContentType, createClairLayers(mock.layerVulns[key]))
 				return
 			}
 		}
