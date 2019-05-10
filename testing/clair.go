@@ -51,7 +51,8 @@ func (mock *clairAPIMock) ServeHTTP(writer http.ResponseWriter, req *http.Reques
 	http.Error(writer, fmt.Sprintf("failed to handle request: %s", req.URL.Path), 500)
 }
 
-// NewTestClairServer creates a mock of Clair with a list of pre-defined clair vulnerabilites
+// NewTestClairServer creates a mock of Clair with a list of pre-defined clair
+// vulnerabilities
 func NewTestClairServer(t *testing.T, vulns map[string][]v1.Vulnerability) *httptest.Server {
 	handler := new(clairAPIMock)
 	handler.layerVulns = map[string][]v1.Vulnerability{}

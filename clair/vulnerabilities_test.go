@@ -8,7 +8,7 @@ import (
 // ClairVulnerabilitiesV1 return a list of clair vulnerabilities
 func ClairVulnerabilities() map[string][]v1.Vulnerability {
 	vulns := map[string][]v1.Vulnerability{
-		"sha256:3c3a4604a545cdc127456d94e421cd355bca5b528f4a9c1905b15da2eb4a4c6b": []v1.Vulnerability{
+		"sha256:3c3a4604a545cdc127456d94e421cd355bca5b528f4a9c1905b15da2eb4a4c6b": {
 			{
 				Name:        "bad vul 1",
 				Description: "some bad vul that i cant comprepend",
@@ -22,7 +22,7 @@ func ClairVulnerabilities() map[string][]v1.Vulnerability {
 				Severity:    "Medium",
 			},
 		},
-		"sha256:ec4b8955958665577945c89419d1af06b5f7636b4ac3da7f12184802ad867736": []v1.Vulnerability{
+		"sha256:ec4b8955958665577945c89419d1af06b5f7636b4ac3da7f12184802ad867736": {
 			{
 				Name:        "Super bad vul",
 				Description: "bark bark",
@@ -44,7 +44,7 @@ func ClairVulnerabilities() map[string][]v1.Vulnerability {
 // corresponding to ClairVulnerabilites
 func VoucherVulnerabilities(keys ...string) []voucher.Vulnerability {
 	vulns := map[string][]voucher.Vulnerability{
-		"low": []voucher.Vulnerability{
+		"low": {
 			{
 				Name:        "Super bad vul",
 				Description: "bark bark",
@@ -52,7 +52,7 @@ func VoucherVulnerabilities(keys ...string) []voucher.Vulnerability {
 				Severity:    voucher.LowSeverity,
 			},
 		},
-		"medium": []voucher.Vulnerability{
+		"medium": {
 			{
 				Name:        "bad vul 1",
 				Description: "some bad vul that i cant comprepend",
@@ -66,7 +66,7 @@ func VoucherVulnerabilities(keys ...string) []voucher.Vulnerability {
 				Severity:    voucher.MediumSeverity,
 			},
 		},
-		"high": []voucher.Vulnerability{
+		"high": {
 			{
 				Name:        "Super bad vul 2 meow",
 				Description: "meow meow",

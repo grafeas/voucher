@@ -20,7 +20,7 @@ func RequestManifest(client *http.Client, ref reference.Canonical) (schema2.Mani
 
 	request.Header.Add("Accept", schema2.MediaTypeManifest)
 
-	err = doDockerCall(client, request, schema2.MediaTypeManifest, &manifest)
+	err = doDockerCall(client, request, &manifest)
 
 	return manifest, err
 }

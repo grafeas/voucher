@@ -5,11 +5,12 @@ import (
 	"errors"
 	"io/ioutil"
 	"net/http"
+	"strings"
 )
 
 // doDockerCall executes an API call to Docker using the passed http.Client, and unmarshals
 // the resulting data into the passed interface, or returns an error if there's an issue.
-func doDockerCall(client *http.Client, request *http.Request, contentType string, data interface{}) error {
+func doDockerCall(client *http.Client, request *http.Request, data interface{}) error {
 	resp, err := client.Do(request)
 	if nil != err {
 		return err
@@ -17,11 +18,27 @@ func doDockerCall(client *http.Client, request *http.Request, contentType string
 
 	defer resp.Body.Close()
 
-	if resp.StatusCode < 300 && resp.Header.Get("Content-Type") == contentType {
+	if resp.StatusCode < 300 && isValidContent(resp.Header.Get("Content-Type")) {
 		return json.NewDecoder(resp.Body).Decode(&data)
 	}
 
 	return responseToError(resp)
+}
+
+// isValidContentType is used to prevent invalid data from being parsed by the
+// json decoder.
+func isValidContent(contentType string) bool {
+	if strings.Contains(contentType, "json") {
+		return true
+	}
+
+	// catches a bug where gcr.io returns "application/octet-stream" instead of
+	// a valid content-type.
+	if contentType == "application/octet-stream" {
+		return true
+	}
+
+	return false
 }
 
 // responseToError converts the body of a response to an error.

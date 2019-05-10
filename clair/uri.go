@@ -12,8 +12,7 @@ func GetNewLayerURI(hostname string) string {
 	return createURI(hostname, "v1/layers")
 }
 
-// GetSubmittedLayerURI gets the layer URI for the passed digest on the
-// passed hostname.
+// GetLayerURI gets the layer URI for the passed digest on the passed hostname.
 func GetLayerURI(hostname string, digest digest.Digest) string {
 	return createURI(hostname, "v1/layers/", string(digest)) + "?vulnerabilities"
 }
