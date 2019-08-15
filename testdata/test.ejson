@@ -10,5 +10,14 @@
     "clair": {
         "username": "EJ[1:26ZG+VvCz9yteYu+ByWREoHCFDFALwYKbWB/mg7V/SI=:F1DTl/ONP/4deC26j4E/6k7hwOEgM6kT:QYT+gXLNJfQiIQLRpncB1shtndHoI+9Z]",
         "password": "EJ[1:26ZG+VvCz9yteYu+ByWREoHCFDFALwYKbWB/mg7V/SI=:3z+p+WOMGifBG+eSVP3y6ZcbkiX8YPZK:HFN4rKGWodgyvzaGxm+ysemrJ/m5Fwojs2THkA==]"
+    },
+  "repositories": {
+    "organization-name": {
+      "token": "EJ[1:baVdqII+LlXEsxfHdWZvQCm+Ky8wPCDs8cwkKNMong8=:hOLHIKVcMXDCB8rXJQwHn81kqdiRRr3c:y6G4aJZDDTQb05w3fPLK6/2Us2JdeRyv]"
+    },
+    "organization2-name": {
+      "username": "EJ[1:baVdqII+LlXEsxfHdWZvQCm+Ky8wPCDs8cwkKNMong8=:q6/T3hWP8M8X+/gFOb1ETSpjlEMtYBaI:pDePVoDFgGdpRl2a465UdJg9+ptuViIo]",
+      "password": "EJ[1:baVdqII+LlXEsxfHdWZvQCm+Ky8wPCDs8cwkKNMong8=:m9Z92lZhd9zDVGGGaeZCp/UAXnK6Ngix:GlSFNokVuQiGoBxG9Nmsru1ZHncdt8jW3F+xNw==]"
     }
+  }
 }

@@ -32,3 +32,7 @@ address = "localhost:6060"
 
 [trusted-projects]
 trusted-builds = true
+
+[[repositories]]
+"org-name" = "organization name here"
+"org-url" = "organization url here"

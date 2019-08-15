@@ -8,14 +8,16 @@ import (
 	"github.com/Shopify/ejson"
 	"github.com/Shopify/voucher"
 	"github.com/Shopify/voucher/clair"
+	"github.com/Shopify/voucher/repository"
 	"github.com/spf13/viper"
 )
 
 // ejsonFormat represents the format that the ejson configuration is structured
 // in.
 type ejsonFormat struct {
-	Keys        map[string]string `json:"openpgpkeys"`
-	ClairConfig clair.Config      `json:"clair"`
+	Keys                     map[string]string  `json:"openpgpkeys"`
+	ClairConfig              clair.Config       `json:"clair"`
+	RepositoryAuthentication repository.KeyRing `json:"repositories"`
 }
 
 // readEjson reads from the ejson file and populates the passed interface.
@@ -38,6 +40,19 @@ func readEjson(data interface{}) error {
 
 	err = json.NewDecoder(bytes.NewReader(decrypted)).Decode(data)
 	return err
+}
+
+// getRepositoryKeyRing uses the Command's configured ejson file to populate a
+// repository.KeyRing
+func getRepositoryKeyRing() (repository.KeyRing, error) {
+	ejsonData := new(ejsonFormat)
+
+	err := readEjson(ejsonData)
+	if err != nil {
+		return nil, err
+	}
+
+	return ejsonData.RepositoryAuthentication, nil
 }
 
 // getClairConfig uses the Command's configured ejson file to populate a
