@@ -61,3 +61,11 @@ required = [
 [[constraint]]
   branch = "master"
   name = "golang.org/x/crypto"
+
+[[constraint]]
+  name = "github.com/shurcooL/githubv4"
+  revision = "4ba037080260cb26279c05337b38064b520a7f9e"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/mennanov/fieldmask-utils"
