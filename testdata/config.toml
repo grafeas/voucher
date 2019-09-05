@@ -1,24 +1,25 @@
-dryrun = true
-scanner = "clair"
-failon = "high"
-image_project = "voucher-test-project"
+dryrun          = true
+scanner         = "clair"
+failon          = "high"
+image_project   = "voucher-test-project"
 binauth_project = "voucher-binauth"
 
 [checks]
-diy      = true
-nobody   = true
-provenance = true
-snakeoil = true
+diy             = true
+nobody          = true
+provenance      = true
+snakeoil        = true
 
 [server]
-port = 8000
-require_auth = true
-username = "vouchertester"
-password = "$2a$10$.PaOjV8GdqSHSmUtfolsJeF6LsAq/3CNsFCYGb3IoN/mO9xj1c/yG"
+port            = 8000
+timeout         = 240
+require_auth    = true
+username        = "vouchertester"
+password        = "$2a$10$.PaOjV8GdqSHSmUtfolsJeF6LsAq/3CNsFCYGb3IoN/mO9xj1c/yG"
 
 [ejson]
-dir = "../testdata/key"
-secrets = "../testdata/test.ejson"
+dir             = "../testdata/key"
+secrets         = "../testdata/test.ejson"
 
 [clair]
-address = "localhost:6060"
+address         = "localhost:6060"

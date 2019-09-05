@@ -2,7 +2,6 @@ package nobody
 
 import (
 	"context"
-	"time"
 
 	"github.com/Shopify/voucher"
 	"github.com/Shopify/voucher/docker"
@@ -22,10 +21,7 @@ func (n *check) SetAuth(auth voucher.Auth) {
 
 // Check verifies if the image runs as root and returns a boolean (true if
 // the user is not root, false otherwise) and an error as response.
-func (n *check) Check(i voucher.ImageData) (bool, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
-	defer cancel()
-
+func (n *check) Check(ctx context.Context, i voucher.ImageData) (bool, error) {
 	if nil == n.auth {
 		return false, voucher.ErrNoAuth
 	}

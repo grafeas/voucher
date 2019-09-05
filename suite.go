@@ -1,5 +1,9 @@
 package voucher
 
+import (
+	"context"
+)
+
 // Suite is a suite of Checks, which
 type Suite struct {
 	checks map[string]Check
@@ -29,8 +33,8 @@ func (cs *Suite) Get(name string) (Check, error) {
 
 // runner runs the passed check against the passed ImageData, and pushes results to the
 // CheckResults channel.
-func runner(name string, check Check, imageData ImageData, resultsChan chan CheckResult) {
-	ok, err := check.Check(imageData)
+func runner(ctx context.Context, name string, check Check, imageData ImageData, resultsChan chan CheckResult) {
+	ok, err := check.Check(ctx, imageData)
 	if err == nil {
 		resultsChan <- CheckResult{Name: name, Err: "", Success: ok, ImageData: imageData}
 	} else {
@@ -47,13 +51,13 @@ func runner(name string, check Check, imageData ImageData, resultsChan chan Chec
 // will run the "diy" and "nobody" tests.
 //
 // Run returns a []CheckResult with a CheckResult for each Check that was run.
-func (cs *Suite) Run(imageData ImageData) []CheckResult {
+func (cs *Suite) Run(ctx context.Context, imageData ImageData) []CheckResult {
 	results := make([]CheckResult, 0, len(cs.checks))
 	resultsChan := make(chan CheckResult, len(cs.checks))
 	defer close(resultsChan)
 
 	for name, check := range cs.checks {
-		go runner(name, check, imageData, resultsChan)
+		go runner(ctx, name, check, imageData, resultsChan)
 	}
 
 	for range cs.checks {
@@ -67,10 +71,10 @@ func (cs *Suite) Run(imageData ImageData) []CheckResult {
 // runs the CreateAttestion function in the Check corresponding to that CheckResult. Each
 // CheckResult is updated with the details (or error) and the resulting []CheckResult is
 // returned.
-func (cs *Suite) Attest(metadataClient MetadataClient, results []CheckResult) []CheckResult {
+func (cs *Suite) Attest(ctx context.Context, metadataClient MetadataClient, results []CheckResult) []CheckResult {
 	for i, result := range results {
 		if result.Success {
-			details, err := createAttestation(metadataClient, result)
+			details, err := createAttestation(ctx, metadataClient, result)
 			results[i].Details = details
 			if nil == err {
 				results[i].Attested = true
@@ -83,21 +87,21 @@ func (cs *Suite) Attest(metadataClient MetadataClient, results []CheckResult) []
 }
 
 // RunAndAttest calls Run, followed by Attest, and returns the final []CheckResult.
-func (cs *Suite) RunAndAttest(metadataClient MetadataClient, imageData ImageData) []CheckResult {
-	results := cs.Run(imageData)
-	return cs.Attest(metadataClient, results)
+func (cs *Suite) RunAndAttest(ctx context.Context, metadataClient MetadataClient, imageData ImageData) []CheckResult {
+	results := cs.Run(ctx, imageData)
+	return cs.Attest(ctx, metadataClient, results)
 }
 
 // createAttestation generates an attestation for the image Check described by CheckResult.
 // That attestation is then added to the metadata server the MetadataClient is connected to.
-func createAttestation(client MetadataClient, result CheckResult) (MetadataItem, error) {
+func createAttestation(ctx context.Context, client MetadataClient, result CheckResult) (MetadataItem, error) {
 	payload, err := client.NewPayloadBody(result.ImageData)
 	if err != nil {
 		return nil, err
 	}
 
 	attestationPayload := NewAttestationPayload(result.Name, payload)
-	occ, err := client.AddAttestationToImage(result.ImageData, attestationPayload)
+	occ, err := client.AddAttestationToImage(ctx, result.ImageData, attestationPayload)
 	return occ, err
 }
 

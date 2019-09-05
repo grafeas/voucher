@@ -1,6 +1,7 @@
 package voucher
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -8,6 +9,8 @@ import (
 
 func TestRegisterCheckFactory(t *testing.T) {
 	assert := assert.New(t)
+
+	ctx := context.Background()
 
 	factories := make(CheckFactories)
 
@@ -25,13 +28,13 @@ func TestRegisterCheckFactory(t *testing.T) {
 	i := newTestImageData(t)
 
 	if assert.NotNil(checks["goodcheck"]) {
-		ok, checkErr := checks["goodcheck"].Check(i)
+		ok, checkErr := checks["goodcheck"].Check(ctx, i)
 		assert.Nil(checkErr)
 		assert.True(ok)
 	}
 
 	if assert.NotNil(checks["badcheck"]) {
-		ok, checkErr := checks["badcheck"].Check(i)
+		ok, checkErr := checks["badcheck"].Check(ctx, i)
 		assert.Nil(checkErr)
 		assert.False(ok)
 	}

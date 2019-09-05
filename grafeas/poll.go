@@ -1,6 +1,7 @@
 package grafeas
 
 import (
+	"context"
 	"strings"
 	"time"
 
@@ -33,9 +34,9 @@ const sleep = time.Second * 10
 
 // pollForDiscoveries pauses execution until Google Container Analysis has pushed
 // the Vulnerability information to the server.
-func pollForDiscoveries(c voucher.MetadataClient, img voucher.ImageData) error {
+func pollForDiscoveries(ctx context.Context, c voucher.MetadataClient, img voucher.ImageData) error {
 	for i := 0; i < attempts; i++ {
-		discoveries, err := c.GetMetadata(img, DiscoveryType)
+		discoveries, err := c.GetMetadata(ctx, img, DiscoveryType)
 		if err != nil {
 			return err
 		}

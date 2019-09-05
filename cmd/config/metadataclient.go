@@ -10,7 +10,7 @@ import (
 )
 
 // NewMetadataClient creates a new MetadataClient.
-func NewMetadataClient(ctx context.Context) voucher.MetadataClient {
+func NewMetadataClient(ctx context.Context) (voucher.MetadataClient, error) {
 	keyring, err := getKeyRing()
 	if nil != err {
 		log.Println("could not load keyring from ejson, continuing without attestation support: ", err)

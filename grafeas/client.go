@@ -17,10 +17,10 @@ var errCannotAttest = errors.New("cannot create attestations, keyring is empty")
 
 // Client implements voucher.MetadataClient, connecting to Grafeas.
 type Client struct {
-	ctx            context.Context  // The context to use for new connections created in this client.
-	keyring        *voucher.KeyRing // The keyring used for signing metadata.
-	binauthProject string           // The project that Binauth Notes and Occurrences are written to.
-	imageProject   string           // The project that image information is stored.
+	grafeas        *containeranalysis.GrafeasV1Beta1Client // The client reference.
+	keyring        *voucher.KeyRing                        // The keyring used for signing metadata.
+	binauthProject string                                  // The project that Binauth Notes and Occurrences are written to.
+	imageProject   string                                  // The project that image information is stored.
 }
 
 // CanAttest returns true if the client can create and sign attestations.
@@ -38,13 +38,7 @@ func (g *Client) NewPayloadBody(reference reference.Canonical) (string, error) {
 }
 
 // GetMetadata gets metadata of the requested type for the passed image.
-func (g *Client) GetMetadata(reference reference.Canonical, metadataType voucher.MetadataType) (items []voucher.MetadataItem, err error) {
-	c, err := containeranalysis.NewGrafeasV1Beta1Client(g.ctx)
-	if err != nil {
-		return
-	}
-	defer c.Close()
-
+func (g *Client) GetMetadata(ctx context.Context, reference reference.Canonical, metadataType voucher.MetadataType) (items []voucher.MetadataItem, err error) {
 	filterStr := resourceURL(reference)
 
 	kind := getNoteKind(metadataType)
@@ -54,7 +48,7 @@ func (g *Client) GetMetadata(reference reference.Canonical, metadataType voucher
 
 	project := projectPath(g.imageProject)
 	req := &grafeaspb.ListOccurrencesRequest{Parent: project, Filter: filterStr}
-	occIterator := c.ListOccurrences(g.ctx, req)
+	occIterator := g.grafeas.ListOccurrences(ctx, req)
 	for {
 		var occ *grafeaspb.Occurrence
 		occ, err = occIterator.Next()
@@ -78,7 +72,7 @@ func (g *Client) GetMetadata(reference reference.Canonical, metadataType voucher
 
 // AddAttestationToImage adds a new attestation with the passed AttestationPayload
 // to the image described by ImageData.
-func (g *Client) AddAttestationToImage(reference reference.Canonical, payload voucher.AttestationPayload) (voucher.MetadataItem, error) {
+func (g *Client) AddAttestationToImage(ctx context.Context, reference reference.Canonical, payload voucher.AttestationPayload) (voucher.MetadataItem, error) {
 	if !g.CanAttest() {
 		return nil, errCannotAttest
 	}
@@ -90,11 +84,7 @@ func (g *Client) AddAttestationToImage(reference reference.Canonical, payload vo
 
 	attestation := newOccurrenceAttestation(signed, keyID)
 	occurrenceRequest := g.getCreateOccurrenceRequest(reference, payload.CheckName, attestation)
-	c, err := containeranalysis.NewGrafeasV1Beta1Client(g.ctx)
-	if err != nil {
-		return nil, err
-	}
-	occ, err := c.CreateOccurrence(g.ctx, occurrenceRequest)
+	occ, err := g.grafeas.CreateOccurrence(ctx, occurrenceRequest)
 	item := new(Item)
 	item.Occurrence = occ
 
@@ -119,12 +109,24 @@ func (g *Client) getCreateOccurrenceRequest(reference reference.Canonical, paren
 	return req
 }
 
+// Close closes the Grafeas client.
+func (g *Client) Close() {
+	g.grafeas.Close()
+}
+
 // NewClient creates a new Grafeas Client.
-func NewClient(ctx context.Context, imageProject, binauthProject string, keyring *voucher.KeyRing) *Client {
+func NewClient(ctx context.Context, imageProject, binauthProject string, keyring *voucher.KeyRing) (*Client, error) {
+	var err error
+
 	client := new(Client)
-	client.ctx = ctx
+	client.grafeas, err = containeranalysis.NewGrafeasV1Beta1Client(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	client.keyring = keyring
 	client.binauthProject = binauthProject
 	client.imageProject = imageProject
-	return client
+
+	return client, nil
 }

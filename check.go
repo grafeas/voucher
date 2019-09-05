@@ -1,6 +1,7 @@
 package voucher
 
 import (
+	"context"
 	"errors"
 )
 
@@ -10,5 +11,5 @@ var ErrNoCheck = errors.New("requested check doesn't exist")
 
 // Check represents a Voucher test.
 type Check interface {
-	Check(ImageData) (bool, error)
+	Check(context.Context, ImageData) (bool, error)
 }

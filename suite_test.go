@@ -1,6 +1,7 @@
 package voucher
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -20,7 +21,7 @@ func TestNewSuite(t *testing.T) {
 
 	imageData := newTestImageData(t)
 
-	results := suite.Run(imageData)
+	results := suite.Run(context.Background(), imageData)
 	require.Equal(t, []CheckResult{}, results)
 
 	brokenCheck := new(testBrokenCheck)
@@ -57,7 +58,7 @@ func TestNewSuite(t *testing.T) {
 		},
 	}
 
-	results = suite.Run(imageData)
+	results = suite.Run(context.Background(), imageData)
 	assert.ElementsMatch(t, expectedResults, results)
 
 	fixedCheck, err := suite.Get("fixed")
@@ -85,7 +86,7 @@ func TestMakeSuccessfulSuite(t *testing.T) {
 
 	imageData := newTestImageData(t)
 
-	results := suite.Run(imageData)
+	results := suite.Run(context.Background(), imageData)
 
 	response := NewResponse(imageData, results)
 	assert.Equal(t, true, response.Success)
@@ -101,7 +102,7 @@ func TestMakeFailingSuite(t *testing.T) {
 
 	imageData := newTestImageData(t)
 
-	results := suite.Run(imageData)
+	results := suite.Run(context.Background(), imageData)
 
 	response := NewResponse(imageData, results)
 	assert.Equal(t, false, response.Success)
@@ -121,7 +122,7 @@ func TestAttestSuite(t *testing.T) {
 
 	imageData := newTestImageData(t)
 
-	results := suite.RunAndAttest(metadataClient, imageData)
+	results := suite.RunAndAttest(context.Background(), metadataClient, imageData)
 
 	expectedResults := []CheckResult{
 		{
@@ -166,7 +167,7 @@ func TestNonattestingSuite(t *testing.T) {
 
 	imageData := newTestImageData(t)
 
-	results := suite.RunAndAttest(metadataClient, imageData)
+	results := suite.RunAndAttest(context.Background(), metadataClient, imageData)
 
 	expectedResult := CheckResult{
 		Name:      "snakeoil",

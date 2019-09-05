@@ -20,7 +20,7 @@ func handleChecks(w http.ResponseWriter, r *http.Request, name ...string) {
 
 	if err = isAuthorized(r); nil != err {
 		http.Error(w, "username or password is incorrect", 401)
-		LogError(err)
+		LogError("username or password is incorrect", err)
 		return
 	}
 
@@ -31,28 +31,34 @@ func handleChecks(w http.ResponseWriter, r *http.Request, name ...string) {
 	imageData, err = handleInput(r)
 	if nil != err {
 		http.Error(w, err.Error(), 422)
-		LogError(err)
+		LogError(err.Error(), err)
 		return
 	}
 
-	context, cancel := context.WithTimeout(context.Background(), serverConfig.TimeoutDuration())
+	ctx, cancel := context.WithTimeout(context.Background(), serverConfig.TimeoutDuration())
 	defer cancel()
 
-	metadataClient := config.NewMetadataClient(context)
+	metadataClient, err := config.NewMetadataClient(ctx)
+	if nil != err {
+		http.Error(w, "server has been misconfigured", 500)
+		LogError("failed to create MetadataClient", err)
+		return
+	}
+	defer metadataClient.Close()
 
 	checksuite, err := config.NewCheckSuite(metadataClient, name...)
 	if nil != err {
 		http.Error(w, "server has been misconfigured", 500)
-		LogError(err)
+		LogError("failed to create CheckSuite", err)
 		return
 	}
 
 	var results []voucher.CheckResult
 
 	if viper.GetBool("dryrun") {
-		results = checksuite.Run(imageData)
+		results = checksuite.Run(ctx, imageData)
 	} else {
-		results = checksuite.RunAndAttest(metadataClient, imageData)
+		results = checksuite.RunAndAttest(ctx, metadataClient, imageData)
 	}
 
 	checkResponse := voucher.NewResponse(imageData, results)
@@ -63,7 +69,7 @@ func handleChecks(w http.ResponseWriter, r *http.Request, name ...string) {
 	if nil != err {
 		// if all else fails
 		http.Error(w, err.Error(), 500)
-		LogError(err)
+		LogError("failed to encode respoonse as JSON", err)
 		return
 	}
 }

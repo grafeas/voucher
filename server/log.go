@@ -35,6 +35,6 @@ func LogResult(response voucher.Response) {
 }
 
 // LogError logs server errors to stdout as Error
-func LogError(err error) {
-	log.Errorf("Server error: %s", err)
+func LogError(message string, err error) {
+	log.Errorf("Server error: %s: %s", message, err)
 }

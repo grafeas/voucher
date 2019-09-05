@@ -43,10 +43,13 @@ func runCheck(name ...string) {
 
 	imageData := getImageData()
 
-	context, cancel := context.WithTimeout(context.Background(), time.Duration(viper.GetInt("timeout"))*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(viper.GetInt("timeout"))*time.Second)
 	defer cancel()
 
-	metadataClient := config.NewMetadataClient(context)
+	metadataClient, err := config.NewMetadataClient(ctx)
+	if nil != err {
+		log.Fatalf("could not instantiate MetadataClient: %s", err)
+	}
 
 	checksuite, err := config.NewCheckSuite(metadataClient, name...)
 	if nil != err {
@@ -54,9 +57,9 @@ func runCheck(name ...string) {
 	}
 
 	if viper.GetBool("dryrun") {
-		results = checksuite.Run(imageData)
+		results = checksuite.Run(ctx, imageData)
 	} else {
-		results = checksuite.RunAndAttest(metadataClient, imageData)
+		results = checksuite.RunAndAttest(ctx, metadataClient, imageData)
 	}
 
 	response := voucher.NewResponse(imageData, results)

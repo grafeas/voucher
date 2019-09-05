@@ -1,6 +1,7 @@
 package provenance
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -24,8 +25,8 @@ func (p *check) SetMetadataClient(metadataClient voucher.MetadataClient) {
 }
 
 // Check runs the check :)
-func (p *check) Check(i voucher.ImageData) (bool, error) {
-	items, err := p.metadataClient.GetMetadata(i, voucher.BuildDetailsType)
+func (p *check) Check(ctx context.Context, i voucher.ImageData) (bool, error) {
+	items, err := p.metadataClient.GetMetadata(ctx, i, voucher.BuildDetailsType)
 	if err != nil {
 		return false, err
 	}

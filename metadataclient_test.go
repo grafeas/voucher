@@ -1,10 +1,16 @@
 package voucher
 
-import "errors"
+import (
+	"context"
+	"errors"
+)
 
 type testMetadataClient struct {
 	canAttest bool
 	keyring   *KeyRing
+}
+
+func (t *testMetadataClient) Close() {
 }
 
 func (t *testMetadataClient) CanAttest() bool {
@@ -18,11 +24,11 @@ func (t *testMetadataClient) NewPayloadBody(i ImageData) (string, error) {
 	return "", errors.New("cannot create payload body")
 }
 
-func (t *testMetadataClient) GetMetadata(i ImageData, metadataType MetadataType) ([]MetadataItem, error) {
+func (t *testMetadataClient) GetMetadata(ctx context.Context, i ImageData, metadataType MetadataType) ([]MetadataItem, error) {
 	return []MetadataItem{}, nil
 }
 
-func (t *testMetadataClient) AddAttestationToImage(i ImageData, payload AttestationPayload) (MetadataItem, error) {
+func (t *testMetadataClient) AddAttestationToImage(ctx context.Context, i ImageData, payload AttestationPayload) (MetadataItem, error) {
 	_, _, err := payload.Sign(t.keyring)
 	if nil != err {
 		return nil, err

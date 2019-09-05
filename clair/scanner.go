@@ -2,7 +2,6 @@ package clair
 
 import (
 	"context"
-	"time"
 
 	"github.com/Shopify/voucher"
 	"github.com/Shopify/voucher/docker"
@@ -25,13 +24,8 @@ func (scanner *Scanner) FailOn(severity voucher.Severity) {
 }
 
 // Scan runs a scan in the Clair namespace.
-func (scanner *Scanner) Scan(i voucher.ImageData) ([]voucher.Vulnerability, error) {
+func (scanner *Scanner) Scan(ctx context.Context, i voucher.ImageData) ([]voucher.Vulnerability, error) {
 	vulns := make([]voucher.Vulnerability, 0)
-
-	// We set a longer timeout for this, given that this operation is far more
-	// intensive.
-	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
-	defer cancel()
 
 	tokenSrc, err := scanner.auth.GetTokenSource(ctx, i)
 	if nil != err {

@@ -1,6 +1,7 @@
 package snakeoil
 
 import (
+	"context"
 	"errors"
 
 	"github.com/Shopify/voucher"
@@ -22,12 +23,12 @@ func (s *check) SetScanner(newScanner voucher.VulnerabilityScanner) {
 }
 
 // Check verifies if the image has known vulnerabilities
-func (s *check) Check(i voucher.ImageData) (bool, error) {
+func (s *check) Check(ctx context.Context, i voucher.ImageData) (bool, error) {
 	if nil == s.scanner {
 		return false, ErrNoScanner
 	}
 
-	vulns, err := s.scanner.Scan(i)
+	vulns, err := s.scanner.Scan(ctx, i)
 	if nil != err {
 		return false, err
 	}

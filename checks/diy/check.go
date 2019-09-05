@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"strings"
-	"time"
 
 	"github.com/Shopify/voucher"
 	"github.com/Shopify/voucher/docker"
@@ -44,14 +43,11 @@ func (d *check) isFromValidRepo(i voucher.ImageData) bool {
 }
 
 // check checks if an image was built by a trusted source
-func (d *check) Check(i voucher.ImageData) (bool, error) {
+func (d *check) Check(ctx context.Context, i voucher.ImageData) (bool, error) {
 
 	if !d.isFromValidRepo(i) {
 		return false, ErrNotFromRepo
 	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
-	defer cancel()
 
 	if nil == d.auth {
 		return false, voucher.ErrNoAuth

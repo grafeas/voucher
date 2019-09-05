@@ -1,6 +1,9 @@
 package voucher
 
-import "errors"
+import (
+	"context"
+	"errors"
+)
 
 var errBrokenTest = errors.New("this test is broken")
 
@@ -10,7 +13,7 @@ type testCheck struct {
 	shouldPass bool
 }
 
-func (t *testCheck) Check(i ImageData) (bool, error) {
+func (t *testCheck) Check(ctx context.Context, i ImageData) (bool, error) {
 	return t.shouldPass, nil
 }
 
@@ -18,7 +21,7 @@ func (t *testCheck) Check(i ImageData) (bool, error) {
 type testBrokenCheck struct {
 }
 
-func (t *testBrokenCheck) Check(i ImageData) (bool, error) {
+func (t *testBrokenCheck) Check(ctx context.Context, i ImageData) (bool, error) {
 	return true, errBrokenTest
 }
 
