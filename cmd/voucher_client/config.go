@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/Shopify/voucher"
 	"github.com/Shopify/voucher/client"
 )
 
@@ -21,8 +22,8 @@ func getCheck() string {
 	return defaultConfig.Check
 }
 
-func getVoucherClient() (*client.VoucherClient, error) {
-	newClient, err := client.NewClient(defaultConfig.Hostname, time.Duration(defaultConfig.Timeout)*time.Second)
+func getVoucherClient() (voucher.Interface, error) {
+	newClient, err := client.NewClient(defaultConfig.Hostname)
 	if nil == err {
 		newClient.SetBasicAuth(defaultConfig.Username, defaultConfig.Password)
 	}

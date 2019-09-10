@@ -2,6 +2,7 @@ package client
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -9,7 +10,6 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"time"
 
 	"github.com/Shopify/voucher"
 	"github.com/docker/distribution/reference"
@@ -17,9 +17,9 @@ import (
 
 var errNoHost = errors.New("cannot create client with empty hostname")
 
-// VoucherClient is a client for the Voucher API.
-type VoucherClient struct {
-	Hostname   *url.URL
+// Client is a client for the Voucher API.
+type Client struct {
+	hostname   *url.URL
 	httpClient *http.Client
 	username   string
 	password   string
@@ -27,7 +27,7 @@ type VoucherClient struct {
 
 // Check executes a request to a Voucher server, to the appropriate check URI, and
 // with the passed reference.Canonical. Returns a voucher.Response and an error.
-func (c *VoucherClient) Check(check string, image reference.Canonical) (voucher.Response, error) {
+func (c *Client) Check(ctx context.Context, check string, image reference.Canonical) (voucher.Response, error) {
 	var checkResp voucher.Response
 	var buffer bytes.Buffer
 
@@ -38,7 +38,12 @@ func (c *VoucherClient) Check(check string, image reference.Canonical) (voucher.
 		return checkResp, fmt.Errorf("could not parse image, error: %s", err)
 	}
 
-	req, err := http.NewRequest(http.MethodPost, toVoucherURL(c.Hostname, check), &buffer)
+	req, err := http.NewRequestWithContext(
+		ctx,
+		http.MethodPost,
+		toVoucherURL(c.hostname, check),
+		&buffer,
+	)
 	if nil != err {
 		return checkResp, err
 	}
@@ -64,34 +69,34 @@ func (c *VoucherClient) Check(check string, image reference.Canonical) (voucher.
 	return checkResp, err
 }
 
-// NewClient creates a new VoucherClient set to connect to the passed
-// hostname, and with the passed timeout.
-func NewClient(hostname string, timeout time.Duration) (*VoucherClient, error) {
+// SetBasicAuth adds the username and password to the Client struct
+func (c *Client) SetBasicAuth(username, password string) {
+	c.username = username
+	c.password = password
+}
+
+// NewClient creates a new Client set to connect to the passed
+// hostname.
+func NewClient(hostname string) (*Client, error) {
 	var err error
 
 	if "" == hostname {
 		return nil, errNoHost
 	}
 
-	client := new(VoucherClient)
-	client.httpClient = &http.Client{
-		Timeout: timeout,
-	}
-
-	client.Hostname, err = url.Parse(hostname)
+	hostnameURL, err := url.Parse(hostname)
 	if nil != err {
 		return nil, fmt.Errorf("could not parse voucher hostname: %s", err)
 	}
 
-	if "" == client.Hostname.Scheme {
-		client.Hostname.Scheme = "https"
+	if "" == hostnameURL.Scheme {
+		hostnameURL.Scheme = "https"
+	}
+
+	client := &Client{
+		hostname:   hostnameURL,
+		httpClient: &http.Client{},
 	}
 
 	return client, nil
-}
-
-// SetBasicAuth adds the username and password to the VoucherClient struct
-func (c *VoucherClient) SetBasicAuth(username, password string) {
-	c.username = username
-	c.password = password
 }

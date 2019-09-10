@@ -7,7 +7,6 @@ import (
 
 	"github.com/Shopify/voucher"
 	"github.com/Shopify/voucher/auth/google"
-	"github.com/Shopify/voucher/client"
 	"github.com/docker/distribution/reference"
 )
 
@@ -39,10 +38,10 @@ func lookupCanonical(ctx context.Context, image string) (reference.Canonical, er
 }
 
 // submit submits the passed image to the voucher server.
-func submit(client *client.VoucherClient, check string, canonicalRef reference.Canonical) error {
+func submit(ctx context.Context, client voucher.Interface, check string, canonicalRef reference.Canonical) error {
 	fmt.Printf("Submitting image to Voucher: %s\n", canonicalRef.String())
 
-	voucherResp, err := client.Check(check, canonicalRef)
+	voucherResp, err := client.Check(ctx, check, canonicalRef)
 	if nil != err {
 		return fmt.Errorf("signing image failed: %s", err)
 	}
@@ -71,7 +70,7 @@ func LookupAndSubmit(args []string) {
 		os.Exit(1)
 	}
 
-	err = submit(client, getCheck(), canonicalRef)
+	err = submit(ctx, client, getCheck(), canonicalRef)
 	if nil != err {
 		errorf("submitting image to voucher failed: %s", err)
 		os.Exit(1)

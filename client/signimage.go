@@ -1,6 +1,7 @@
 package client
 
 import (
+	"context"
 	"time"
 
 	"github.com/Shopify/voucher"
@@ -14,12 +15,15 @@ const timeout = 120 * time.Second
 // to run the specified checks. It returns an error, or nil if no errors
 // occur and the check was successful.
 func SignImage(hostname string, image reference.Canonical, check string) (voucher.Response, error) {
-	client, err := NewClient(hostname, timeout)
+	client, err := NewClient(hostname)
 	if nil != err {
 		return voucher.Response{}, err
 	}
 
-	checkResp, err := client.Check(check, image)
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	checkResp, err := client.Check(ctx, check, image)
 	if nil != err {
 		return voucher.Response{}, err
 	}
