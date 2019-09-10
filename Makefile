@@ -1,6 +1,5 @@
 # Go parameters
 GOCMD=go
-GODEP=dep
 GORELEASER=goreleaser
 DOCKER=docker
 GOPATH?=`echo $$GOPATH`
@@ -28,9 +27,6 @@ endif
 ifeq ($(shell $(DOCKER) -v dot 2> /dev/null) , "")
 	$(error "docker is not installed")
 endif
-ifeq ($(shell $(GODEP) version dot 2> /dev/null) , "")
-	$(error "dep is not installed")
-endif
 ifeq ($(shell $(GORELEASER) version dot 2> /dev/null) , "")
 	$(error "goreleaser is not installed")
 endif
@@ -49,8 +45,7 @@ clean:
 	done
 
 update-deps:
-	$(GOCMD) get github.com/golang/dep/cmd/dep
-	$(GODEP) ensure
+	$(GOCMD) mod vendor
 
 build: $(PACKAGES)
 
