@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/Shopify/voucher"
-	"github.com/Shopify/voucher/cmd/config"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
+	"github.com/Shopify/voucher"
+	"github.com/Shopify/voucher/cmd/config"
 )
 
 var allCmd = &cobra.Command{

@@ -73,7 +73,6 @@ func TestNewSuite(t *testing.T) {
 	if assert.NotNil(t, gottenCheck) {
 		assert.Equal(t, gottenCheck, brokenCheck)
 	}
-
 }
 
 func TestMakeSuccessfulSuite(t *testing.T) {

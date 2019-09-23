@@ -1,23 +1,17 @@
 package config
 
 import (
-	// Register the DIY check
-	_ "github.com/Shopify/voucher/checks/diy"
-
-	// Register the Nobody check
-	_ "github.com/Shopify/voucher/checks/nobody"
-
-	// Register the Provenance check
-	_ "github.com/Shopify/voucher/checks/provenance"
-
-	// Register the Snakeoil check
-	_ "github.com/Shopify/voucher/checks/snakeoil"
-)
-
-import (
 	"fmt"
 
 	"github.com/Shopify/voucher"
+	// Register the DIY check
+	_ "github.com/Shopify/voucher/checks/diy"
+	// Register the Nobody check
+	_ "github.com/Shopify/voucher/checks/nobody"
+	// Register the Provenance check
+	_ "github.com/Shopify/voucher/checks/provenance"
+	// Register the Snakeoil check
+	_ "github.com/Shopify/voucher/checks/snakeoil"
 )
 
 // EnabledChecks returns a slice of strings with the check names, based on a

@@ -5,8 +5,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Shopify/voucher"
 	"google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/discovery"
+
+	"github.com/Shopify/voucher"
 )
 
 // isVulnerabilityDiscovery returns true if the passed Item wraps a Vulnerability Discovery.

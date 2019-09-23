@@ -7,11 +7,12 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Shopify/voucher"
-	"github.com/Shopify/voucher/grafeas"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/build"
+
+	"github.com/Shopify/voucher"
+	"github.com/Shopify/voucher/grafeas"
 )
 
 // check holds the required data for the check

@@ -11,7 +11,6 @@ import (
 // configured username and password. The password in the configuration is assumed to
 // have hashed using the bcrypt algorithm.
 func isAuthorized(r *http.Request) error {
-
 	// If the server does not require auth, the user is always authorized.
 	if !serverConfig.RequireAuth {
 		return nil

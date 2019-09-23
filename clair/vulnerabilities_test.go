@@ -1,8 +1,9 @@
 package clair
 
 import (
-	"github.com/Shopify/voucher"
 	v1 "github.com/coreos/clair/api/v1"
+
+	"github.com/Shopify/voucher"
 )
 
 // ClairVulnerabilitiesV1 return a list of clair vulnerabilities

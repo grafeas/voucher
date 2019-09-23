@@ -1,7 +1,7 @@
 project_name: voucher
 before:
    hooks:
-     - make update-deps
+     - make ensure-deps
 builds:
   - id: voucher_cli
     main: ./cmd/voucher_cli

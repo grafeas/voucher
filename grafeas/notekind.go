@@ -1,8 +1,9 @@
 package grafeas
 
 import (
-	"github.com/Shopify/voucher"
 	"google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/common"
+
+	"github.com/Shopify/voucher"
 )
 
 // getNoteKind translates the Voucher MetadataType into a Google Container Analysis NoteKind.

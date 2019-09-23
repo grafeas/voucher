@@ -44,7 +44,6 @@ func (d *check) isFromValidRepo(i voucher.ImageData) bool {
 
 // check checks if an image was built by a trusted source
 func (d *check) Check(ctx context.Context, i voucher.ImageData) (bool, error) {
-
 	if !d.isFromValidRepo(i) {
 		return false, ErrNotFromRepo
 	}

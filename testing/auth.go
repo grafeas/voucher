@@ -6,9 +6,10 @@ import (
 	"net/http/httptest"
 	"time"
 
-	"github.com/Shopify/voucher"
 	"github.com/docker/distribution/reference"
 	"golang.org/x/oauth2"
+
+	"github.com/Shopify/voucher"
 )
 
 type testTokenSource struct {

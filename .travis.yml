@@ -1,9 +1,17 @@
 language: go
 
+cache:
+  directories:
+    - $GOPATH/pkg/mod
+
+env:
+- GO111MODULE=on
+
 go:
   - 1.13.x
 
 script:
+  - make ensure-deps
   - make test
   
 after_success:

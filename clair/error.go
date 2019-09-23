@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/coreos/clair/api/v1"
+	v1 "github.com/coreos/clair/api/v1"
 )
 
 func getErrorFromResponse(resp *http.Response) error {

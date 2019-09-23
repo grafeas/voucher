@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/Shopify/voucher"
-	"github.com/Shopify/voucher/auth"
 	"github.com/docker/distribution/reference"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
+
+	"github.com/Shopify/voucher"
+	"github.com/Shopify/voucher/auth"
 )
 
 const gcrScope = "https://www.googleapis.com/auth/cloud-platform"
@@ -28,7 +29,6 @@ func (a *gAuth) GetTokenSource(ctx context.Context, ref reference.Named) (oauth2
 	}
 
 	return source, err
-
 }
 
 // ToClient returns a new http.Client with the authentication details setup by

@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/docker/distribution/reference"
+
 	"github.com/Shopify/voucher"
 	"github.com/Shopify/voucher/auth/google"
-	"github.com/docker/distribution/reference"
 )
 
 // lookupCanonical looks up the canonical version of the passed image path.

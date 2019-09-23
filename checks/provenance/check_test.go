@@ -3,11 +3,12 @@ package provenance
 import (
 	"testing"
 
-	"github.com/Shopify/voucher"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/build"
 	"google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/provenance"
+
+	"github.com/Shopify/voucher"
 )
 
 var (

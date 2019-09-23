@@ -44,9 +44,11 @@ $ git checkout -b <the name of your branch>
     - Please run `go fmt` and `golint` while you work on your change, to clean
 up your formatting/check for issues.
 
-    - If you update the dependencies, you may have to run `make update-deps` to
- ensure that the dependencies are vendored. This should happen in a separate
-commit from those containing your source modifications.
+    - If you add a dependencies, run `go mod tidy` to prune any no-longer-needed
+    dependencies from `go.mod`.
+
+    - To update dependencies to use newer minor or patch releases when available:
+    run `make update-deps`.
 
 - Push your changes to your fork's remote:
 

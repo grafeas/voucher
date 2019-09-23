@@ -4,9 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Shopify/voucher/repository"
 	"github.com/shurcooL/githubv4"
 	"golang.org/x/oauth2"
+
+	"github.com/Shopify/voucher/repository"
 )
 
 // ghGraphQLClient represents a GraphQL client to interact with the GitHub API

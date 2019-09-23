@@ -4,8 +4,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/Shopify/voucher"
 	"github.com/docker/distribution/reference"
+
+	"github.com/Shopify/voucher"
 )
 
 const timeout = 120 * time.Second

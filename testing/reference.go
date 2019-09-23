@@ -46,5 +46,4 @@ func parseReference(t *testing.T, name string) reference.Canonical {
 	require.True(t, ok, "could not convert reference to Canonical reference")
 
 	return refCanonical
-
 }

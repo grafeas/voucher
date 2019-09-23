@@ -1,11 +1,12 @@
 package config
 
 import (
+	log "github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
+
 	"github.com/Shopify/voucher"
 	"github.com/Shopify/voucher/clair"
 	"github.com/Shopify/voucher/grafeas"
-	log "github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 )
 
 func newScanner(metadataClient voucher.MetadataClient, auth voucher.Auth) (scanner voucher.VulnerabilityScanner) {

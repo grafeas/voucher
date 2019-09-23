@@ -6,10 +6,11 @@ import (
 	"fmt"
 
 	"github.com/Shopify/ejson"
+	"github.com/spf13/viper"
+
 	"github.com/Shopify/voucher"
 	"github.com/Shopify/voucher/clair"
 	"github.com/Shopify/voucher/repository"
-	"github.com/spf13/viper"
 )
 
 // ejsonFormat represents the format that the ejson configuration is structured

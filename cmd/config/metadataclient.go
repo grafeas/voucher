@@ -3,10 +3,11 @@ package config
 import (
 	"context"
 
-	"github.com/Shopify/voucher"
-	"github.com/Shopify/voucher/grafeas"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+
+	"github.com/Shopify/voucher"
+	"github.com/Shopify/voucher/grafeas"
 )
 
 // NewMetadataClient creates a new MetadataClient.

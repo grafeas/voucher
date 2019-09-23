@@ -4,11 +4,12 @@ import (
 	"context"
 	"time"
 
-	"github.com/Shopify/voucher"
-	"github.com/Shopify/voucher/cmd/config"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
+	"github.com/Shopify/voucher"
+	"github.com/Shopify/voucher/cmd/config"
 )
 
 // rootCmd stores the metadata about the toot voucher commands

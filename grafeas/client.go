@@ -5,12 +5,13 @@ import (
 	"errors"
 
 	containeranalysis "cloud.google.com/go/containeranalysis/apiv1beta1"
-	"github.com/Shopify/voucher"
-	binauth "github.com/Shopify/voucher/grafeas/binauth"
 	"github.com/docker/distribution/reference"
 	"google.golang.org/api/iterator"
 	"google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/common"
 	grafeaspb "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/grafeas"
+
+	"github.com/Shopify/voucher"
+	binauth "github.com/Shopify/voucher/grafeas/binauth"
 )
 
 var errCannotAttest = errors.New("cannot create attestations, keyring is empty")

@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Shopify/voucher/repository"
 	"github.com/shurcooL/githubv4"
+
+	"github.com/Shopify/voucher/repository"
 )
 
 // queryHandler is called on every iteration of paginationQuery to populate a slice of query results
@@ -47,7 +48,7 @@ func newRepositoryOrgInfoResult(ctx context.Context, ghc ghGraphQLClient, uri st
 		return nil, err
 	}
 
-	var repoInfoVariables = map[string]interface{}{
+	repoInfoVariables := map[string]interface{}{
 		"url": githubv4.URI(*formattedURI),
 	}
 

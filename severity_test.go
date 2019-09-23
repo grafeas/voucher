@@ -26,7 +26,6 @@ func TestSeverityToString(t *testing.T) {
 		value := severity.String()
 		assert.Equalf(value, expected, "Severity.String() returned the wrong output, should be: %v, was %v", expected, value)
 	}
-
 }
 
 func TestStringToSeverity(t *testing.T) {

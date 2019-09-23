@@ -3,11 +3,12 @@ package clair
 import (
 	"context"
 
-	"github.com/Shopify/voucher"
-	"github.com/Shopify/voucher/docker"
 	"github.com/docker/distribution/manifest/schema2"
 	"github.com/docker/distribution/reference"
 	"golang.org/x/oauth2"
+
+	"github.com/Shopify/voucher"
+	"github.com/Shopify/voucher/docker"
 )
 
 // Scanner implements the interface SnakeoilScanner.

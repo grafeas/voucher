@@ -12,7 +12,6 @@ import (
 // RequestImageConfig requests an image configuration from the server, based on the passed
 // reference. Returns an ImageConfig or an error.
 func RequestImageConfig(client *http.Client, ref reference.Canonical) (ImageConfig, error) {
-
 	manifest, err := RequestManifest(client, ref)
 	if nil != err {
 		return ImageConfig{}, err

@@ -3,8 +3,9 @@ package server
 import (
 	"net/http"
 
-	"github.com/Shopify/voucher"
 	log "github.com/sirupsen/logrus"
+
+	"github.com/Shopify/voucher"
 )
 
 func init() {

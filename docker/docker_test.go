@@ -6,9 +6,10 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	vtesting "github.com/Shopify/voucher/testing"
 	"github.com/docker/distribution/reference"
 	"github.com/stretchr/testify/require"
+
+	vtesting "github.com/Shopify/voucher/testing"
 )
 
 // PrepareDockerTest creates a new http.Client and httptest.Server for testing with.

@@ -3,11 +3,12 @@ package docker
 import (
 	"testing"
 
-	vtesting "github.com/Shopify/voucher/testing"
 	"github.com/docker/distribution/reference"
 	digest "github.com/opencontainers/go-digest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	vtesting "github.com/Shopify/voucher/testing"
 )
 
 func TestGetDigestFromTagged(t *testing.T) {

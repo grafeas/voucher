@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/Shopify/voucher/repository"
 	"github.com/golang/protobuf/protoc-gen-go/generator"
 	utils "github.com/mennanov/fieldmask-utils"
 	"github.com/shurcooL/githubv4"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/Shopify/voucher/repository"
 )
 
 type queryHandlerFunc func(query interface{}, variables map[string]interface{}) error

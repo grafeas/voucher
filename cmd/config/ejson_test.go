@@ -3,11 +3,12 @@ package config
 import (
 	"testing"
 
-	"github.com/Shopify/voucher/clair"
-	"github.com/Shopify/voucher/repository"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/Shopify/voucher/clair"
+	"github.com/Shopify/voucher/repository"
 )
 
 func TestNonExistantEjson(t *testing.T) {

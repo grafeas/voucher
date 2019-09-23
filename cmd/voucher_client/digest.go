@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/Shopify/voucher/docker"
 	"github.com/docker/distribution/reference"
+
+	"github.com/Shopify/voucher/docker"
 )
 
 // getCanonicalReference gets the canonical image reference for the passed

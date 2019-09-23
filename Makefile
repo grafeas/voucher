@@ -12,12 +12,14 @@ CLI_NAME=voucher_cli
 CLIENT_NAME=voucher_client
 IMAGE_NAME?=voucher
 
-.PHONY: clean update-deps system-deps \
+export GO111MODULE=on
+
+.PHONY: clean ensure-deps update-deps system-deps \
 	test show-coverage \
 	build release snapshot container \
 	$(PACKAGES)
 
-all: clean build
+all: clean ensure-deps build
 
 # System Dependencies
 system-deps:
@@ -44,8 +46,14 @@ clean:
 		rm -vrf build/$$PACKAGE; \
 	done
 
+ensure-deps:
+	$(GOCMD) mod tidy
+	$(GOCMD) mod download
+	$(GOCMD) mod verify
+
 update-deps:
-	$(GOCMD) mod vendor
+	$(GOCMD) get -u -t all
+	$(GOCMD) mod tidy
 
 build: $(PACKAGES)
 

@@ -6,10 +6,11 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/Shopify/voucher"
-	"github.com/Shopify/voucher/cmd/config"
 	"github.com/gorilla/mux"
 	"github.com/spf13/viper"
+
+	"github.com/Shopify/voucher"
+	"github.com/Shopify/voucher/cmd/config"
 )
 
 func handleChecks(w http.ResponseWriter, r *http.Request, name ...string) {

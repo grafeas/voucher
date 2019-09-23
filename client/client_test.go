@@ -20,7 +20,6 @@ func TestNewClient(t *testing.T) {
 
 	_, err = NewClient(":localhost")
 	require.Contains(t, err.Error(), "could not parse voucher hostname", "failed to create client: ", err)
-
 }
 
 func TestVoucherURL(t *testing.T) {

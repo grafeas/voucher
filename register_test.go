@@ -38,7 +38,6 @@ func TestRegisterCheckFactory(t *testing.T) {
 		assert.Nil(checkErr)
 		assert.False(ok)
 	}
-
 }
 
 func TestEmptyCheckFactory(t *testing.T) {

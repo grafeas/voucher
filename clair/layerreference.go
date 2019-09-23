@@ -1,11 +1,12 @@
 package clair
 
 import (
-	"github.com/Shopify/voucher/docker"
-	"github.com/coreos/clair/api/v1"
+	v1 "github.com/coreos/clair/api/v1"
 	"github.com/docker/distribution/reference"
 	"github.com/opencontainers/go-digest"
 	"golang.org/x/oauth2"
+
+	"github.com/Shopify/voucher/docker"
 )
 
 // LayerReference is a structure containing a Layer digest, as well as the repository

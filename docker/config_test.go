@@ -3,10 +3,11 @@ package docker
 import (
 	"testing"
 
-	vtesting "github.com/Shopify/voucher/testing"
 	dockerTypes "github.com/docker/docker/api/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	vtesting "github.com/Shopify/voucher/testing"
 )
 
 func TestRequestConfig(t *testing.T) {

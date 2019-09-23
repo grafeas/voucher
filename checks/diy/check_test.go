@@ -4,10 +4,11 @@ import (
 	"context"
 	"testing"
 
-	"github.com/Shopify/voucher"
-	vtesting "github.com/Shopify/voucher/testing"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/Shopify/voucher"
+	vtesting "github.com/Shopify/voucher/testing"
 )
 
 func TestDIYCheck(t *testing.T) {

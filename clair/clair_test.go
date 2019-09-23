@@ -7,13 +7,12 @@ import (
 
 	v1 "github.com/coreos/clair/api/v1"
 	"github.com/docker/distribution/reference"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/oauth2"
 
 	"github.com/Shopify/voucher"
-
 	vtesting "github.com/Shopify/voucher/testing"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestGetClairVulnerabilites(t *testing.T) {

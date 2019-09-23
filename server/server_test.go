@@ -7,10 +7,11 @@ import (
 	"os"
 	"testing"
 
-	"github.com/Shopify/voucher/cmd/config"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/Shopify/voucher/cmd/config"
 )
 
 var testParams = []byte(`
@@ -69,7 +70,7 @@ func TestBadAuthentication(t *testing.T) {
 }
 
 func TestInvalidJSON(t *testing.T) {
-	var invalidJSON = []byte(`
+	invalidJSON := []byte(`
 		{  
 			image_url:poorly-formatted-json,
 		}
