@@ -3,6 +3,7 @@ package voucher
 import (
 	"context"
 	"errors"
+	"github.com/docker/distribution/reference"
 )
 
 type testMetadataClient struct {
@@ -37,6 +38,10 @@ func (t *testMetadataClient) AddAttestationToImage(ctx context.Context, i ImageD
 	occ := new(MetadataItem)
 
 	return *occ, nil
+}
+
+func (t *testMetadataClient) GetBuildDetails(ctx context.Context, reference reference.Canonical) ([]BuildDetail, error) {
+	return []BuildDetail{}, nil
 }
 
 func newTestMetadataClient(keyring *KeyRing, canAttest bool) *testMetadataClient {

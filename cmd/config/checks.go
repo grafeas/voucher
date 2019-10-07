@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/Shopify/voucher"
+	"github.com/spf13/viper"
 	// Register the DIY check
 	_ "github.com/Shopify/voucher/checks/diy"
 	// Register the Nobody check
@@ -59,6 +60,16 @@ func setCheckValidRepos(check voucher.Check, validRepos []string) {
 	}
 }
 
+// setCheckTrustedIdentitiesAndProjects sets trusted identities and projects used in ProvenanceCheck
+// trustedBuildCreators is a list of trusted build creators
+// trustedProjects is a list of trusted projects
+func setCheckTrustedIdentitiesAndProjects(check voucher.Check, trustedBuildCreators []string, trustedProjects []string) {
+	if provenanceCheck, ok := check.(voucher.ProvenanceCheck); ok {
+		provenanceCheck.SetTrustedBuildCreators(trustedBuildCreators)
+		provenanceCheck.SetTrustedProjects(trustedProjects)
+	}
+}
+
 // NewCheckSuite creates a new checks.Suite with the requested
 // Checks, passing any necessary configuration details to the
 // checks.
@@ -67,6 +78,9 @@ func NewCheckSuite(metadataClient voucher.MetadataClient, names ...string) (*vou
 	repos := validRepos()
 	scanner := newScanner(metadataClient, auth)
 	checksuite := voucher.NewSuite()
+
+	trustedBuildCreators := viper.GetStringSlice("trusted-builder-identities")
+	trustedProjects := viper.GetStringSlice("trusted-projects")
 
 	checks, err := voucher.GetCheckFactories(names...)
 	if nil != err {
@@ -78,6 +92,7 @@ func NewCheckSuite(metadataClient voucher.MetadataClient, names ...string) (*vou
 		setCheckScanner(check, scanner)
 		setCheckMetadataClient(check, metadataClient)
 		setCheckValidRepos(check, repos)
+		setCheckTrustedIdentitiesAndProjects(check, trustedBuildCreators, trustedProjects)
 
 		checksuite.Add(name, check)
 	}

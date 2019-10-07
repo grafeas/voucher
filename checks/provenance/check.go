@@ -2,22 +2,17 @@ package provenance
 
 import (
 	"context"
-	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
-	"google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/build"
-
 	"github.com/Shopify/voucher"
-	"github.com/Shopify/voucher/grafeas"
 )
 
 // check holds the required data for the check
 type check struct {
 	metadataClient voucher.MetadataClient
+	trustedBuildCreators map[string]bool
+	trustedProjects map[string]bool
 }
 
 // SetMetadataClient sets the MetadataClient for this Check.
@@ -25,56 +20,47 @@ func (p *check) SetMetadataClient(metadataClient voucher.MetadataClient) {
 	p.metadataClient = metadataClient
 }
 
+// SetTrustedBuildCreators sets trustedBuildCreators for this Check.
+func (p *check) SetTrustedBuildCreators(buildCreators []string) {
+	p.trustedBuildCreators = make(map[string]bool)
+	for _, identity := range buildCreators {
+		p.trustedBuildCreators[identity] = true
+	}
+}
+
+// SetTrustedProjects sets trustedProjects for this Check.
+func (p *check) SetTrustedProjects(trustedProjects []string) {
+	p.trustedProjects = make(map[string]bool)
+	for _, project := range trustedProjects {
+		p.trustedProjects[project] = true
+	}
+}
+
 // Check runs the check :)
 func (p *check) Check(ctx context.Context, i voucher.ImageData) (bool, error) {
-	items, err := p.metadataClient.GetMetadata(ctx, i, voucher.BuildDetailsType)
+	items, err := p.metadataClient.GetBuildDetails(ctx, i)
 	if err != nil {
 		return false, err
 	}
 
-	// there should only be one occurrence
-	if len(items) != 1 {
-		return false, fmt.Errorf("Got %d items for: %s", len(items), i.String())
+	for _, buildDetail := range items {
+		ok := true
+		if ok, err = validateProvenance(p, buildDetail); !ok || !validateArtifacts(i, buildDetail) {
+			return false, err
+		}
 	}
 
-	item, ok := items[0].(*grafeas.Item)
-	if !ok {
-		return false, fmt.Errorf("response from MetadataClient is not an grafeas.Item")
-	}
-
-	buildDetails := item.Occurrence.GetBuild()
-	if validateProvenance(buildDetails) && validateArtifacts(i, buildDetails) {
-		log.Infof("Validated image provenance and artifacts for: %s", i.String())
-		return true, nil
-	}
-
-	return false, nil
+	return true, nil
 }
 
-func validateProvenance(details *build.Details) (trusted bool) {
-	// get trusted things
-	trustedBuilderIdentities := voucher.ToMapStringBool(viper.GetStringMap("trusted-builder-identities"))
-	trustedBuilderProjects := voucher.ToMapStringBool(viper.GetStringMap("trusted-projects"))
-
-	provenance, err := base64.StdEncoding.DecodeString(details.ProvenanceBytes)
-	if err != nil {
-		log.Errorf("Error decoding provenance: %v", err)
+func validateProvenance(p *check, detail voucher.BuildDetail) (trusted bool, err error) {
+	if !p.trustedBuildCreators[detail.BuildCreator] {
+		err = fmt.Errorf("builder identity not trusted: %s", detail.BuildCreator)
 		return
 	}
 
-	// unmarshal against provenance bytes
-	if err := json.Unmarshal(provenance, details); err != nil {
-		log.Errorf("Provenance bytes do not match details: %v", err)
-		return
-	}
-
-	if !trustedBuilderIdentities[details.Provenance.Creator] {
-		log.Errorf("Builder identity not trusted: %s", details.Provenance.Creator)
-		return
-	}
-
-	if !trustedBuilderProjects[details.Provenance.ProjectId] {
-		log.Errorf("Builder project not trusted: %s", details.Provenance.ProjectId)
+	if !p.trustedProjects[detail.ProjectID] {
+		err = fmt.Errorf("builder project not trusted: %s", detail.ProjectID)
 		return
 	}
 
@@ -82,9 +68,9 @@ func validateProvenance(details *build.Details) (trusted bool) {
 	return
 }
 
-func validateArtifacts(i voucher.ImageData, details *build.Details) (matched bool) {
+func validateArtifacts(i voucher.ImageData, detail voucher.BuildDetail) (matched bool) {
 	// if an artifact built by this Build is the image, validate the SHAs match
-	for _, artifact := range details.Provenance.BuiltArtifacts {
+	for _, artifact := range detail.Artifacts {
 		if strings.HasSuffix(i.Digest().String(), artifact.Checksum) {
 			matched = true
 		}

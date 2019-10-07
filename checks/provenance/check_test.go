@@ -5,9 +5,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/build"
-	"google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/provenance"
-
 	"github.com/Shopify/voucher"
 )
 
@@ -18,21 +15,18 @@ var (
 	projectTestData         = "test"
 )
 
-var buildDetailsTestData = &build.Details{
-	Provenance: &provenance.BuildProvenance{
-		Id:        "foo",
-		ProjectId: projectTestData,
-		Creator:   builderIdentityTestData,
-		BuiltArtifacts: []*provenance.Artifact{
-			{
-				Id:       imageURLTestData,
-				Checksum: imageSHA256TestData,
-				Names:    []string{"foo", "bar"},
-			},
+var buildDetailsTestData = voucher.BuildDetail{
+	ProjectID: 		projectTestData,
+	BuildCreator:   builderIdentityTestData,
+	Artifacts: 		[]voucher.BuildArtifact{
+		{
+			ID:       imageURLTestData,
+			Checksum: imageSHA256TestData,
 		},
 	},
-	ProvenanceBytes: "base64blob",
 }
+
+
 
 func TestArtifactIsImage(t *testing.T) {
 	imageDataTestData, err := voucher.NewImageData(imageURLTestData)

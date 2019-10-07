@@ -115,6 +115,33 @@ func (g *Client) Close() {
 	g.grafeas.Close()
 }
 
+// GetBuildDetails gets BuildDetails for the passed image.
+func (g *Client) GetBuildDetails(ctx context.Context, reference reference.Canonical) (items []voucher.BuildDetail, err error) {
+	filterStr := kindFilterStr(reference, common.NoteKind_BUILD)
+
+	project := projectPath(g.imageProject)
+	req := &grafeaspb.ListOccurrencesRequest{Parent: project, Filter: filterStr}
+	occIterator := g.grafeas.ListOccurrences(ctx, req)
+	for {
+		var occ *grafeaspb.Occurrence
+		occ, err = occIterator.Next()
+		if nil != err {
+			if iterator.Done == err {
+				err = nil
+			}
+			break
+		}
+		item := OccurrenceToBuildDetails(occ)
+		items = append(items, item)
+	}
+
+	if 0 == len(items) && nil == err {
+		err = errNoOccurrences
+	}
+
+	return
+}
+
 // NewClient creates a new Grafeas Client.
 func NewClient(ctx context.Context, imageProject, binauthProject string, keyring *voucher.KeyRing) (*Client, error) {
 	var err error
