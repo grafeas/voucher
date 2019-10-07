@@ -110,6 +110,33 @@ func (g *Client) getCreateOccurrenceRequest(reference reference.Canonical, paren
 	return req
 }
 
+// GetVulnerabilities returns the detected vulnerabilities for the Image described by voucher.ImageData.
+func (g *Client) GetVulnerabilities(ctx context.Context, reference reference.Canonical) (items []voucher.Vulnerability, err error) {
+	filterStr := kindFilterStr(reference, common.NoteKind_VULNERABILITY)
+	err = pollForDiscoveries(ctx, g, reference)
+	if nil != err {
+		return []voucher.Vulnerability{}, err
+	}
+
+	project := projectPath(g.imageProject)
+	req := &grafeaspb.ListOccurrencesRequest{Parent: project, Filter: filterStr}
+	occIterator := g.grafeas.ListOccurrences(ctx, req)
+	for {
+		var occ *grafeaspb.Occurrence
+		occ, err = occIterator.Next()
+		if nil != err {
+			if iterator.Done == err {
+				err = nil
+			}
+			break
+		}
+		item := OccurrenceToVulnerability(occ)
+		items = append(items, item)
+	}
+
+	return
+}
+
 // Close closes the Grafeas client.
 func (g *Client) Close() {
 	g.grafeas.Close()

@@ -29,6 +29,10 @@ func (t *testMetadataClient) GetMetadata(ctx context.Context, i ImageData, metad
 	return []MetadataItem{}, nil
 }
 
+func (t *testMetadataClient) GetVulnerabilities(ctx context.Context, i ImageData) ([]Vulnerability, error) {
+	return []Vulnerability{}, nil
+}
+
 func (t *testMetadataClient) AddAttestationToImage(ctx context.Context, i ImageData, payload AttestationPayload) (MetadataItem, error) {
 	_, _, err := payload.Sign(t.keyring)
 	if nil != err {

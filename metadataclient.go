@@ -11,6 +11,7 @@ type MetadataClient interface {
 	CanAttest() bool
 	NewPayloadBody(ImageData) (string, error)
 	GetMetadata(context.Context, ImageData, MetadataType) ([]MetadataItem, error)
+	GetVulnerabilities(context.Context, ImageData) ([]Vulnerability, error)
 	GetBuildDetails(context.Context, reference.Canonical) ([]BuildDetail, error)
 	AddAttestationToImage(context.Context, ImageData, AttestationPayload) (MetadataItem, error)
 	Close()

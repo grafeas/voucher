@@ -2,7 +2,6 @@ package grafeas
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/Shopify/voucher"
 )
@@ -21,38 +20,20 @@ func (s *Scanner) FailOn(severity voucher.Severity) {
 	s.failOn = severity
 }
 
-// GetVulnerabilitiesForImage returns the detected vulnerabilities for the Image
-// described by voucher.ImageData.
-func (s *Scanner) getVulnerabilitiesForImage(ctx context.Context, i voucher.ImageData) ([]voucher.Vulnerability, error) {
-	items, err := s.client.GetMetadata(ctx, i, voucher.VulnerabilityType)
-	vulns := make([]voucher.Vulnerability, 0, len(items))
-	if nil != err {
-		return vulns, fmt.Errorf("could not get vulnerabilities: %s", err)
-	}
-
-	for _, item := range items {
-		metadataItem, ok := item.(*Item)
-		if !ok {
-			continue
-		}
-
-		vuln := OccurrenceToVulnerability(metadataItem.Occurrence)
-		if voucher.ShouldIncludeVulnerability(vuln, s.failOn) {
-			vulns = append(vulns, vuln)
-		}
-	}
-
-	return vulns, nil
-}
 
 // Scan gets the vulnerabilities for an Image.
 func (s *Scanner) Scan(ctx context.Context, i voucher.ImageData) ([]voucher.Vulnerability, error) {
-	err := pollForDiscoveries(ctx, s.client, i)
+	v, err := s.client.GetVulnerabilities(ctx, i)
 	if nil != err {
 		return []voucher.Vulnerability{}, err
 	}
-
-	return s.getVulnerabilitiesForImage(ctx, i)
+	vulns := make([]voucher.Vulnerability, 0, len(v))
+	for _, item := range v {
+		if voucher.ShouldIncludeVulnerability(item, s.failOn) {
+			vulns = append(vulns, item)
+		}
+	}
+	return vulns, nil
 }
 
 // NewScanner creates a new grafeas.Scanner.
