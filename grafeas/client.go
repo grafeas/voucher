@@ -65,7 +65,10 @@ func (g *Client) GetMetadata(ctx context.Context, reference reference.Canonical,
 	}
 
 	if 0 == len(items) && nil == err {
-		err = errNoOccurrences
+		err = &voucher.NoMetadataError{
+			Type: metadataType,
+			Err:  errNoOccurrences,
+		}
 	}
 
 	return
@@ -163,7 +166,10 @@ func (g *Client) GetBuildDetails(ctx context.Context, reference reference.Canoni
 	}
 
 	if 0 == len(items) && nil == err {
-		err = errNoOccurrences
+		err = &voucher.NoMetadataError{
+			Type: voucher.VulnerabilityType,
+			Err:  errNoOccurrences,
+		}
 	}
 
 	return

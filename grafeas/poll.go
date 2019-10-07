@@ -38,7 +38,7 @@ const sleep = time.Second * 10
 func pollForDiscoveries(ctx context.Context, c voucher.MetadataClient, img voucher.ImageData) error {
 	for i := 0; i < attempts; i++ {
 		discoveries, err := c.GetMetadata(ctx, img, DiscoveryType)
-		if err != nil {
+		if err != nil && !voucher.IsNoMetadataError(err) {
 			return err
 		}
 		if len(discoveries) > 0 {

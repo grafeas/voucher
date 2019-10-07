@@ -2,17 +2,22 @@ package provenance
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/Shopify/voucher"
 )
 
+// ErrNoBuildData is an error returned if we can't pull any BuildData from
+// Grafeas for an image.
+var ErrNoBuildData = errors.New("no build metadata associated with this image")
+
 // check holds the required data for the check
 type check struct {
-	metadataClient voucher.MetadataClient
+	metadataClient       voucher.MetadataClient
 	trustedBuildCreators map[string]bool
-	trustedProjects map[string]bool
+	trustedProjects      map[string]bool
 }
 
 // SetMetadataClient sets the MetadataClient for this Check.
@@ -40,6 +45,9 @@ func (p *check) SetTrustedProjects(trustedProjects []string) {
 func (p *check) Check(ctx context.Context, i voucher.ImageData) (bool, error) {
 	items, err := p.metadataClient.GetBuildDetails(ctx, i)
 	if err != nil {
+		if voucher.IsNoMetadataError(err) {
+			return false, ErrNoBuildData
+		}
 		return false, err
 	}
 
