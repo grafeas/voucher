@@ -10,21 +10,21 @@ func OccurrenceToBuildDetails(occ *grafeaspb.Occurrence) (detail voucher.BuildDe
 	buildProvenance := occ.GetBuild().GetProvenance()
 
 	detail.ProjectID = buildProvenance.GetProjectId()
-    detail.BuildCreator = buildProvenance.GetCreator()
+	detail.BuildCreator = buildProvenance.GetCreator()
 	detail.BuildURL = buildProvenance.GetLogsUri()
 	detail.RepositoryURL = buildProvenance.GetSourceProvenance().GetContext().GetGit().GetUrl()
 	detail.Commit = buildProvenance.GetSourceProvenance().GetContext().GetGit().GetRevisionId()
 
 	buildArtifacts := buildProvenance.GetBuiltArtifacts()
 
-    detail.Artifacts = make([]voucher.BuildArtifact, 0, len(buildArtifacts))
+	detail.Artifacts = make([]voucher.BuildArtifact, 0, len(buildArtifacts))
 
-    for _, artifact := range buildArtifacts {
-        detail.Artifacts = append(detail.Artifacts, voucher.BuildArtifact{
-            ID:       artifact.Id,
-            Checksum: artifact.Checksum,
-        })
-    }
+	for _, artifact := range buildArtifacts {
+		detail.Artifacts = append(detail.Artifacts, voucher.BuildArtifact{
+			ID:       artifact.Id,
+			Checksum: artifact.Checksum,
+		})
+	}
 
 	return
 }

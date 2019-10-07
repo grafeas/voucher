@@ -3,8 +3,8 @@ package github
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/Shopify/voucher"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestParseGithutURL(t *testing.T) {
@@ -56,7 +56,7 @@ func TestGetCommitURL(t *testing.T) {
 			mockBuildDetail: &voucher.BuildDetail{
 				RepositoryURL: "git@github.com/Shopify/voucher.git",
 				Commit:        "sl2o3vo2wojweoie",
-				BuildCreator:        "someone",
+				BuildCreator:  "someone",
 				BuildURL:      "somebuild.url.io",
 			},
 		},

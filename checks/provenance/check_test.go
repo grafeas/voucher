@@ -3,9 +3,9 @@ package provenance
 import (
 	"testing"
 
+	"github.com/Shopify/voucher"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/Shopify/voucher"
 )
 
 var (
@@ -16,17 +16,15 @@ var (
 )
 
 var buildDetailsTestData = voucher.BuildDetail{
-	ProjectID: 		projectTestData,
-	BuildCreator:   builderIdentityTestData,
-	Artifacts: 		[]voucher.BuildArtifact{
+	ProjectID:    projectTestData,
+	BuildCreator: builderIdentityTestData,
+	Artifacts: []voucher.BuildArtifact{
 		{
 			ID:       imageURLTestData,
 			Checksum: imageSHA256TestData,
 		},
 	},
 }
-
-
 
 func TestArtifactIsImage(t *testing.T) {
 	imageDataTestData, err := voucher.NewImageData(imageURLTestData)

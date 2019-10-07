@@ -2,13 +2,14 @@ package github
 
 import (
 	"errors"
-	"regexp"
+	"github.com/Shopify/voucher"
 	"net/url"
 	"path"
-	"github.com/Shopify/voucher"
+	"regexp"
 )
 
 const (
+	// GithubRegex matches typical Github URLs.
 	GithubRegex = "^(?:https?|git)(?:://|@)(?P<vcs>[^/:]+)[/:](?P<org>[^/.]+)/(?P<name>[^/.]+)(?:.git)?"
 )
 
@@ -42,11 +43,10 @@ func GetCommitURL(b *voucher.BuildDetail) (string, error) {
 	return scheme.String(), nil
 }
 
+// ParseGithubURL parses the passed string as a Github URL and returns a
+// RepositryMetadata with the information contained in that URL.
 func ParseGithubURL(gitURL string) (*RepositoryMetadata, error) {
-	re, err := regexp.Compile(GithubRegex)
-	if err != nil {
-		return nil, err
-	}
+	re := regexp.MustCompile(GithubRegex)
 	repoDetail := re.FindStringSubmatch(gitURL)
 
 	// ensure regex matches
@@ -58,5 +58,5 @@ func ParseGithubURL(gitURL string) (*RepositoryMetadata, error) {
 		Organization: repoDetail[2],
 		Name:         repoDetail[3],
 	}
-	return repo, err
+	return repo, nil
 }

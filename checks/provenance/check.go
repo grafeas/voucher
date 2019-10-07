@@ -52,7 +52,7 @@ func (p *check) Check(ctx context.Context, i voucher.ImageData) (bool, error) {
 	}
 
 	for _, buildDetail := range items {
-		ok := true
+		var ok bool
 		if ok, err = validateProvenance(p, buildDetail); !ok || !validateArtifacts(i, buildDetail) {
 			return false, err
 		}

@@ -32,14 +32,14 @@ func (b *BuildDetail) String() string {
 	if b.ProjectID != "" {
 		str += "ProjectID: " + b.ProjectID + "\n"
 	}
-	str_artifacts := ""
+	strArtifacts := ""
 	for _, val := range b.Artifacts {
 		if val.String() != "" {
-			str_artifacts = strings.Join([]string{str_artifacts, val.String()}, ", ")
+			strArtifacts = strings.Join([]string{strArtifacts, val.String()}, ", ")
 		}
 	}
-	if str_artifacts != "" {
-		str += "Artifacts: " + str_artifacts + "\n"
+	if strArtifacts != "" {
+		str += "Artifacts: " + strArtifacts + "\n"
 	}
 	return str
 }

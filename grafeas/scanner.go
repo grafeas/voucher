@@ -20,7 +20,6 @@ func (s *Scanner) FailOn(severity voucher.Severity) {
 	s.failOn = severity
 }
 
-
 // Scan gets the vulnerabilities for an Image.
 func (s *Scanner) Scan(ctx context.Context, i voucher.ImageData) ([]voucher.Vulnerability, error) {
 	v, err := s.client.GetVulnerabilities(ctx, i)

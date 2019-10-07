@@ -24,7 +24,7 @@ func TestAddPreviewSchemaHeaders(t *testing.T) {
 			testName: "Headers exist",
 			headers:  []string{"header1", "header2"},
 			expected: map[string][]string{
-				"Accept": []string{"header1", "header2"},
+				"Accept": {"header1", "header2"},
 			},
 		},
 		{
