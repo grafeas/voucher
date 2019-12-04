@@ -1,5 +1,5 @@
 # Builder
-FROM golang:1.10-alpine as builder
+FROM golang:1.13-alpine as builder
 
 LABEL maintainer "klautcomputing"
 WORKDIR /go/src/github.com/Shopify/voucher
