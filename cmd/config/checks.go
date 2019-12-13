@@ -2,8 +2,12 @@ package config
 
 import (
 	"fmt"
+	"strings"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/Shopify/voucher"
+	"github.com/Shopify/voucher/checks/org"
 	"github.com/spf13/viper"
 	// Register the DIY check
 	_ "github.com/Shopify/voucher/checks/diy"
@@ -81,6 +85,17 @@ func NewCheckSuite(metadataClient voucher.MetadataClient, names ...string) (*vou
 
 	trustedBuildCreators := viper.GetStringSlice("trusted-builder-identities")
 	trustedProjects := viper.GetStringSlice("trusted-projects")
+
+	orgs := GetOrganizationsFromConfig()
+	for name, organization := range orgs {
+		repositoryClient := newRepositoryClient(organization)
+		if repositoryClient == nil {
+			log.Errorf("repository client for org %s is nil", name)
+			continue
+		}
+		orgCheck := org.NewOrganizationCheckFactory(organization, repositoryClient)
+		voucher.RegisterCheckFactory("is_"+strings.ToLower(name), orgCheck)
+	}
 
 	checks, err := voucher.GetCheckFactories(names...)
 	if nil != err {

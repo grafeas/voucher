@@ -34,5 +34,6 @@ address = "localhost:6060"
 trusted-builds = true
 
 [[repositories]]
-"org-name" = "organization name here"
-"org-url" = "organization url here"
+org-name = "Shopify"
+org-url = "https://github.com/Shopify"
+
