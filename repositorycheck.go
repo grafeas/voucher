@@ -13,5 +13,5 @@ import "github.com/Shopify/voucher/repository"
 // and (possibly) vulnerability information.
 type RepositoryCheck interface {
 	MetadataCheck
-	SetRepositoryClient(*repository.Client)
+	SetRepositoryClient(repository.Client)
 }

@@ -1,4 +1,4 @@
-package voucher
+package repository
 
 // BuildArtifact is a type that describes the artifact info
 // related to a build

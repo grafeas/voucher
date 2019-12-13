@@ -12,6 +12,7 @@ import (
 
 	"github.com/Shopify/voucher"
 	binauth "github.com/Shopify/voucher/grafeas/binauth"
+	"github.com/Shopify/voucher/repository"
 )
 
 var errCannotAttest = errors.New("cannot create attestations, keyring is empty")
@@ -146,7 +147,7 @@ func (g *Client) Close() {
 }
 
 // GetBuildDetails gets BuildDetails for the passed image.
-func (g *Client) GetBuildDetails(ctx context.Context, reference reference.Canonical) (items []voucher.BuildDetail, err error) {
+func (g *Client) GetBuildDetails(ctx context.Context, reference reference.Canonical) (items []repository.BuildDetail, err error) {
 	filterStr := kindFilterStr(reference, common.NoteKind_BUILD)
 
 	project := projectPath(g.imageProject)

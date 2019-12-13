@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/Shopify/voucher"
+	"github.com/Shopify/voucher/repository"
 )
 
 // ErrNoBuildData is an error returned if we can't pull any BuildData from
@@ -61,7 +62,7 @@ func (p *check) Check(ctx context.Context, i voucher.ImageData) (bool, error) {
 	return true, nil
 }
 
-func validateProvenance(p *check, detail voucher.BuildDetail) (trusted bool, err error) {
+func validateProvenance(p *check, detail repository.BuildDetail) (trusted bool, err error) {
 	if !p.trustedBuildCreators[detail.BuildCreator] {
 		err = fmt.Errorf("builder identity not trusted: %s", detail.BuildCreator)
 		return
@@ -76,7 +77,7 @@ func validateProvenance(p *check, detail voucher.BuildDetail) (trusted bool, err
 	return
 }
 
-func validateArtifacts(i voucher.ImageData, detail voucher.BuildDetail) (matched bool) {
+func validateArtifacts(i voucher.ImageData, detail repository.BuildDetail) (matched bool) {
 	// if an artifact built by this Build is the image, validate the SHAs match
 	for _, artifact := range detail.Artifacts {
 		if strings.HasSuffix(i.Digest().String(), artifact.Checksum) {

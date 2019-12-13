@@ -2,22 +2,20 @@ package repository
 
 // Organization contains repository information pertaining to an organization
 type Organization struct {
-	ID   string
 	Name string
 	URL  string
 }
 
-// CreateNewOrganization returns a new Organization object
-func CreateNewOrganization(id string, name string, url string) Organization {
+// NewOrganization returns a new Organization object
+func NewOrganization(name string, url string) Organization {
 	return Organization{
-		ID:   id,
 		Name: name,
 		URL:  url,
 	}
 }
 
-// CommitInfo contains information pertaining to the validity of a commit
-type CommitInfo struct {
+// Commit contains information pertaining to the validity of a commit
+type Commit struct {
 	URL                    string
 	Checks                 []Check
 	Status                 string
@@ -38,8 +36,8 @@ type App struct {
 	URL  string
 }
 
-// CreateNewCheck returns a new Check object
-func CreateNewCheck(appName string, appURL string, status string, conclusion string) Check {
+// NewCheck returns a new Check object
+func NewCheck(appName string, appURL string, status string, conclusion string) Check {
 	return Check{
 		App: App{
 			Name: appName,
@@ -50,15 +48,15 @@ func CreateNewCheck(appName string, appURL string, status string, conclusion str
 	}
 }
 
-// CreateNewCommit returns a new Commit object
-func CreateNewCommit(commitURL string) Commit {
-	return Commit{
+// NewCommitRef returns a new CommitRef object
+func NewCommitRef(commitURL string) CommitRef {
+	return CommitRef{
 		URL: commitURL,
 	}
 }
 
-// CreateNewPullRequest returns a new PullRequest object
-func CreateNewPullRequest(baseBranchName string, headBranchName string, isMerged bool) PullRequest {
+// NewPullRequest returns a new PullRequest object
+func NewPullRequest(baseBranchName string, headBranchName string, isMerged bool) PullRequest {
 	return PullRequest{
 		BaseBranchName: baseBranchName,
 		HeadBranchName: headBranchName,
@@ -66,9 +64,9 @@ func CreateNewPullRequest(baseBranchName string, headBranchName string, isMerged
 	}
 }
 
-// CreateNewCommitInfo returns a new CommitInfo object
-func CreateNewCommitInfo(commitURL string, checks []Check, commitStatus string, isSigned bool, associatedPullRequests []PullRequest) CommitInfo {
-	return CommitInfo{
+// NewCommit returns a new Commit object
+func NewCommit(commitURL string, checks []Check, commitStatus string, isSigned bool, associatedPullRequests []PullRequest) Commit {
+	return Commit{
 		URL:                    commitURL,
 		Checks:                 checks,
 		Status:                 commitStatus,
@@ -77,22 +75,22 @@ func CreateNewCommitInfo(commitURL string, checks []Check, commitStatus string, 
 	}
 }
 
-// DefaultBranch contains the information related to the repository's default branch
-type DefaultBranch struct {
-	Name    string
-	Commits []Commit
+// Branch contains the information related to the repository's default branch
+type Branch struct {
+	Name       string
+	CommitRefs []CommitRef
 }
 
-// CreateNewDefaultBranch returns a new DefaultBranch object
-func CreateNewDefaultBranch(name string, commits []Commit) DefaultBranch {
-	return DefaultBranch{
-		Name:    name,
-		Commits: commits,
+// NewBranch returns a new Branch object
+func NewBranch(name string, commits []CommitRef) Branch {
+	return Branch{
+		Name:       name,
+		CommitRefs: commits,
 	}
 }
 
-// Commit contains information pertaining to a commit
-type Commit struct {
+// CommitRef contains a URL referencing a commit
+type CommitRef struct {
 	URL string
 }
 

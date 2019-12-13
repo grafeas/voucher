@@ -3,7 +3,7 @@ package github
 import (
 	"testing"
 
-	"github.com/Shopify/voucher"
+	"github.com/Shopify/voucher/repository"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -49,11 +49,11 @@ func TestInvalidGithubURL(t *testing.T) {
 func TestGetCommitURL(t *testing.T) {
 	getCommitURLTests := []struct {
 		expectedURL     string
-		mockBuildDetail *voucher.BuildDetail
+		mockBuildDetail *repository.BuildDetail
 	}{
 		{
 			expectedURL: "https://github.com/Shopify/voucher/commit/sl2o3vo2wojweoie",
-			mockBuildDetail: &voucher.BuildDetail{
+			mockBuildDetail: &repository.BuildDetail{
 				RepositoryURL: "git@github.com/Shopify/voucher.git",
 				Commit:        "sl2o3vo2wojweoie",
 				BuildCreator:  "someone",
@@ -65,5 +65,27 @@ func TestGetCommitURL(t *testing.T) {
 		commitURL, err := GetCommitURL(test.mockBuildDetail)
 		assert.NoError(t, err, "error parsing github url")
 		assert.EqualValues(t, test.expectedURL, commitURL, "commit url is not properly formatted")
+	}
+}
+
+func TestGetRepositoryURL(t *testing.T) {
+	getRepositoryURLTests := []struct {
+		expectedURL     string
+		mockBuildDetail *repository.BuildDetail
+	}{
+		{
+			expectedURL: "https://github.com/Shopify/voucher",
+			mockBuildDetail: &repository.BuildDetail{
+				RepositoryURL: "git@github.com/Shopify/voucher.git",
+				Commit:        "sl2o3vo2wojweoie",
+				BuildCreator:  "someone",
+				BuildURL:      "somebuild.url.io",
+			},
+		},
+	}
+	for _, test := range getRepositoryURLTests {
+		commitURL, err := GetRepositoryURL(test.mockBuildDetail)
+		assert.NoError(t, err, "error parsing github url")
+		assert.EqualValues(t, test.expectedURL, commitURL, "repository url is not properly formatted")
 	}
 }

@@ -2,12 +2,12 @@ package github
 
 import "github.com/shurcooL/githubv4"
 
-// defaultBranchQuery is the GraphQL query for retrieving information pertaining to the repository's default branch
-type defaultBranchQuery struct {
+// branchQuery is the GraphQL query for retrieving information pertaining to a branch in a repository
+type branchQuery struct {
 	Resource struct {
 		Typename   string `graphql:"__typename"`
 		Repository struct {
-			DefaultBranchRef struct {
+			Ref struct {
 				Name   string
 				Target struct {
 					Commit struct {
@@ -18,11 +18,11 @@ type defaultBranchQuery struct {
 								HasNextPage bool
 							}
 							Typename string   `graphql:"__typename"`
-							Nodes    []commit // Nodes contains all of the commits in the default branch
-						} `graphql:"history(first: 100, after: $defaultBranchCommitCursor)"`
+							Nodes    []commit // Nodes contains all of the commits in the branch
+						} `graphql:"history(first: 100, after: $branchCommitCursor)"`
 					} `graphql:"... on Commit"`
 				}
-			}
+			} `graphql:"ref(qualifiedName: $branch_name)"`
 		} `graphql:"... on Repository"`
 	} `graphql:"resource(url: $url)"`
 }

@@ -41,38 +41,63 @@ func NewClient(ctx context.Context, auth *repository.Auth) (repository.Client, e
 }
 
 // GetOrganization retrieves the necessary GitHub organizational information used in Voucher's checks
-func (ghc *client) GetOrganization(ctx context.Context, uri string) (repository.Organization, error) {
-	repoInfo, err := newRepositoryOrgInfoResult(ctx, ghc.ghClient, uri)
+func (ghc *client) GetOrganization(ctx context.Context, details repository.BuildDetail) (repository.Organization, error) {
+	repoURI, err := GetRepositoryURL(&details)
+	if err != nil {
+		return repository.Organization{}, fmt.Errorf("Error creating a repository url. Error: %s", err)
+	}
+
+	organization, err := newRepositoryOrgInfoResult(ctx, ghc.ghClient, repoURI)
 	if err != nil {
 		return repository.Organization{}, err
 	}
 
-	if repoInfo.Resource.Typename != commitType {
-		return repository.Organization{}, repository.NewTypeMismatchError(commitType, repoInfo.Resource.Typename)
-	}
-	if repoInfo.Resource.Commit.Repository.Owner.Typename != organizationType {
-		return repository.Organization{}, repository.NewTypeMismatchError(organizationType, repoInfo.Resource.Commit.Repository.Owner.Typename)
-	}
-
-	organization := repoInfo.Resource.Commit.Repository.Owner.Organization
-
-	return repository.CreateNewOrganization(organization.ID, organization.Name, organization.URL), nil
+	return organization, nil
 }
 
-// GetCommitInfo retrieves the necessary GitHub commit information used in Voucher's checks
-func (ghc *client) GetCommitInfo(ctx context.Context, commitURI string) (repository.CommitInfo, error) {
-	commitInfo, err := newCommitInfoResult(ctx, ghc.ghClient, commitURI)
+// GetCommit retrieves the necessary GitHub commit information used in Voucher's checks
+func (ghc *client) GetCommit(ctx context.Context, details repository.BuildDetail) (repository.Commit, error) {
+	commitURI, err := GetCommitURL(&details)
 	if err != nil {
-		return repository.CommitInfo{}, fmt.Errorf("GetCommitInfo query could not be completed. Error: %s", err)
+		return repository.Commit{}, fmt.Errorf("Error creating a commit url. Error: %s", err)
 	}
-	return commitInfo, nil
+
+	commit, err := newCommitInfoResult(ctx, ghc.ghClient, commitURI)
+	if err != nil {
+		return repository.Commit{}, fmt.Errorf("GetCommitInfo query could not be completed. Error: %s", err)
+	}
+	return commit, nil
 }
 
 // GetDefaultBranch retrieves the necessary GitHub default branch information used in Voucher's checks
-func (ghc *client) GetDefaultBranch(ctx context.Context, commitURI string) (repository.DefaultBranch, error) {
-	defaultBranchResult, err := newDefaultBranchResult(ctx, ghc.ghClient, commitURI)
+func (ghc *client) GetDefaultBranch(ctx context.Context, details repository.BuildDetail) (repository.Branch, error) {
+	repoURI, err := GetRepositoryURL(&details)
 	if err != nil {
-		return repository.DefaultBranch{}, fmt.Errorf("GetDefaultBranch query could not be completed. Error: %s", err)
+		return repository.Branch{}, fmt.Errorf("Error creating a repository url. Error: %s", err)
+	}
+
+	defaultBranchResult, err := newDefaultBranchResult(ctx, ghc.ghClient, repoURI)
+	if err != nil {
+		return repository.Branch{}, fmt.Errorf("GetDefaultBranch query could not be completed. Error: %s", err)
 	}
 	return defaultBranchResult, nil
+}
+
+// GetBranch retrieves the necessary GitHub branch information used in Voucher's checks given the name of the branch
+func (ghc *client) GetBranch(ctx context.Context, details repository.BuildDetail, name string) (repository.Branch, error) {
+	repoURI, err := GetRepositoryURL(&details)
+	if err != nil {
+		return repository.Branch{}, fmt.Errorf("Error creating a repository url. Error: %s", err)
+	}
+
+	branchResult, err := newBranchResult(ctx, ghc.ghClient, repoURI, name)
+	if err != nil {
+		return repository.Branch{}, fmt.Errorf("GetBranch query could not be completed. Error: %s", err)
+	}
+	return branchResult, nil
+}
+
+func IsGithubRepoClient(repositoryClient repository.Client) bool {
+	_, ok := repositoryClient.(*client)
+	return ok
 }

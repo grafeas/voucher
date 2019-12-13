@@ -42,58 +42,52 @@ func (m *mockGitHubGraphQLClient) Query(ctx context.Context, query interface{}, 
 
 func TestNewRepositoryOrgInfoResult(t *testing.T) {
 	newRepoOrgTests := []struct {
-		testName  string
-		commitURL string
-		input     *repositoryOrgInfoQuery
-		mask      []string
-		expected  *repositoryOrgInfoQuery
+		testName    string
+		uri         string
+		input       *repositoryOrgInfoQuery
+		mask        []string
+		expected    repository.Organization
+		shouldError bool
 	}{
 		{
-			testName:  "Testing happy path",
-			commitURL: "www.shopify.com",
+			testName: "Testing happy path",
+			uri:      "https://github.com/Shopify/voucher",
 			input: func() *repositoryOrgInfoQuery {
 				res := new(repositoryOrgInfoQuery)
-				res.Resource.Typename = "Commit"
-				res.Resource.Commit.Repository.Owner.Typename = "Organization"
-				org := res.Resource.Commit.Repository.Owner.Organization
-				org.ID = "2342ffesfdf"
-				org.Name = "Shopify"
-				org.URL = "github.com/Shopify"
+				res.Resource.Repository.Owner.Typename = "Organization"
+				res.Resource.Repository.Owner.Organization.Name = "Shopify"
+				res.Resource.Repository.Owner.Organization.URL = "https://github.com/Shopify"
 				return res
 			}(),
-			mask: []string{"Resource.Typename", "Resource.Commit.Repository.Owner.Typename"},
-			expected: func() *repositoryOrgInfoQuery {
-				res := new(repositoryOrgInfoQuery)
-				res.Resource.Typename = "Commit"
-				res.Resource.Commit.Repository.Owner.Typename = "Organization"
-				return res
-			}(),
+			mask: []string{"Resource.Repository.Owner.Typename", "Resource.Repository.Owner.Organization"},
+			expected: repository.Organization{
+				URL:  "https://github.com/Shopify",
+				Name: "Shopify",
+			},
+			shouldError: false,
 		},
 		{
-			testName:  "Testing with bad URL",
-			commitURL: "hello@%a&%(.com",
-			input:     new(repositoryOrgInfoQuery),
-			mask:      []string{},
-			expected:  nil,
+			testName:    "Testing with bad URL",
+			uri:         "hello@%a&%(.com",
+			input:       new(repositoryOrgInfoQuery),
+			mask:        []string{},
+			expected:    repository.Organization{},
+			shouldError: true,
 		},
 	}
 
 	for _, test := range newRepoOrgTests {
 		t.Run(test.testName, func(t *testing.T) {
 			c := new(mockGitHubGraphQLClient)
-			c.HandlerFunc = createHandler(test.commitURL, test.input, test.mask, test.expected)
-			res, err := newRepositoryOrgInfoResult(context.Background(), c, test.commitURL)
-
-			if test.expected == nil {
-				require.Error(t, err)
+			c.HandlerFunc = createHandler(test.uri, test.input, test.mask, test.expected)
+			res, err := newRepositoryOrgInfoResult(context.Background(), c, test.uri)
+			if test.shouldError {
+				assert.Error(t, err)
 				return
 			}
-
 			require.NoError(t, err)
-			assert.Exactly(t, test.expected, res)
-
-			require.Equal(t, commitType, res.Resource.Typename)
-			assert.Equal(t, organizationType, res.Resource.Commit.Repository.Owner.Typename)
+			assert.EqualValues(t, test.expected, res)
+			assert.Equal(t, organizationType, test.input.Resource.Repository.Owner.Typename)
 		})
 	}
 }
@@ -165,15 +159,11 @@ func TestGetAllCheckSuites(t *testing.T) {
 			c := new(mockGitHubGraphQLClient)
 			c.HandlerFunc = createHandler(test.commitURL, test.input, test.mask, test.expected)
 			formattedURI, err := createNewGitHubV4URI(test.commitURL)
-			queryPopulationVariables := map[string]interface{}{
-				"url":               githubv4.URI(*formattedURI),
-				"checkSuitesCursor": (*githubv4.String)(nil),
-			}
 			require.Equal(t, commitType, test.input.Resource.Typename)
 
 			assert.NoError(t, err)
 
-			res, err := getAllCheckSuites(context.Background(), c, test.input, queryPopulationVariables)
+			res, err := getAllCheckSuites(context.Background(), c, test.input, githubv4.URI(*formattedURI))
 			assert.NoError(t, err, "Getting all check suites failed")
 			assert.EqualValues(t, test.expected, res)
 		})
@@ -241,15 +231,11 @@ func TestGetAllAssociatedPullRequests(t *testing.T) {
 			c := new(mockGitHubGraphQLClient)
 			c.HandlerFunc = createHandler(test.commitURL, test.input, test.mask, test.expected)
 			formattedURI, err := createNewGitHubV4URI(test.commitURL)
-			queryPopulationVariables := map[string]interface{}{
-				"url":                          githubv4.URI(*formattedURI),
-				"associatedPullRequestsCursor": (*githubv4.String)(nil),
-			}
 			require.Equal(t, commitType, test.input.Resource.Typename)
 
 			assert.NoError(t, err)
 
-			res, err := getAllAssociatedPullRequests(context.Background(), c, test.input, queryPopulationVariables)
+			res, err := getAllAssociatedPullRequests(context.Background(), c, test.input, githubv4.URI(*formattedURI))
 			assert.NoError(t, err, "Getting all associated pull requests failed")
 			assert.EqualValues(t, test.expected, res)
 		})
@@ -329,7 +315,7 @@ func TestNewCommitInfo(t *testing.T) {
 		queryResult            *commitInfoQuery
 		checkSuites            []checkSuite
 		associatedPullRequests []pullRequest
-		expected               repository.CommitInfo
+		expected               repository.Commit
 		shouldError            bool
 	}{
 		{
@@ -377,7 +363,7 @@ func TestNewCommitInfo(t *testing.T) {
 					Merged:      true,
 				},
 			},
-			expected: repository.CommitInfo{
+			expected: repository.Commit{
 				URL: "https://github.com/Shopify/voucher/commit/8c235f3bd57393c53037b032e6da3e2b48aa0428",
 				Checks: []repository.Check{
 					{
@@ -409,7 +395,7 @@ func TestNewCommitInfo(t *testing.T) {
 			}(),
 			checkSuites:            []checkSuite{},
 			associatedPullRequests: []pullRequest{},
-			expected:               repository.CommitInfo{},
+			expected:               repository.Commit{},
 			shouldError:            true,
 		},
 	}
@@ -429,39 +415,39 @@ func TestNewCommitInfo(t *testing.T) {
 func TestNewDefaultBranchResult(t *testing.T) {
 	defaultBranchResultTests := []struct {
 		testName    string
-		commitURL   string
+		repoURL     string
 		input       *defaultBranchQuery
 		mask        []string
-		expected    repository.DefaultBranch
+		expected    repository.Branch
 		shouldError bool
 	}{
 		{
-			testName:  "Testing no commits in default branch",
-			commitURL: "github.com/Shopify/voucher/commit/FakeCommit",
+			testName: "Testing no commits in default branch",
+			repoURL:  "github.com/Shopify/voucher",
 			input: func() *defaultBranchQuery {
 				res := new(defaultBranchQuery)
-				res.Resource.Typename = "Commit"
-				res.Resource.Commit.Repository.DefaultBranchRef.Name = "master"
-				res.Resource.Commit.Repository.DefaultBranchRef.Target.Commit.Typename = "Commit"
-				res.Resource.Commit.Repository.DefaultBranchRef.Target.Commit.History.Nodes = []commit{}
+				res.Resource.Typename = "Repository"
+				res.Resource.Repository.DefaultBranchRef.Name = "master"
+				res.Resource.Repository.DefaultBranchRef.Target.Commit.Typename = "Commit"
+				res.Resource.Repository.DefaultBranchRef.Target.Commit.History.Nodes = []commit{}
 				return res
 			}(),
-			mask: []string{"Resource.Typename", "Resource.Commit.Repository.DefaultBranchRef.Target.Commit.History.Nodes"},
-			expected: repository.DefaultBranch{
-				Name:    "",
-				Commits: []repository.Commit{},
+			mask: []string{"Resource.Typename", "Resource.Repository.DefaultBranchRef"},
+			expected: repository.Branch{
+				Name:       "master",
+				CommitRefs: []repository.CommitRef{},
 			},
 			shouldError: false,
 		},
 		{
-			testName:  "Testing has some commits in default branch",
-			commitURL: "github.com/Shopify/voucher/commit/FakeCommit1",
+			testName: "Testing has some commits in default branch",
+			repoURL:  "github.com/Shopify/voucher",
 			input: func() *defaultBranchQuery {
 				res := new(defaultBranchQuery)
-				res.Resource.Typename = "Commit"
-				res.Resource.Commit.Repository.DefaultBranchRef.Name = "master"
-				res.Resource.Commit.Repository.DefaultBranchRef.Target.Commit.Typename = "Commit"
-				res.Resource.Commit.Repository.DefaultBranchRef.Target.Commit.History.Nodes = []commit{
+				res.Resource.Typename = "Repository"
+				res.Resource.Repository.DefaultBranchRef.Name = "master"
+				res.Resource.Repository.DefaultBranchRef.Target.Commit.Typename = "Commit"
+				res.Resource.Repository.DefaultBranchRef.Target.Commit.History.Nodes = []commit{
 					{
 						URL: "github.com/Shopify/voucher/commit/FakeCommit1",
 					},
@@ -472,12 +458,11 @@ func TestNewDefaultBranchResult(t *testing.T) {
 				return res
 			}(),
 			mask: []string{
-				"Resource.Typename",
-				"Resource.Commit.Repository.DefaultBranchRef",
+				"Resource.Typename", "Resource.Repository.DefaultBranchRef",
 			},
-			expected: repository.DefaultBranch{
+			expected: repository.Branch{
 				Name: "master",
-				Commits: []repository.Commit{
+				CommitRefs: []repository.CommitRef{
 					{
 						URL: "github.com/Shopify/voucher/commit/FakeCommit1",
 					},
@@ -490,23 +475,23 @@ func TestNewDefaultBranchResult(t *testing.T) {
 		},
 		{
 			testName:    "Testing error propagation",
-			commitURL:   "github.com/Shopify/voucher/commit/%$#^&@",
+			repoURL:     "random.com/Shopify/voucher",
 			input:       new(defaultBranchQuery),
 			mask:        []string{},
-			expected:    repository.DefaultBranch{},
+			expected:    repository.Branch{},
 			shouldError: true,
 		},
 	}
 	for _, test := range defaultBranchResultTests {
 		t.Run(test.testName, func(t *testing.T) {
 			c := new(mockGitHubGraphQLClient)
-			c.HandlerFunc = createHandler(test.commitURL, test.input, test.mask, test.expected)
-			res, err := newDefaultBranchResult(context.Background(), c, test.commitURL)
+			c.HandlerFunc = createHandler(test.repoURL, test.input, test.mask, test.expected)
+			res, err := newDefaultBranchResult(context.Background(), c, test.repoURL)
 			if test.shouldError {
 				assert.Error(t, err)
 				return
 			}
-			require.Equal(t, commitType, test.input.Resource.Typename)
+			require.Equal(t, repositoryType, test.input.Resource.Typename)
 
 			assert.NoError(t, err, "Getting default branch result failed")
 			assert.EqualValues(t, test.expected, res)
@@ -520,7 +505,7 @@ func TestCreateNewDefaultBranch(t *testing.T) {
 		queryResult            *commitInfoQuery
 		checkSuites            []checkSuite
 		associatedPullRequests []pullRequest
-		expected               repository.CommitInfo
+		expected               repository.Commit
 	}{
 		{
 			testName: "Testing an unsigned commit",
@@ -567,7 +552,7 @@ func TestCreateNewDefaultBranch(t *testing.T) {
 					Merged:      true,
 				},
 			},
-			expected: repository.CommitInfo{
+			expected: repository.Commit{
 				URL: "https://github.com/Shopify/voucher/commit/8c235f3bd57393c53037b032e6da3e2b48aa0428",
 				Checks: []repository.Check{
 					{
@@ -600,13 +585,100 @@ func TestCreateNewDefaultBranch(t *testing.T) {
 	}
 }
 
+func TestNewBranchResult(t *testing.T) {
+	branchResultTests := []struct {
+		testName    string
+		repoURL     string
+		input       *branchQuery
+		mask        []string
+		expected    repository.Branch
+		shouldError bool
+	}{
+		{
+			testName: "Testing no commits in master branch",
+			repoURL:  "github.com/Shopify/voucher",
+			input: func() *branchQuery {
+				res := new(branchQuery)
+				res.Resource.Typename = "Repository"
+				res.Resource.Repository.Ref.Name = "master"
+				res.Resource.Repository.Ref.Target.Commit.Typename = "Commit"
+				res.Resource.Repository.Ref.Target.Commit.History.Nodes = []commit{}
+				return res
+			}(),
+			mask: []string{"Resource.Typename", "Resource.Repository.Ref"},
+			expected: repository.Branch{
+				Name:       "master",
+				CommitRefs: []repository.CommitRef{},
+			},
+			shouldError: false,
+		},
+		{
+			testName: "Testing has some commits in master branch",
+			repoURL:  "github.com/Shopify/voucher",
+			input: func() *branchQuery {
+				res := new(branchQuery)
+				res.Resource.Typename = "Repository"
+				res.Resource.Repository.Ref.Name = "master"
+				res.Resource.Repository.Ref.Target.Commit.Typename = "Commit"
+				res.Resource.Repository.Ref.Target.Commit.History.Nodes = []commit{
+					{
+						URL: "github.com/Shopify/voucher/commit/FakeCommit1",
+					},
+					{
+						URL: "github.com/Shopify/voucher/commit/FakeCommit2",
+					},
+				}
+				return res
+			}(),
+			mask: []string{
+				"Resource.Typename", "Resource.Repository.Ref",
+			},
+			expected: repository.Branch{
+				Name: "master",
+				CommitRefs: []repository.CommitRef{
+					{
+						URL: "github.com/Shopify/voucher/commit/FakeCommit1",
+					},
+					{
+						URL: "github.com/Shopify/voucher/commit/FakeCommit2",
+					},
+				},
+			},
+			shouldError: false,
+		},
+		{
+			testName:    "Testing error propagation",
+			repoURL:     "error.com/Shopify/voucher",
+			input:       new(branchQuery),
+			mask:        []string{},
+			expected:    repository.Branch{},
+			shouldError: true,
+		},
+	}
+	for _, test := range branchResultTests {
+		t.Run(test.testName, func(t *testing.T) {
+			c := new(mockGitHubGraphQLClient)
+			c.HandlerFunc = createHandler(test.repoURL, test.input, test.mask, test.expected)
+			res, err := newBranchResult(context.Background(), c, test.repoURL, "master")
+			if test.shouldError {
+				assert.Error(t, err)
+				return
+			}
+			require.Equal(t, repositoryType, test.input.Resource.Typename)
+
+			assert.NoError(t, err, "Getting master branch result failed")
+			assert.EqualValues(t, test.expected, res)
+		})
+	}
+}
+
 func TestNewCommitInfoResult(t *testing.T) {
 	newCommitInfoResultTests := []struct {
 		testName    string
 		commitURL   string
 		input       *commitInfoQuery
 		mask        []string
-		expected    repository.CommitInfo
+		expected    repository.Commit
 		shouldError bool
 	}{
 		{
@@ -627,7 +699,7 @@ func TestNewCommitInfoResult(t *testing.T) {
 				"Resource.Commit.AssociatedPullRequests.Nodes",
 				"Resource.Commit.CheckSuites.Nodes",
 			},
-			expected:    repository.CommitInfo{},
+			expected:    repository.Commit{},
 			shouldError: true,
 		},
 		{
@@ -664,7 +736,7 @@ func TestNewCommitInfoResult(t *testing.T) {
 				"Resource.Typename",
 				"Resource.Commit",
 			},
-			expected: repository.CommitInfo{
+			expected: repository.Commit{
 				URL: "https://github.com/Shopify/voucher/commit/8c235f3bd57393c53037b032e6da3e2b48aa0428",
 				Checks: []repository.Check{
 					{

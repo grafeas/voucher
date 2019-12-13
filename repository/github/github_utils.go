@@ -2,10 +2,11 @@ package github
 
 import (
 	"errors"
-	"github.com/Shopify/voucher"
 	"net/url"
 	"path"
 	"regexp"
+
+	"github.com/Shopify/voucher/repository"
 )
 
 const (
@@ -22,7 +23,7 @@ type RepositoryMetadata struct {
 }
 
 // GetCommitURL generates a commit url from the build metadata
-func GetCommitURL(b *voucher.BuildDetail) (string, error) {
+func GetCommitURL(b *repository.BuildDetail) (string, error) {
 	repoMeta, err := ParseGithubURL(b.RepositoryURL)
 	if err != nil {
 		return "", errors.New("Error parsing github commit url")
@@ -39,6 +40,26 @@ func GetCommitURL(b *voucher.BuildDetail) (string, error) {
 		repoMeta.Name,
 		"commit",
 		b.Commit,
+	)
+	return scheme.String(), nil
+}
+
+// GetRepositoryURL generates a repository url from the build metadata
+func GetRepositoryURL(b *repository.BuildDetail) (string, error) {
+	repoMeta, err := ParseGithubURL(b.RepositoryURL)
+	if err != nil {
+		return "", errors.New("Error parsing github commit url")
+	}
+	scheme, err := url.Parse("https://")
+	if err != nil {
+		return "", err
+	}
+
+	scheme.Path = path.Join(
+		scheme.Path,
+		repoMeta.Vcs,
+		repoMeta.Organization,
+		repoMeta.Name,
 	)
 	return scheme.String(), nil
 }

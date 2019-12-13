@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/Shopify/voucher"
+	"github.com/Shopify/voucher/repository"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -15,10 +16,10 @@ var (
 	projectTestData         = "test"
 )
 
-var buildDetailsTestData = voucher.BuildDetail{
+var buildDetailsTestData = repository.BuildDetail{
 	ProjectID:    projectTestData,
 	BuildCreator: builderIdentityTestData,
-	Artifacts: []voucher.BuildArtifact{
+	Artifacts: []repository.BuildArtifact{
 		{
 			ID:       imageURLTestData,
 			Checksum: imageSHA256TestData,

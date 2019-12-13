@@ -42,10 +42,10 @@ func paginationQuery(
 }
 
 // newRepositoryOrgInfoResult calls the repositoryOrgInfoQuery and incorporates the respective variables
-func newRepositoryOrgInfoResult(ctx context.Context, ghc ghGraphQLClient, uri string) (*repositoryOrgInfoQuery, error) {
+func newRepositoryOrgInfoResult(ctx context.Context, ghc ghGraphQLClient, uri string) (repository.Organization, error) {
 	formattedURI, err := createNewGitHubV4URI(uri)
 	if err != nil {
-		return nil, err
+		return repository.Organization{}, err
 	}
 
 	repoInfoVariables := map[string]interface{}{
@@ -54,38 +54,42 @@ func newRepositoryOrgInfoResult(ctx context.Context, ghc ghGraphQLClient, uri st
 
 	queryResult := new(repositoryOrgInfoQuery)
 	if err := ghc.Query(ctx, queryResult, repoInfoVariables); err != nil {
-		return nil, fmt.Errorf("RepositoryInfo query could not be completed. Error: %s", err)
+		return repository.Organization{}, fmt.Errorf("RepositoryInfo query could not be completed. Error: %s", err)
 	}
+	if queryResult.Resource.Repository.Owner.Typename != organizationType {
+		return repository.Organization{}, repository.NewTypeMismatchError(organizationType, queryResult.Resource.Repository.Owner.Typename)
+	}
+	organization := queryResult.Resource.Repository.Owner.Organization
 
-	return queryResult, nil
+	return repository.NewOrganization(organization.Name, organization.URL), nil
 }
 
 // newCommitInfoResult calls the commitInfoQuery and populates the respective variables
-func newCommitInfoResult(ctx context.Context, ghc ghGraphQLClient, commitURL string) (repository.CommitInfo, error) {
+func newCommitInfoResult(ctx context.Context, ghc ghGraphQLClient, commitURL string) (repository.Commit, error) {
 	formattedURI, err := createNewGitHubV4URI(commitURL)
 	if err != nil {
-		return repository.CommitInfo{}, err
-	}
-	commitInfoVariables := map[string]interface{}{
-		"url":                          githubv4.URI(*formattedURI),
-		"checkSuitesCursor":            (*githubv4.String)(nil),
-		"associatedPullRequestsCursor": (*githubv4.String)(nil),
+		return repository.Commit{}, err
 	}
 	queryResult := new(commitInfoQuery)
-	checkSuites, err := getAllCheckSuites(ctx, ghc, queryResult, commitInfoVariables)
+	checkSuites, err := getAllCheckSuites(ctx, ghc, queryResult, githubv4.URI(*formattedURI))
 	if err != nil {
-		return repository.CommitInfo{}, err
+		return repository.Commit{}, err
 	}
-	associatedPullRequests, err := getAllAssociatedPullRequests(ctx, ghc, queryResult, commitInfoVariables)
+	associatedPullRequests, err := getAllAssociatedPullRequests(ctx, ghc, queryResult, githubv4.URI(*formattedURI))
 	if err != nil {
-		return repository.CommitInfo{}, err
+		return repository.Commit{}, err
 	}
 	return createNewCommitInfo(queryResult, checkSuites, associatedPullRequests)
 }
 
 // getAllCheckSuites is the GraphQL query for collecting all the Check Suites pertaining to a commit
-func getAllCheckSuites(ctx context.Context, ghc ghGraphQLClient, queryResult *commitInfoQuery, commitInfoVariables map[string]interface{}) ([]checkSuite, error) {
+func getAllCheckSuites(ctx context.Context, ghc ghGraphQLClient, queryResult *commitInfoQuery, uri githubv4.URI) ([]checkSuite, error) {
 	allCheckSuites := make([]checkSuite, 0)
+	commitInfoVariables := map[string]interface{}{
+		"url":                          uri,
+		"checkSuitesCursor":            (*githubv4.String)(nil),
+		"associatedPullRequestsCursor": (*githubv4.String)(nil),
+	}
 	err := paginationQuery(ctx, ghc, queryResult, commitInfoVariables, queryPageLimit, func(v interface{}) (bool, error) {
 		ciq, ok := v.(*commitInfoQuery)
 		if !ok {
@@ -109,8 +113,13 @@ func getAllCheckSuites(ctx context.Context, ghc ghGraphQLClient, queryResult *co
 }
 
 // getAllAssociatedPullRequests is the GraphQL query for collecting all the pull requests associated with a commit
-func getAllAssociatedPullRequests(ctx context.Context, ghc ghGraphQLClient, queryResult *commitInfoQuery, commitInfoVariables map[string]interface{}) ([]pullRequest, error) {
+func getAllAssociatedPullRequests(ctx context.Context, ghc ghGraphQLClient, queryResult *commitInfoQuery, uri githubv4.URI) ([]pullRequest, error) {
 	allAssociatedPullRequests := make([]pullRequest, 0)
+	commitInfoVariables := map[string]interface{}{
+		"url":                          uri,
+		"checkSuitesCursor":            (*githubv4.String)(nil),
+		"associatedPullRequestsCursor": (*githubv4.String)(nil),
+	}
 	err := paginationQuery(ctx, ghc, queryResult, commitInfoVariables, queryPageLimit, func(v interface{}) (bool, error) {
 		ciq, ok := v.(*commitInfoQuery)
 		if !ok {
@@ -134,40 +143,40 @@ func getAllAssociatedPullRequests(ctx context.Context, ghc ghGraphQLClient, quer
 }
 
 // createNewCommitInfo returns a populated repository.CommitInfo object
-func createNewCommitInfo(queryResult *commitInfoQuery, checkSuites []checkSuite, associatedPullRequests []pullRequest) (repository.CommitInfo, error) {
+func createNewCommitInfo(queryResult *commitInfoQuery, checkSuites []checkSuite, associatedPullRequests []pullRequest) (repository.Commit, error) {
 	commit := queryResult.Resource.Commit
 
 	statusState := commit.Status.State
 	if !statusState.isValidStatusState() {
-		return repository.CommitInfo{}, newTypeMismatchError("statusState", statusState)
+		return repository.Commit{}, newTypeMismatchError("statusState", statusState)
 	}
 	checks := make([]repository.Check, 0)
 	pullRequests := make([]repository.PullRequest, 0)
 
 	for _, pr := range associatedPullRequests {
-		pullRequests = append(pullRequests, repository.CreateNewPullRequest(pr.BaseRefName, pr.HeadRefName, pr.Merged))
+		pullRequests = append(pullRequests, repository.NewPullRequest(pr.BaseRefName, pr.HeadRefName, pr.Merged))
 	}
 	for _, checkSuite := range checkSuites {
 		if !checkSuite.Status.isValidCheckStatusState() {
-			return repository.CommitInfo{}, newTypeMismatchError("checkStatusState", checkSuite.Status)
+			return repository.Commit{}, newTypeMismatchError("checkStatusState", checkSuite.Status)
 		}
 		if !checkSuite.Conclusion.isValidCheckConclusionState() {
-			return repository.CommitInfo{}, newTypeMismatchError("checkConclusionState", checkSuite.Conclusion)
+			return repository.Commit{}, newTypeMismatchError("checkConclusionState", checkSuite.Conclusion)
 		}
-		check := repository.CreateNewCheck(checkSuite.App.Name, checkSuite.App.URL, string(checkSuite.Status), string(checkSuite.Conclusion))
+		check := repository.NewCheck(checkSuite.App.Name, checkSuite.App.URL, string(checkSuite.Status), string(checkSuite.Conclusion))
 		checks = append(checks, check)
 	}
 
 	isSigned := commit.Signature.IsValid
 
-	return repository.CreateNewCommitInfo(commit.URL, checks, string(statusState), isSigned, pullRequests), nil
+	return repository.NewCommit(commit.URL, checks, string(statusState), isSigned, pullRequests), nil
 }
 
 // newDefaultBranchResult calls the defaultBranchQuery and populates the results with the respective variables
-func newDefaultBranchResult(ctx context.Context, ghc ghGraphQLClient, commitURL string) (repository.DefaultBranch, error) {
-	formattedURI, err := createNewGitHubV4URI(commitURL)
+func newDefaultBranchResult(ctx context.Context, ghc ghGraphQLClient, repoURL string) (repository.Branch, error) {
+	formattedURI, err := createNewGitHubV4URI(repoURL)
 	if err != nil {
-		return repository.DefaultBranch{}, err
+		return repository.Branch{}, err
 	}
 	queryResult := new(defaultBranchQuery)
 	allDefaultBranchCommits := make([]commit, 0)
@@ -182,27 +191,70 @@ func newDefaultBranchResult(ctx context.Context, ghc ghGraphQLClient, commitURL 
 			return false, newTypeMismatchError("defaultBranchQuery", dbq)
 		}
 		resourceType := v.(*defaultBranchQuery).Resource.Typename
-		if resourceType != commitType {
-			return false, repository.NewTypeMismatchError(commitType, resourceType)
+		if resourceType != repositoryType {
+			return false, repository.NewTypeMismatchError(repositoryType, resourceType)
 		}
-		commit := dbq.Resource.Commit
+		repo := dbq.Resource.Repository
 
-		allDefaultBranchCommits = append(allDefaultBranchCommits, commit.Repository.DefaultBranchRef.Target.Commit.History.Nodes...)
-		hasMoreResults := commit.Repository.DefaultBranchRef.Target.Commit.History.PageInfo.HasNextPage
-		defaultBranchInfoVariables["defaultBranchCommitCursor"] = githubv4.NewString(commit.Repository.DefaultBranchRef.Target.Commit.History.PageInfo.EndCursor)
+		allDefaultBranchCommits = append(allDefaultBranchCommits, repo.DefaultBranchRef.Target.Commit.History.Nodes...)
+		hasMoreResults := repo.DefaultBranchRef.Target.Commit.History.PageInfo.HasNextPage
+		defaultBranchInfoVariables["defaultBranchCommitCursor"] = githubv4.NewString(repo.DefaultBranchRef.Target.Commit.History.PageInfo.EndCursor)
 		return hasMoreResults, nil
 	})
 	if err != nil {
-		return repository.DefaultBranch{}, err
+		return repository.Branch{}, err
 	}
 
-	defaultBranchName := queryResult.Resource.Commit.Repository.DefaultBranchRef.Name
-	commits := make([]repository.Commit, 0)
+	defaultBranchName := queryResult.Resource.Repository.DefaultBranchRef.Name
+	commits := make([]repository.CommitRef, 0)
 	for _, commit := range allDefaultBranchCommits {
-		repoCommit := repository.CreateNewCommit(commit.URL)
+		repoCommit := repository.NewCommitRef(commit.URL)
 		commits = append(commits, repoCommit)
 	}
-	return repository.CreateNewDefaultBranch(defaultBranchName, commits), nil
+	return repository.NewBranch(defaultBranchName, commits), nil
+}
+
+// newBranchResult calls the branchQuery and populates the results with the respective variables
+func newBranchResult(ctx context.Context, ghc ghGraphQLClient, repoURL string, branchName string) (repository.Branch, error) {
+	formattedURI, err := createNewGitHubV4URI(repoURL)
+	if err != nil {
+		return repository.Branch{}, err
+	}
+	queryResult := new(branchQuery)
+	allBranchCommits := make([]commit, 0)
+	branchInfoVariables := map[string]interface{}{
+		"url":                githubv4.URI(*formattedURI),
+		"branchCommitCursor": (*githubv4.String)(nil),
+		"branch_name":        (githubv4.String)(branchName),
+	}
+
+	err = paginationQuery(ctx, ghc, queryResult, branchInfoVariables, queryPageLimit, func(v interface{}) (bool, error) {
+		dbq, ok := v.(*branchQuery)
+		if !ok {
+			return false, newTypeMismatchError("branchQuery", dbq)
+		}
+		resourceType := v.(*branchQuery).Resource.Typename
+		if resourceType != repositoryType {
+			return false, repository.NewTypeMismatchError(repositoryType, resourceType)
+		}
+		repo := dbq.Resource.Repository
+
+		allBranchCommits = append(allBranchCommits, repo.Ref.Target.Commit.History.Nodes...)
+		hasMoreResults := repo.Ref.Target.Commit.History.PageInfo.HasNextPage
+		branchInfoVariables["branchCommitCursor"] = githubv4.NewString(repo.Ref.Target.Commit.History.PageInfo.EndCursor)
+		return hasMoreResults, nil
+	})
+	if err != nil {
+		return repository.Branch{}, err
+	}
+
+	branchNameResult := queryResult.Resource.Repository.Ref.Name
+	commits := make([]repository.CommitRef, 0)
+	for _, commit := range allBranchCommits {
+		repoCommit := repository.NewCommitRef(commit.URL)
+		commits = append(commits, repoCommit)
+	}
+	return repository.NewBranch(branchNameResult, commits), nil
 }
 
 // checkSuite is a collection of the check runs created by a CI/CD App
