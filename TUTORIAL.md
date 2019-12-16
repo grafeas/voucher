@@ -1,6 +1,6 @@
 # Voucher Tutorial
 
-This tutorial should give you an overview on how to set up Voucher. These instructions will work with both Voucher Server (`voucher_server`) and Voucher Standalone (`voucher_cli`).
+This tutorial should give you an overview on how to set up Voucher Server.
 
 ## Installing Voucher
 

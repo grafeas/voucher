@@ -9,17 +9,14 @@
 - [Introduction](#introduction)
 - [Installing voucher](#installing-voucher)
   - [Voucher Server](#voucher-server)
-  - [Voucher Standalone](#voucher-standalone)
   - [Voucher Client](#voucher-client)
-- [Voucher Server and Standalone](#voucher-server-and-standalone)
-  - [Configuration](#configuration)
-    - [Scanner](#scanner)
-    - [Fail-On: Failing on vulnerabilities](#fail-on-failing-on-vulnerabilities)
-    - [Valid Repos](#valid-repos)
-    - [Enabling Checks](#enabling-checks)
-  - [Running Voucher](#running-voucher)
-    - [Using voucher standalone to check an image](#using-voucher-standalone-to-check-an-image)
-    - [Using Voucher Server to check an image](#using-voucher-server-to-check-an-image)
+- [Configuration](#configuration)
+  - [Scanner](#scanner)
+  - [Fail-On: Failing on vulnerabilities](#fail-on-failing-on-vulnerabilities)
+  - [Valid Repos](#valid-repos)
+  - [Enabling Checks](#enabling-checks)
+- [Running Voucher](#running-voucher)
+  - [Using Voucher Server to check an image](#using-voucher-server-to-check-an-image)
 - [Voucher Client](#voucher-client)
   - [Configuration](#configuration)
   - [Using Voucher Client](#using-voucher-client)
@@ -52,16 +49,6 @@ $ go get -u github.com/Shopify/voucher/cmd/voucher_server
 
 This will download and install the voucher server binary into `$GOPATH/bin` directory.
 
-### Voucher Standalone
-
-Install the standalone version of Voucher, `voucher_cli`, by running:
-
-```shell
-$ go get -u github.com/Shopify/voucher/cmd/voucher_cli
-```
-
-This will download and install the voucher binary into `$GOPATH/bin` directory.
-
 ### Voucher Client
 
 Voucher Client is a tool for connecting to a running Voucher server.
@@ -74,17 +61,15 @@ $ go get -u github.com/Shopify/voucher/cmd/voucher_client
 
 This will download and install the voucher client into `$GOPATH/bin` directory.
 
-## Voucher Server and Standalone
+## Configuration
 
 See the [Tutorial](TUTORIAL.md) for more thorough setup instructions.
-
-### Configuration
 
 An example configuration file can be found in the [config directory](config/config.toml).
 
 The configuration can be written as a toml, json, or yaml file, and you can specify the path to the configuration file using "-c".
 
-Below are the configuration options for Voucher Standalone and Server:
+Below are the configuration options for Voucher Server:
 
 | Group     | Key               | Description                                                                                           |
 | :-------- | :---------------  | :---------------------------------------------------------------------------------------------------- |
@@ -94,7 +79,6 @@ Below are the configuration options for Voucher Standalone and Server:
 |           | `valid_repos`     | A list of repos that are owned by your team/organization.                                             |
 |           | `image_project`   | The project in the metadata server that image information is stored.                                  |
 |           | `binauth_project` | The project in the metadata server that the binauth information is stored.                            |
-|           | `timeout`         | The number of seconds to spend checking an image, before failing (voucher standalone only).           |
 | `checks`  | (test name here)  | A test that is active when running "all" tests.                                                       |
 | `server`  | `port`            | The port that the server can be reached on.                                                           |
 | `server`  | `timeout`         | The number of seconds to spend checking an image, before failing.                                     |
@@ -107,7 +91,7 @@ Below are the configuration options for Voucher Standalone and Server:
 
 Configuration options can be overridden at runtime by setting the appropriate flag. For example, if you set the "port" flag when running `voucher_server`, that value will override whatever is in the configuration.
 
-#### Scanner
+### Scanner
 
 The `scanner` option in the configuration is used to select the Vulnerability scanner.
 
@@ -118,7 +102,7 @@ This option supports two values:
 
 If you decide to use Clair, you will need to update the clair configuration block to specify the correct address for the server.
 
-#### Fail-On: Failing on vulnerabilities
+### Fail-On: Failing on vulnerabilities
 
 The `failon` option allows you to set the minimum vulnerability to consider an image insecure.
 
@@ -133,7 +117,7 @@ This option supports the following:
 
 For example, if you set `failon` to "high", only "high" and "critical" vulnerabilities will prevent the image from being attested. A value of "low" will cause "low", "medium", "unknown", "high", and "critical" vulnerabilities to prevent the image from being attested failure.
 
-#### Valid Repos
+### Valid Repos
 
 The `valid_repos` option in the configuration is used to limit which repositories images must be from to pass the DIY check.
 
@@ -152,7 +136,7 @@ For example:
 
 Will allow images that start with `gcr.io/team-images/` and `gcr.io/external-images/specific-project/` to pass the DIY check, while blocking other `gcr.io/external-images/`.
 
-#### Enabling Checks
+### Enabling Checks
 
 You can enable certain checks for the "all" option by updating the `checks` block in the configuration.
 
@@ -168,44 +152,9 @@ snakeoil = true
 
 With this configuration, the "diy", "nobody", and "snakeoil" checks would run when running "all" checks. The "provenance" check will be ignored unless called directly.
 
-### Running Voucher
+## Running Voucher
 
-#### Using voucher standalone to check an image
-
-You can run Voucher's standalone version by `voucher_cli`, using the following syntax:
-
-```shell
-$ voucher_cli <test to run> --image <image to check> [other options]
-```
-
-`voucher_cli` supports the following flags:
-
-| Flag        | Short Flag       | Description                                                                |
-| :--------   | :--------------- | :------------------------------------------------------------------------- |
-| `--config`  | `-c`             | The path to a configuration file that should be used.                      |
-| `--dryrun`  |                  | When set, don't create attestations.                                       |
-| `--scanner` |                  | The vulnerability scanner to use ("clair" or "gca").                       |
-| `--failon`  |                  | The minimum vulnerability to fail on. Discussed above.                     |
-| `--image`   | `-i`             | The image to check and attest.                                             |
-| `--timeout` |                  | The number of seconds to spend checking an image, before failing.          |
-
-For example:
-
-```shell
-$ voucher_cli all --image gcr.io/path/to/image@sha256:ab7524b7375fbf09b3784f0bbd9cb2505700dd05e03ce5f5e6d262bf2f5ac51c
-```
-
-This would run all possible tests, or all tests that are enabled by the [configuration](#configuration), against the image located at the passed URL.
-
-You can also run an individual test, by specifying that test:
-
-```shell
-$ voucher_cli diy --image gcr.io/path/to/image@sha256:ab7524b7375fbf09b3784f0bbd9cb2505700dd05e03ce5f5e6d262bf2f5ac51c
-```
-
-This would run the "diy" test.
-
-#### Using Voucher Server to check an image
+### Using Voucher Server to check an image
 
 You can run Voucher in server mode by launching `voucher_server`, using the following syntax:
 
@@ -277,7 +226,7 @@ More details about Voucher server can be read in the [API documentation](server/
 
 The configuration for Voucher Client can be written as a toml, json, or yaml file, and you can specify the path to the configuration file using "-c". By default, the configuration is expected to be located at `~/.voucher{.yaml,.toml,.json}`.
 
-Below are the configuration options for Voucher Standalone and Server:
+Below are the configuration options for Voucher Client:
 
 | Key         | Description                                                                                |
 | :---------- | :----------------------------------------------------------------------------------------- |
