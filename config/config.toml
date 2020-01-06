@@ -7,6 +7,15 @@ valid_repos = [
     "gcr.io/path/to/my/project",
 ]
 
+trusted_builder-identities = [
+    "email@example.com",
+    "idcloudbuild.gserviceaccount.com"
+]
+
+trusted_projects = [
+    "trusted-builds"
+]
+
 [checks]
 diy      = true
 nobody   = true
@@ -26,14 +35,11 @@ secrets = "/etc/voucher/secrets.production.ejson"
 [clair]
 address = "localhost:6060"
 
-[trusted-builder-identities]
-"email@address.com" = true
-"idcloudbuild.gserviceaccount.com" = true
-
-[trusted-projects]
-trusted-builds = true
-
 [[repositories]]
 org-name = "Shopify"
 org-url = "https://github.com/Shopify"
+
+[[repositories]]
+org-name = "Grafeas"
+org-url = "https://github.com/grafeas"
 

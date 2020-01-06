@@ -83,8 +83,8 @@ func NewCheckSuite(metadataClient voucher.MetadataClient, names ...string) (*vou
 	scanner := newScanner(metadataClient, auth)
 	checksuite := voucher.NewSuite()
 
-	trustedBuildCreators := viper.GetStringSlice("trusted-builder-identities")
-	trustedProjects := viper.GetStringSlice("trusted-projects")
+	trustedBuildCreators := viper.GetStringSlice("trusted_builder_identities")
+	trustedProjects := viper.GetStringSlice("trusted_projects")
 
 	orgs := GetOrganizationsFromConfig()
 	for name, organization := range orgs {
