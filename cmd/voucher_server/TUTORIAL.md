@@ -4,7 +4,7 @@ This tutorial should give you an overview on how to set up Voucher Server.
 
 ## Installing Voucher
 
-First, install Voucher using the instructions in the [README](README.md).
+First, install Voucher using the instructions in the [README](cmd/voucher_server/README.md).
 
 ## Create configuration
 
