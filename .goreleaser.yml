@@ -3,11 +3,6 @@ before:
    hooks:
      - make ensure-deps
 builds:
-  - id: voucher_cli
-    main: ./cmd/voucher_cli
-    binary: voucher_cli
-    env:
-      - CGO_ENABLED=0
   - id: voucher_server
     main: ./cmd/voucher_server
     binary: voucher_server
@@ -19,19 +14,13 @@ builds:
     env:
       - CGO_ENABLED=0
 archives:
-  - id: voucher_cli
-    builds:
-      - voucher_cli
-    name_template: "voucher_cli_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
-    replacements:
-      darwin: Darwin
-      linux: Linux
-      windows: Windows
-      amd64: x86_64
   - id: voucher_server
     builds:
       - voucher_server
     name_template: "voucher_server_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
+    files:
+      - LICENSE
+    wrap_in_directory: true
     replacements:
       darwin: Darwin
       linux: Linux
@@ -41,6 +30,9 @@ archives:
     builds:
       - voucher_client
     name_template: "voucher_client_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
+    files:
+      - LICENSE
+    wrap_in_directory: true
     replacements:
       darwin: Darwin
       linux: Linux
