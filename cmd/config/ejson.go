@@ -24,12 +24,12 @@ type ejsonFormat struct {
 // readEjson reads from the ejson file and populates the passed interface.
 func readEjson(data interface{}) error {
 	if !viper.IsSet("ejson.dir") {
-		return fmt.Errorf("ESON dir not set in the config file")
+		return fmt.Errorf("EJSON dir not set in the config file")
 	}
 
 	dir := viper.GetString("ejson.dir")
 	if !viper.IsSet("ejson.secrets") {
-		return fmt.Errorf("ESON secrets not set in the config file")
+		return fmt.Errorf("EJSON secrets not set in the config file")
 	}
 
 	secrets := viper.GetString("ejson.secrets")

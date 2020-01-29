@@ -27,7 +27,7 @@ var serverCmd = &cobra.Command{
 
 func init() {
 	cobra.OnInitialize(config.InitConfig)
-	serverCmd.Flags().IntP("port", "", 8000, "port on which the server will listen")
+	serverCmd.Flags().IntP("port", "p", 8000, "port on which the server will listen")
 	viper.BindPFlag("server.port", serverCmd.Flags().Lookup("port"))
 	serverCmd.Flags().StringVarP(&config.FileName, "config", "c", "", "path to config")
 	serverCmd.Flags().IntP("timeout", "", 240, "number of seconds that should be dedicated to a Voucher call")

@@ -4,7 +4,7 @@ Adding new checks follows the same pattern that adding new SQL drivers uses. Che
 
 The check name itself, which is set when registering the Check for use, will also be used to enable/disable that check, and to co-ordinate which PGP key to use when attesting images.
 
-Below is an example of a Check, "examplecheck", which we will step through. This Check would logically be found at `config/examplecheck/check.go`.
+Below is an example of a Check, "examplecheck", which we will step through. This Check would logically be found at `checks/examplecheck/check.go`.
 
 ```golang
 package examplecheck
@@ -36,7 +36,7 @@ Below is the Check interface from the source code.
 
 ```golang
 type Check interface {
-	Check(ImageData) (bool, error)
+	Check(context.Context, ImageData) (bool, error)
 }
 ```
 
@@ -46,7 +46,7 @@ This is the method where the test itself should run.
 
 ```golang
 // Check if the image described by ImageData is acceptable for our purposes.
-func (c *check) Check(i voucher.ImageData) (bool, error) {
+func (c *check) Check(ctx context.Context, i voucher.ImageData) (bool, error) {
     ok := isImageGood(i)
 	return ok, nil
 }

@@ -4,11 +4,11 @@ This tutorial should give you an overview on how to set up Voucher Server.
 
 ## Installing Voucher
 
-First, install Voucher using the instructions in the [README](cmd/voucher_server/README.md).
+First, install Voucher using the instructions in the [README](/cmd/voucher_server/README.md).
 
 ## Create configuration
 
-Create a new configuration file. You may want to refer to the [example configuration](config/config.toml).
+Create a new configuration file. You may want to refer to the [example configuration](/config/config.toml).
 
 Make sure that you update the `ejson` specific blocks to point to the `ejson` file and key you will be making in the next step.
 
