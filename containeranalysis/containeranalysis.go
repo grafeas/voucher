@@ -1,10 +1,10 @@
-package grafeas
+package containeranalysis
 
 import (
 	"errors"
 
 	"github.com/docker/distribution/reference"
-	"google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/common"
+	grafeas "google.golang.org/genproto/googleapis/grafeas/v1"
 )
 
 var errNoOccurrences = errors.New("no occurrences returned for image")
@@ -18,6 +18,6 @@ func projectPath(project string) string {
 	return "projects/" + project
 }
 
-func kindFilterStr(reference reference.Reference, kind common.NoteKind) string {
+func kindFilterStr(reference reference.Reference, kind grafeas.NoteKind) string {
 	return resourceURL(reference) + " AND kind=\"" + kind.String() + "\""
 }

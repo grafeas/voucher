@@ -1,12 +1,12 @@
-package grafeas
+package containeranalysis
 
 import (
 	"github.com/Shopify/voucher/repository"
-	grafeaspb "google.golang.org/genproto/googleapis/devtools/containeranalysis/v1beta1/grafeas"
+	grafeas "google.golang.org/genproto/googleapis/grafeas/v1"
 )
 
-// OccurrenceToBuildDetails converts an Occurrence to a Build_Detail
-func OccurrenceToBuildDetails(occ *grafeaspb.Occurrence) (detail repository.BuildDetail) {
+// OccurrenceToBuildDetails converts an Occurrence to a BuildDetail
+func OccurrenceToBuildDetails(occ *grafeas.Occurrence) (detail repository.BuildDetail) {
 	buildProvenance := occ.GetBuild().GetProvenance()
 
 	detail.ProjectID = buildProvenance.GetProjectId()

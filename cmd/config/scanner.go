@@ -6,7 +6,6 @@ import (
 
 	"github.com/Shopify/voucher"
 	"github.com/Shopify/voucher/clair"
-	"github.com/Shopify/voucher/grafeas"
 )
 
 func newScanner(metadataClient voucher.MetadataClient, auth voucher.Auth) (scanner voucher.VulnerabilityScanner) {
@@ -22,7 +21,10 @@ func newScanner(metadataClient voucher.MetadataClient, auth voucher.Auth) (scann
 		}
 		scanner = clair.NewScanner(config, auth)
 	case "gca", "g":
-		scanner = grafeas.NewScanner(metadataClient)
+		log.Warningf("the %s option for `scanner` has been deprecated and will be removed in the future. Please use `metadata` instead.", scannerName)
+		scanner = voucher.NewScanner(metadataClient)
+	case "metadata":
+		scanner = voucher.NewScanner(metadataClient)
 	default:
 		scanner = nil
 	}

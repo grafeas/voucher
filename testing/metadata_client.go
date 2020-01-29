@@ -7,7 +7,7 @@ import (
 	"github.com/docker/distribution/reference"
 
 	"github.com/Shopify/voucher"
-	"github.com/Shopify/voucher/grafeas/binauth"
+	"github.com/Shopify/voucher/attestation"
 	"github.com/Shopify/voucher/repository"
 )
 
@@ -40,15 +40,11 @@ func (c *MetadataClient) CanAttest() bool {
 }
 
 func (c *MetadataClient) NewPayloadBody(reference reference.Canonical) (string, error) {
-	payload, err := binauth.NewPayload(reference).ToString()
+	payload, err := attestation.NewPayload(reference).ToString()
 	if err != nil {
 		return "", err
 	}
 	return payload, err
-}
-
-func (c *MetadataClient) GetMetadata(ctx context.Context, reference reference.Canonical, metadataType voucher.MetadataType) ([]voucher.MetadataItem, error) {
-	return []voucher.MetadataItem{}, nil
 }
 
 func (c *MetadataClient) GetVulnerabilities(ctx context.Context, reference reference.Canonical) ([]voucher.Vulnerability, error) {
@@ -68,9 +64,8 @@ func (c *MetadataClient) GetBuildDetails(ctx context.Context, reference referenc
 	return c.details[refString], nil
 }
 
-func (c *MetadataClient) AddAttestationToImage(ctx context.Context, reference reference.Canonical, payload voucher.AttestationPayload) (voucher.MetadataItem, error) {
-	occ := new(voucher.MetadataItem)
-	return *occ, nil
+func (c *MetadataClient) AddAttestationToImage(ctx context.Context, reference reference.Canonical, payload voucher.AttestationPayload) (interface{}, error) {
+	return nil, nil
 }
 
 func (c *MetadataClient) Close() {}

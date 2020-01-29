@@ -7,7 +7,7 @@ COPY . .
 RUN apk --no-cache add \
     git \
     make && \
-    make all
+    make voucher_server
 
 # Final build
 FROM alpine:3.8

@@ -1,4 +1,4 @@
-package grafeas
+package containeranalysis
 
 import (
 	"testing"

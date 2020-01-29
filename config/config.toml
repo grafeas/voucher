@@ -1,6 +1,7 @@
 dryrun = false
-scanner = "clair"
+scanner = "metadata"
 failon = "high"
+metadata_client = "containeranalysis"
 image_project = "your-project-here"
 binauth_project = "your-project-here"
 valid_repos = [
@@ -42,4 +43,3 @@ org-url = "https://github.com/Shopify"
 [[repositories]]
 org-name = "Grafeas"
 org-url = "https://github.com/grafeas"
-

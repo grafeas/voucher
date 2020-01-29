@@ -94,15 +94,15 @@ func (cs *Suite) RunAndAttest(ctx context.Context, metadataClient MetadataClient
 
 // createAttestation generates an attestation for the image Check described by CheckResult.
 // That attestation is then added to the metadata server the MetadataClient is connected to.
-func createAttestation(ctx context.Context, client MetadataClient, result CheckResult) (MetadataItem, error) {
+func createAttestation(ctx context.Context, client MetadataClient, result CheckResult) (interface{}, error) {
 	payload, err := client.NewPayloadBody(result.ImageData)
 	if err != nil {
 		return nil, err
 	}
 
 	attestationPayload := NewAttestationPayload(result.Name, payload)
-	occ, err := client.AddAttestationToImage(ctx, result.ImageData, attestationPayload)
-	return occ, err
+	details, err := client.AddAttestationToImage(ctx, result.ImageData, attestationPayload)
+	return details, err
 }
 
 // NewSuite creates a new Suite.

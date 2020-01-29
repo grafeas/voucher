@@ -1,4 +1,4 @@
-package binauth
+package attestation
 
 import (
 	"encoding/json"

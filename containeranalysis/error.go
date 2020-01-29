@@ -1,4 +1,4 @@
-package grafeas
+package containeranalysis
 
 import (
 	"google.golang.org/grpc/codes"

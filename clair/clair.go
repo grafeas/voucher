@@ -130,7 +130,6 @@ func getClairVulnerabilities(manifest schema2.Manifest, config Config, tokenSrc 
 				vulns[vul.Name] = vul
 			}
 		}
-
 	} else {
 		return vulns, errNoLayers
 	}

@@ -27,23 +27,17 @@ func (t *testMetadataClient) NewPayloadBody(i ImageData) (string, error) {
 	return "", errors.New("cannot create payload body")
 }
 
-func (t *testMetadataClient) GetMetadata(ctx context.Context, i ImageData, metadataType MetadataType) ([]MetadataItem, error) {
-	return []MetadataItem{}, nil
-}
-
 func (t *testMetadataClient) GetVulnerabilities(ctx context.Context, i ImageData) ([]Vulnerability, error) {
 	return []Vulnerability{}, nil
 }
 
-func (t *testMetadataClient) AddAttestationToImage(ctx context.Context, i ImageData, payload AttestationPayload) (MetadataItem, error) {
+func (t *testMetadataClient) AddAttestationToImage(ctx context.Context, i ImageData, payload AttestationPayload) (interface{}, error) {
 	_, _, err := payload.Sign(t.keyring)
 	if nil != err {
 		return nil, err
 	}
 
-	occ := new(MetadataItem)
-
-	return *occ, nil
+	return nil, nil
 }
 
 func (t *testMetadataClient) GetBuildDetails(ctx context.Context, reference reference.Canonical) ([]repository.BuildDetail, error) {
