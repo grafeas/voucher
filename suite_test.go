@@ -2,11 +2,30 @@ package voucher
 
 import (
 	"context"
+	"os"
 	"testing"
 
+	"github.com/Shopify/voucher/signer/pgp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func newTestKeyRing(t *testing.T) *pgp.KeyRing {
+	t.Helper()
+
+	require := require.New(t)
+
+	keyring := pgp.NewKeyRing()
+
+	keyFile, err := os.Open("testdata/testkey.asc")
+	require.NoErrorf(err, "failed to open key file: %s", err)
+	defer keyFile.Close()
+
+	err = pgp.AddKeyToKeyRingFromReader(keyring, "snakeoil", keyFile)
+	require.NoErrorf(err, "Failed to add key to keyring: %s", err)
+
+	return keyring
+}
 
 func newTestImageData(t *testing.T) ImageData {
 	t.Helper()

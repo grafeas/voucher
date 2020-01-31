@@ -1,4 +1,4 @@
-package voucher
+package pgp
 
 import (
 	"bytes"
@@ -21,7 +21,7 @@ func newTestKeyRing(t *testing.T) *KeyRing {
 
 	keyring := NewKeyRing()
 
-	keyFile, err := os.Open("testdata/testkey.asc")
+	keyFile, err := os.Open("../../testdata/testkey.asc")
 	require.NoErrorf(err, "failed to open key file: %s", err)
 	defer keyFile.Close()
 
@@ -54,7 +54,7 @@ func TestGetKeyAndSign(t *testing.T) {
 	keyID := getTestKeyID(t)
 	require.Equal(entity.PrimaryKey.KeyId, keyID)
 
-	signedValue, err := Sign(entity, testSignedValue)
+	signedValue, err := sign(entity, testSignedValue)
 	require.NoErrorf(err, "Failed to sign message: %s", err)
 
 	_, err = Verify(keyring, signedValue)
@@ -90,5 +90,21 @@ func TestBadAddKey(t *testing.T) {
 	err := AddKeyToKeyRingFromReader(keyring, "badkey", &buffer)
 	if assert.Error(err) {
 		assert.Equal(err.Error(), "openpgp: invalid argument: no armored data found")
+	}
+}
+
+func TestAttestationPayload(t *testing.T) {
+	payloadMessage := "test was successful"
+
+	keyring := newTestKeyRing(t)
+
+	result, fingerprint, err := keyring.Sign("snakeoil", payloadMessage)
+	if assert.NoErrorf(t, err, "Failed to sign attestation: %s", err) {
+		assert.Equalf(t, snakeoilKeyFingerprint, fingerprint, "Failed to get correct fingerprint, was %s vs %s", fingerprint, snakeoilKeyFingerprint)
+	}
+
+	message, err := Verify(keyring, result)
+	if assert.NoErrorf(t, err, "Failed to verify result: %s", result) {
+		assert.Equalf(t, message, payloadMessage, "Failed to get correct message, was \"%s\" instead of \"%s\"", message, payloadMessage)
 	}
 }

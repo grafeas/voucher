@@ -1,4 +1,4 @@
-package voucher
+package pgp
 
 import (
 	"errors"
@@ -18,6 +18,16 @@ var errEmptyKeyring = errors.New("keyring is empty")
 type KeyRing struct {
 	keyIds   map[string]uint64
 	entities openpgp.EntityList
+}
+
+func (keyring *KeyRing) Sign(checkName, body string) (string, string, error) {
+	signer, err := keyring.GetSignerByName(checkName)
+	if nil != err {
+		return "", "", err
+	}
+
+	signature, err := sign(signer, body)
+	return signature, fmt.Sprintf("%X", signer.PrimaryKey.Fingerprint), err
 }
 
 // KeysById returns the set of keys that have the given key id.

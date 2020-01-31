@@ -8,9 +8,9 @@ import (
 	"github.com/Shopify/ejson"
 	"github.com/spf13/viper"
 
-	"github.com/Shopify/voucher"
 	"github.com/Shopify/voucher/clair"
 	"github.com/Shopify/voucher/repository"
+	"github.com/Shopify/voucher/signer/pgp"
 )
 
 // ejsonFormat represents the format that the ejson configuration is structured
@@ -71,8 +71,8 @@ func getClairConfig() (clair.Config, error) {
 
 // getKeyRing uses the Command's configured ejson file to populate a
 // voucher.KeyRing.
-func getKeyRing() (*voucher.KeyRing, error) {
-	newKeyRing := voucher.NewKeyRing()
+func getKeyRing() (*pgp.KeyRing, error) {
+	newKeyRing := pgp.NewKeyRing()
 
 	ejsonData := new(ejsonFormat)
 
@@ -82,7 +82,7 @@ func getKeyRing() (*voucher.KeyRing, error) {
 	}
 
 	for name, key := range ejsonData.Keys {
-		err = voucher.AddKeyToKeyRingFromReader(newKeyRing, name, bytes.NewReader([]byte(key)))
+		err = pgp.AddKeyToKeyRingFromReader(newKeyRing, name, bytes.NewReader([]byte(key)))
 		if nil != err {
 			return nil, err
 		}

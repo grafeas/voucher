@@ -1,4 +1,4 @@
-package voucher
+package pgp
 
 import (
 	"bytes"
@@ -27,7 +27,7 @@ var signConfig = packet.Config{
 }
 
 // Sign creates the signature for the attestation
-func Sign(signer *openpgp.Entity, msg string) (string, error) {
+func sign(signer *openpgp.Entity, msg string) (string, error) {
 	if nil == signer {
 		return "", fmt.Errorf("nil cannot be used as a signer")
 	}

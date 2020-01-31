@@ -5,12 +5,13 @@ import (
 	"errors"
 
 	"github.com/Shopify/voucher/repository"
+	"github.com/Shopify/voucher/signer/pgp"
 	"github.com/docker/distribution/reference"
 )
 
 type testMetadataClient struct {
 	canAttest bool
-	keyring   *KeyRing
+	keyring   *pgp.KeyRing
 }
 
 func (t *testMetadataClient) Close() {
@@ -44,7 +45,7 @@ func (t *testMetadataClient) GetBuildDetails(ctx context.Context, reference refe
 	return []repository.BuildDetail{}, nil
 }
 
-func newTestMetadataClient(keyring *KeyRing, canAttest bool) *testMetadataClient {
+func newTestMetadataClient(keyring *pgp.KeyRing, canAttest bool) *testMetadataClient {
 	client := new(testMetadataClient)
 	client.keyring = keyring
 	client.canAttest = canAttest

@@ -14,16 +14,17 @@ import (
 	"github.com/Shopify/voucher"
 	"github.com/Shopify/voucher/attestation"
 	"github.com/Shopify/voucher/repository"
+	"github.com/Shopify/voucher/signer"
 )
 
 var errCannotAttest = errors.New("cannot create attestations, keyring is empty")
 
 // Client implements voucher.MetadataClient, connecting to containeranalysis Grafeas.
 type Client struct {
-	containeranalysis *grafeasv1.Client // The client reference.
-	keyring           *voucher.KeyRing  // The keyring used for signing metadata.
-	binauthProject    string            // The project that Binauth Notes and Occurrences are written to.
-	imageProject      string            // The project that image information is stored.
+	containeranalysis *grafeasv1.Client        // The client reference.
+	keyring           signer.AttestationSigner // The keyring used for signing metadata.
+	binauthProject    string                   // The project that Binauth Notes and Occurrences are written to.
+	imageProject      string                   // The project that image information is stored.
 }
 
 // CanAttest returns true if the client can create and sign attestations.
@@ -160,7 +161,7 @@ func (g *Client) GetBuildDetails(ctx context.Context, reference reference.Canoni
 }
 
 // NewClient creates a new containeranalysis Grafeas Client.
-func NewClient(ctx context.Context, imageProject, binauthProject string, keyring *voucher.KeyRing) (*Client, error) {
+func NewClient(ctx context.Context, imageProject, binauthProject string, keyring signer.AttestationSigner) (*Client, error) {
 	var err error
 
 	caClient, err := containeranalysisapi.NewClient(ctx)

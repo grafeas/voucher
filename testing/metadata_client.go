@@ -9,12 +9,13 @@ import (
 	"github.com/Shopify/voucher"
 	"github.com/Shopify/voucher/attestation"
 	"github.com/Shopify/voucher/repository"
+	"github.com/Shopify/voucher/signer"
 )
 
 type MetadataClient struct {
 	details map[string][]repository.BuildDetail
 	vulns   map[string][]voucher.Vulnerability
-	keyring *voucher.KeyRing
+	keyring signer.AttestationSigner
 }
 
 //AddBuildDetail adds BuildDetails to the metadata client
