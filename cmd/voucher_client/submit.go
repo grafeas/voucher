@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 
@@ -10,6 +11,8 @@ import (
 	"github.com/Shopify/voucher"
 	"github.com/Shopify/voucher/auth/google"
 )
+
+var errImageCheckFailed = errors.New("image failed to pass required check(s)")
 
 // lookupCanonical looks up the canonical version of the passed image path.
 func lookupCanonical(ctx context.Context, image string) (reference.Canonical, error) {
@@ -48,6 +51,10 @@ func submit(ctx context.Context, client voucher.Interface, check string, canonic
 	}
 
 	fmt.Println(formatResponse(&voucherResp))
+
+	if !voucherResp.Success {
+		return errImageCheckFailed
+	}
 
 	return nil
 }
