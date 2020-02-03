@@ -13,18 +13,18 @@ import (
 )
 
 type MetadataClient struct {
-	details map[string][]repository.BuildDetail
+	details map[string]repository.BuildDetail
 	vulns   map[string][]voucher.Vulnerability
 	keyring signer.AttestationSigner
 }
 
-//AddBuildDetail adds BuildDetails to the metadata client
-func (c *MetadataClient) AddBuildDetails(reference reference.Reference, details []repository.BuildDetail) {
+//SetBuildDetail sets BuildDetail for the given object reference
+func (c *MetadataClient) SetBuildDetail(reference reference.Reference, details repository.BuildDetail) {
 	if c.details == nil {
-		c.details = make(map[string][]repository.BuildDetail)
+		c.details = make(map[string]repository.BuildDetail)
 	}
 	refString := reference.String()
-	c.details[refString] = append(c.details[refString], details...)
+	c.details[refString] = details
 }
 
 //AddBuildDetail adds Vulnerabilities to the metadata client
@@ -53,14 +53,14 @@ func (c *MetadataClient) GetVulnerabilities(ctx context.Context, reference refer
 	return c.vulns[refString], nil
 }
 
-func (c *MetadataClient) GetBuildDetails(ctx context.Context, reference reference.Canonical) ([]repository.BuildDetail, error) {
+func (c *MetadataClient) GetBuildDetail(ctx context.Context, reference reference.Canonical) (repository.BuildDetail, error) {
 	refString := reference.String()
 	if len(c.details) == 0 {
 		err := &voucher.NoMetadataError{
 			Type: voucher.VulnerabilityType,
 			Err:  errors.New("no occurrences returned for image"),
 		}
-		return nil, err
+		return repository.BuildDetail{}, err
 	}
 	return c.details[refString], nil
 }

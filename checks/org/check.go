@@ -26,7 +26,7 @@ func (o *check) SetMetadataClient(metadataClient voucher.MetadataClient) {
 
 // Check runs the org check
 func (o *check) Check(ctx context.Context, i voucher.ImageData) (bool, error) {
-	items, err := o.metadataClient.GetBuildDetails(ctx, i)
+	buildDetail, err := o.metadataClient.GetBuildDetail(ctx, i)
 	if err != nil {
 		if voucher.IsNoMetadataError(err) {
 			return false, ErrNoBuildData
@@ -34,14 +34,12 @@ func (o *check) Check(ctx context.Context, i voucher.ImageData) (bool, error) {
 		return false, err
 	}
 
-	for _, buildDetail := range items {
-		org, err := o.repositoryClient.GetOrganization(ctx, buildDetail)
-		if err != nil {
-			return false, err
-		}
-		if org != o.org {
-			return false, nil
-		}
+	org, err := o.repositoryClient.GetOrganization(ctx, buildDetail)
+	if err != nil {
+		return false, err
+	}
+	if org != o.org {
+		return false, nil
 	}
 
 	return true, nil

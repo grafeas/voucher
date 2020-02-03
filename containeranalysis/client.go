@@ -118,10 +118,8 @@ func (g *Client) Close() {
 	g.containeranalysis.Close()
 }
 
-// GetBuildDetails gets BuildDetails for the passed image.
-func (g *Client) GetBuildDetails(ctx context.Context, reference reference.Canonical) ([]repository.BuildDetail, error) {
-	var buildDetails []repository.BuildDetail
-
+// GetBuildDetail gets the BuildDetail for the passed image.
+func (g *Client) GetBuildDetail(ctx context.Context, reference reference.Canonical) (repository.BuildDetail, error) {
 	var err error
 
 	filterStr := kindFilterStr(reference, grafeas.NoteKind_BUILD)
@@ -130,34 +128,22 @@ func (g *Client) GetBuildDetails(ctx context.Context, reference reference.Canoni
 	req := &grafeas.ListOccurrencesRequest{Parent: project, Filter: filterStr}
 	occIterator := g.containeranalysis.ListOccurrences(ctx, req)
 
-	for {
-		var occ *grafeas.Occurrence
-
-		occ, err = occIterator.Next()
-		if err != nil {
-			if err == iterator.Done {
-				err = nil
-			}
-
-			break
-		}
-
-		vuln := OccurrenceToBuildDetails(occ)
-		buildDetails = append(buildDetails, vuln)
-	}
-
-	if len(buildDetails) == 0 && err == nil {
-		err = &voucher.NoMetadataError{
-			Type: voucher.VulnerabilityType,
-			Err:  errNoOccurrences,
-		}
-	}
-
+	occ, err := occIterator.Next()
 	if err != nil {
-		return nil, err
+		if err == iterator.Done {
+			err = &voucher.NoMetadataError{
+				Type: voucher.VulnerabilityType,
+				Err:  errNoOccurrences,
+			}
+		}
+		return repository.BuildDetail{}, err
 	}
 
-	return buildDetails, nil
+	if _, err := occIterator.Next(); err != iterator.Done {
+		return repository.BuildDetail{}, errors.New("Found multiple Grafeas occurrences for " + reference.String())
+	}
+
+	return OccurrenceToBuildDetail(occ), nil
 }
 
 // NewClient creates a new containeranalysis Grafeas Client.

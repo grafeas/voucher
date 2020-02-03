@@ -5,8 +5,8 @@ import (
 	grafeas "google.golang.org/genproto/googleapis/grafeas/v1"
 )
 
-// OccurrenceToBuildDetails converts an Occurrence to a BuildDetail
-func OccurrenceToBuildDetails(occ *grafeas.Occurrence) (detail repository.BuildDetail) {
+// OccurrenceToBuildDetail converts an Occurrence to a BuildDetail
+func OccurrenceToBuildDetail(occ *grafeas.Occurrence) (detail repository.BuildDetail) {
 	buildProvenance := occ.GetBuild().GetProvenance()
 
 	detail.ProjectID = buildProvenance.GetProjectId()

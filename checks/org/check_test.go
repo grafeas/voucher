@@ -32,8 +32,8 @@ func TestOrgCheck(t *testing.T) {
 	metadataClient := new(vtesting.MetadataClient)
 	i, err := voucher.NewImageData("gcr.io/voucher-test-project/apps/staging/voucher-internal@sha256:73d506a23331fce5cb6f49bfb4c27450d2ef4878efce89f03a46b27372a88430")
 	require.NoErrorf(t, err, "failed to get ImageData: %s", err)
-	details := []r.BuildDetail{{RepositoryURL: "https://github.com/Shopify/app", Commit: "efgh6543"}}
-	metadataClient.AddBuildDetails(i, details)
+	details := r.BuildDetail{RepositoryURL: "https://github.com/Shopify/app", Commit: "efgh6543"}
+	metadataClient.SetBuildDetail(i, details)
 
 	organization := r.Organization{Name: "Shopify", URL: "https://github.com/Shopify"}
 
@@ -64,8 +64,8 @@ func TestOrgCheckWithInvalidRepo(t *testing.T) {
 	metadataClient := new(vtesting.MetadataClient)
 	i, err := voucher.NewImageData("gcr.io/voucher-test-project/apps/staging/voucher-internal@sha256:73d506a23331fce5cb6f49bfb4c27450d2ef4878efce89f03a46b27372a88430")
 	require.NoErrorf(t, err, "failed to get ImageData: %s", err)
-	details := []r.BuildDetail{{RepositoryURL: "git@github.com/TestOrg/TestRepo.git", Commit: "cdef0987"}}
-	metadataClient.AddBuildDetails(i, details)
+	details := r.BuildDetail{RepositoryURL: "git@github.com/TestOrg/TestRepo.git", Commit: "cdef0987"}
+	metadataClient.SetBuildDetail(i, details)
 
 	organization := r.Organization{Name: "Shopify", URL: "https://github.com/Shopify"}
 

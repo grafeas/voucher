@@ -41,8 +41,8 @@ func (t *testMetadataClient) AddAttestationToImage(ctx context.Context, i ImageD
 	return nil, nil
 }
 
-func (t *testMetadataClient) GetBuildDetails(ctx context.Context, reference reference.Canonical) ([]repository.BuildDetail, error) {
-	return []repository.BuildDetail{}, nil
+func (t *testMetadataClient) GetBuildDetail(ctx context.Context, reference reference.Canonical) (repository.BuildDetail, error) {
+	return repository.BuildDetail{}, nil
 }
 
 func newTestMetadataClient(keyring *pgp.KeyRing, canAttest bool) *testMetadataClient {

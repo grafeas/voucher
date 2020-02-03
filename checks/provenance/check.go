@@ -44,7 +44,7 @@ func (p *check) SetTrustedProjects(trustedProjects []string) {
 
 // Check runs the check :)
 func (p *check) Check(ctx context.Context, i voucher.ImageData) (bool, error) {
-	items, err := p.metadataClient.GetBuildDetails(ctx, i)
+	buildDetail, err := p.metadataClient.GetBuildDetail(ctx, i)
 	if err != nil {
 		if voucher.IsNoMetadataError(err) {
 			return false, ErrNoBuildData
@@ -52,11 +52,8 @@ func (p *check) Check(ctx context.Context, i voucher.ImageData) (bool, error) {
 		return false, err
 	}
 
-	for _, buildDetail := range items {
-		var ok bool
-		if ok, err = validateProvenance(p, buildDetail); !ok || !validateArtifacts(i, buildDetail) {
-			return false, err
-		}
+	if ok, err := validateProvenance(p, buildDetail); !ok || !validateArtifacts(i, buildDetail) {
+		return false, err
 	}
 
 	return true, nil
