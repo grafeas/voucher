@@ -154,7 +154,7 @@ func TestAttestSuite(t *testing.T) {
 		{
 			Name:      "pass2",
 			ImageData: imageData,
-			Err:       "no signing entity exists for check name \"pass2\"",
+			Err:       "no signing entity exists for check",
 			Success:   true,
 			Attested:  false,
 			Details:   nil,
@@ -162,7 +162,7 @@ func TestAttestSuite(t *testing.T) {
 		{
 			Name:      "pass3",
 			ImageData: imageData,
-			Err:       "no signing entity exists for check name \"pass3\"",
+			Err:       "no signing entity exists for check",
 			Success:   true,
 			Attested:  false,
 			Details:   nil,

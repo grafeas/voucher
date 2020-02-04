@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/Shopify/voucher/signer"
 	"golang.org/x/crypto/openpgp"
 	"golang.org/x/crypto/openpgp/packet"
 )
@@ -60,7 +61,7 @@ func (keyring *KeyRing) GetSignerByName(name string) (*openpgp.Entity, error) {
 		}
 	}
 
-	return nil, fmt.Errorf("no signing entity exists for check name \"%s\"", name)
+	return nil, signer.NoKeyForCheckError
 }
 
 // AddEntities adds new keys from the passed EntityList to the keyring for

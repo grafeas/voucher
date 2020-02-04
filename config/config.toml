@@ -4,6 +4,7 @@ failon = "high"
 metadata_client = "containeranalysis"
 image_project = "your-project-here"
 binauth_project = "your-project-here"
+signer = "kms"
 valid_repos = [
     "gcr.io/path/to/my/project",
 ]
@@ -43,3 +44,13 @@ org-url = "https://github.com/Shopify"
 [[repositories]]
 org-name = "Grafeas"
 org-url = "https://github.com/grafeas"
+
+[[kms_keys]]
+check = "diy"
+path = "projects/<GCP project>/locations/global/keyRings/<key ring>-keys/cryptoKeys/<key name>/cryptoKeyVersions/<key version>"
+algo = "SHA512"
+
+[[kms_keys]]
+check = "snakeoil"
+path = "projects/<GCP project>/locations/global/keyRings/<key ring>-keys/cryptoKeys/<key name>/cryptoKeyVersions/<key version>"
+algo = "SHA512"

@@ -8,14 +8,29 @@ import (
 
 	"github.com/Shopify/voucher"
 	"github.com/Shopify/voucher/containeranalysis"
+	"github.com/Shopify/voucher/signer"
 )
 
 // NewMetadataClient creates a new MetadataClient.
 func NewMetadataClient(ctx context.Context) (voucher.MetadataClient, error) {
-	keyring, err := getKeyRing()
-	if nil != err {
-		log.Println("could not load keyring from ejson, continuing without attestation support: ", err)
-		keyring = nil
+	var keyring signer.AttestationSigner
+	var err error
+
+	signerName := viper.GetString("signer")
+	if signerName == "pgp" || signerName == "" {
+		keyring, err = getPGPKeyRing()
+		if nil != err {
+			log.Println("could not load PGP keyring from ejson, continuing without attestation support: ", err)
+			keyring = nil
+		}
+	} else if signerName == "kms" {
+		keyring, err = getKMSKeyRing()
+		if nil != err {
+			log.Println("could not load KMS keyring from config, continuing without attestation support: ", err)
+			keyring = nil
+		}
+	} else {
+		log.Printf("signer %q is unknown, supported values are 'kms' or 'pgp'\n", signerName)
 	}
 
 	metadataClient := viper.GetString("metadata_client")

@@ -69,9 +69,9 @@ func getClairConfig() (clair.Config, error) {
 	return ejsonData.ClairConfig, nil
 }
 
-// getKeyRing uses the Command's configured ejson file to populate a
+// getPGPKeyRing uses the Command's configured ejson file to populate a
 // voucher.KeyRing.
-func getKeyRing() (*pgp.KeyRing, error) {
+func getPGPKeyRing() (*pgp.KeyRing, error) {
 	newKeyRing := pgp.NewKeyRing()
 
 	ejsonData := new(ejsonFormat)

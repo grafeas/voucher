@@ -67,11 +67,11 @@ func TestGetClairConfig(t *testing.T) {
 	}, clairConfig)
 }
 
-func TestGetKeyRing(t *testing.T) {
+func TestGetPGPKeyRing(t *testing.T) {
 	viper.Set("ejson.secrets", "../../testdata/test.ejson")
 	viper.Set("ejson.dir", "../../testdata/key")
 
-	keyRing, err := getKeyRing()
+	keyRing, err := getPGPKeyRing()
 	require.NoError(t, err)
 	assert.NotNil(t, keyRing)
 }
