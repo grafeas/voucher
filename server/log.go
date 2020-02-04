@@ -39,3 +39,8 @@ func LogResult(response voucher.Response) {
 func LogError(message string, err error) {
 	log.Errorf("Server error: %s: %s", message, err)
 }
+
+// LogWarning logs server errors to stdout as Warning
+func LogWarning(message string, err error) {
+	log.Warningf("Server warning: %s: %s", message, err)
+}

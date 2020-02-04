@@ -100,3 +100,20 @@ type PullRequest struct {
 	HeadBranchName string
 	IsMerged       bool
 }
+
+// Metadata describes the top level metadata information about a repo
+// that one can get from the gitUrl
+type Metadata struct {
+	Vcs          string `json:"vcs"`
+	Organization string `json:"organization"`
+	Name         string `json:"name"`
+}
+
+// NewOrganization returns a new Organization object
+func NewRepositoryMetadata(vcs, org, name string) Metadata {
+	return Metadata{
+		Vcs:          vcs,
+		Organization: org,
+		Name:         name,
+	}
+}

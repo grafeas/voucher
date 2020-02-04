@@ -7,13 +7,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestParseGithutURL(t *testing.T) {
+func TestParseGithubURL(t *testing.T) {
 	parseGithubTests := []struct {
-		expectedResults *RepositoryMetadata
+		expectedResults *repository.Metadata
 		githubURL       string
 	}{
 		{
-			expectedResults: &RepositoryMetadata{
+			expectedResults: &repository.Metadata{
 				Vcs:          "github.com",
 				Organization: "Shopify",
 				Name:         "TestRepo",
@@ -21,7 +21,7 @@ func TestParseGithutURL(t *testing.T) {
 			githubURL: "git@github.com/Shopify/TestRepo.git",
 		},
 		{
-			expectedResults: &RepositoryMetadata{
+			expectedResults: &repository.Metadata{
 				Vcs:          "github.com",
 				Organization: "Shopify",
 				Name:         "voucher",

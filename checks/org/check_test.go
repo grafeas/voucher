@@ -39,7 +39,7 @@ func TestOrgCheck(t *testing.T) {
 
 	orgCheck := new(check)
 	orgCheck.org = organization
-	orgCheck.repositoryClient = repoClient
+	orgCheck.SetRepositoryClient(repoClient)
 	orgCheck.SetMetadataClient(metadataClient)
 
 	status, err := orgCheck.Check(c, i)
@@ -71,7 +71,7 @@ func TestOrgCheckWithInvalidRepo(t *testing.T) {
 
 	orgCheck := new(check)
 	orgCheck.org = organization
-	orgCheck.repositoryClient = repoClient
+	orgCheck.SetRepositoryClient(repoClient)
 	orgCheck.SetMetadataClient(metadataClient)
 
 	status, err := orgCheck.Check(c, i)

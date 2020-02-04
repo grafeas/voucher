@@ -14,14 +14,6 @@ const (
 	GithubRegex = "^(?:https?|git)(?:://|@)(?P<vcs>[^/:]+)[/:](?P<org>[^/.]+)/(?P<name>[^/.]+)(?:.git)?"
 )
 
-// RepositoryMetadata describes the top level metadata information about a repo
-// that one can get from the gitUrl
-type RepositoryMetadata struct {
-	Vcs          string `json:"vcs"`
-	Organization string `json:"organization"`
-	Name         string `json:"name"`
-}
-
 // GetCommitURL generates a commit url from the build metadata
 func GetCommitURL(b *repository.BuildDetail) (string, error) {
 	repoMeta, err := ParseGithubURL(b.RepositoryURL)
@@ -65,8 +57,8 @@ func GetRepositoryURL(b *repository.BuildDetail) (string, error) {
 }
 
 // ParseGithubURL parses the passed string as a Github URL and returns a
-// RepositryMetadata with the information contained in that URL.
-func ParseGithubURL(gitURL string) (*RepositoryMetadata, error) {
+// RepositoryMetadata with the information contained in that URL.
+func ParseGithubURL(gitURL string) (*repository.Metadata, error) {
 	re := regexp.MustCompile(GithubRegex)
 	repoDetail := re.FindStringSubmatch(gitURL)
 
@@ -74,10 +66,6 @@ func ParseGithubURL(gitURL string) (*RepositoryMetadata, error) {
 	if len(repoDetail) != 4 {
 		return nil, errors.New("unable to parse github url")
 	}
-	repo := &RepositoryMetadata{
-		Vcs:          repoDetail[1],
-		Organization: repoDetail[2],
-		Name:         repoDetail[3],
-	}
-	return repo, nil
+	repo := repository.NewRepositoryMetadata(repoDetail[1], repoDetail[2], repoDetail[3])
+	return &repo, nil
 }

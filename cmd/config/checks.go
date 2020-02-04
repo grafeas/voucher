@@ -4,10 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
-
 	"github.com/Shopify/voucher"
 	"github.com/Shopify/voucher/checks/org"
+	"github.com/Shopify/voucher/repository"
 	"github.com/spf13/viper"
 	// Register the DIY check
 	_ "github.com/Shopify/voucher/checks/diy"
@@ -74,10 +73,18 @@ func setCheckTrustedIdentitiesAndProjects(check voucher.Check, trustedBuildCreat
 	}
 }
 
+// setCheckRepositoryClient sets the repository client for the passed Check, if that Check implements
+// RepositoryCheck.
+func setCheckRepositoryClient(check voucher.Check, repositoryClient repository.Client) {
+	if repositoryCheck, ok := check.(voucher.RepositoryCheck); ok {
+		repositoryCheck.SetRepositoryClient(repositoryClient)
+	}
+}
+
 // NewCheckSuite creates a new checks.Suite with the requested
 // Checks, passing any necessary configuration details to the
 // checks.
-func NewCheckSuite(metadataClient voucher.MetadataClient, names ...string) (*voucher.Suite, error) {
+func NewCheckSuite(metadataClient voucher.MetadataClient, repositoryClient repository.Client, names ...string) (*voucher.Suite, error) {
 	auth := newAuth()
 	repos := validRepos()
 	scanner := newScanner(metadataClient, auth)
@@ -88,12 +95,7 @@ func NewCheckSuite(metadataClient voucher.MetadataClient, names ...string) (*vou
 
 	orgs := GetOrganizationsFromConfig()
 	for name, organization := range orgs {
-		repositoryClient := newRepositoryClient(organization)
-		if repositoryClient == nil {
-			log.Errorf("repository client for org %s is nil", name)
-			continue
-		}
-		orgCheck := org.NewOrganizationCheckFactory(organization, repositoryClient)
+		orgCheck := org.NewOrganizationCheckFactory(organization)
 		voucher.RegisterCheckFactory("is_"+strings.ToLower(name), orgCheck)
 	}
 
@@ -108,6 +110,7 @@ func NewCheckSuite(metadataClient voucher.MetadataClient, names ...string) (*vou
 		setCheckMetadataClient(check, metadataClient)
 		setCheckValidRepos(check, repos)
 		setCheckTrustedIdentitiesAndProjects(check, trustedBuildCreators, trustedProjects)
+		setCheckRepositoryClient(check, repositoryClient)
 
 		checksuite.Add(name, check)
 	}

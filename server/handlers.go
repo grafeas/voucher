@@ -11,10 +11,12 @@ import (
 
 	"github.com/Shopify/voucher"
 	"github.com/Shopify/voucher/cmd/config"
+	"github.com/Shopify/voucher/repository"
 )
 
 func handleChecks(w http.ResponseWriter, r *http.Request, name ...string) {
 	var imageData voucher.ImageData
+	var repositoryClient repository.Client
 	var err error
 
 	defer r.Body.Close()
@@ -47,7 +49,17 @@ func handleChecks(w http.ResponseWriter, r *http.Request, name ...string) {
 	}
 	defer metadataClient.Close()
 
-	checksuite, err := config.NewCheckSuite(metadataClient, name...)
+	buildDetail, err := metadataClient.GetBuildDetail(ctx, imageData)
+	if nil != err {
+		LogWarning("failed to get buildDetail for image", err)
+	} else {
+		repositoryClient, err = config.NewRepositoryClient(ctx, buildDetail.RepositoryURL)
+		if nil != err {
+			LogWarning("failed to create repository client, continuing without git repo support:", err)
+		}
+	}
+
+	checksuite, err := config.NewCheckSuite(metadataClient, repositoryClient, name...)
 	if nil != err {
 		http.Error(w, "server has been misconfigured", 500)
 		LogError("failed to create CheckSuite", err)
