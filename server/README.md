@@ -50,6 +50,11 @@ Run the test specified in the URL.
 
 For example, if the API call is `POST /diy`, this will run the DIY test and nothing else.
 
+This can also be used to run all tests required for an environment as specified in the configuration.
+
+For example, if the API call is `POST /myenv`, this will run the all tests enabled for `myenv`.
+
+
 The input and output of this API call is identical to that described in [`POST /all`](#post-all), 
 and like that call, authorization may be handled by Basic Authentication.
 

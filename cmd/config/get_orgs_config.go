@@ -18,8 +18,6 @@ func GetOrganizationsFromConfig() (orgs map[string]repository.Organization) {
 			name := m["org-name"].(string)
 			url := m["org-url"].(string)
 			orgs[name] = repository.Organization{Name: name, URL: url}
-		} else {
-			continue
 		}
 	}
 	if len(orgs) == 0 {

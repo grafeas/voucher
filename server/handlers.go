@@ -95,8 +95,8 @@ func HandleAll(w http.ResponseWriter, r *http.Request) {
 // HandleIndividualCheck is a request handler that executes an individual check and creates an attestation if applicable.
 func HandleIndividualCheck(w http.ResponseWriter, r *http.Request) {
 	variables := mux.Vars(r)
-
 	checkName := variables["check"]
+
 	if "" == checkName {
 		http.Error(w, "failure", 500)
 		return
@@ -108,6 +108,27 @@ func HandleIndividualCheck(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Error(w, fmt.Sprintf("check %s is not available", checkName), 404)
+}
+
+func HandleCheckGroup(w http.ResponseWriter, r *http.Request) {
+	groupName := r.URL.Path
+
+	if "" == groupName {
+		http.Error(w, "failure", 500)
+		return
+	}
+
+	if '/' == groupName[0] {
+		groupName = groupName[1:]
+	}
+
+	requiredChecks := config.GetRequiredChecksFromConfig()
+	if checkNames, ok := requiredChecks[groupName]; ok {
+		handleChecks(w, r, checkNames...)
+		return
+	}
+
+	http.Error(w, fmt.Sprintf("check group %s is not available", groupName), 404)
 }
 
 // HandleHealthCheck is a request handler that returns HTTP Status Code 200 when it is called from shopify cloud

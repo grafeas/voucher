@@ -28,3 +28,11 @@ address         = "localhost:6060"
 [[repositories]]
 org-name = "Shopify"
 org-url = "https://github.com/Shopify"
+
+[required.env1]
+diy = true
+provenance = false
+
+[required.env2]
+diy = true
+nobody = true

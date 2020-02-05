@@ -78,7 +78,11 @@ func TestInvalidJSON(t *testing.T) {
 
 	router := NewRouter()
 
-	for _, route := range Routes {
+	// Use the check groups configured in the test config
+	config.FileName = "../testdata/config.toml"
+	config.InitConfig()
+
+	for _, route := range getRoutes() {
 		path := route.Path
 		if "/{check}" == path {
 			path = "/diy"

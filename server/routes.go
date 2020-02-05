@@ -3,6 +3,7 @@ package server
 import (
 	"net/http"
 
+	"github.com/Shopify/voucher/cmd/config"
 	"github.com/gorilla/mux"
 )
 
@@ -19,7 +20,7 @@ type Route struct {
 // NewRouter creates a mux router with the specified routes and handlers
 func NewRouter() *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
-	for _, route := range Routes {
+	for _, route := range getRoutes() {
 		router.
 			Methods(route.Method).
 			Path(route.Path).
@@ -27,6 +28,26 @@ func NewRouter() *mux.Router {
 			Handler(route.HandlerFunc)
 	}
 	return router
+}
+
+func getRoutes() []Route {
+	return append(getCheckGroupRoutes(), Routes...)
+}
+
+// getCheckGroupRoutes creates Route objects for each group of required checks configured in the configuration file
+func getCheckGroupRoutes() []Route {
+	groups := config.GetRequiredChecksFromConfig()
+	routes := make([]Route, 0, len(groups))
+	for groupName := range groups {
+		route := Route{
+			Name:        groupName,
+			Method:      "POST",
+			Path:        "/" + groupName,
+			HandlerFunc: HandleCheckGroup,
+		}
+		routes = append(routes, route)
+	}
+	return routes
 }
 
 // Routes an array of type Route

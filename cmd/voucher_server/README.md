@@ -32,27 +32,28 @@ The configuration can be written as a toml, json, or yaml file, and you can spec
 
 Below are the configuration options for Voucher Server:
 
-| Group          | Key                          | Description                                                                                           |
-| :------------- | :--------------------------- | :---------------------------------------------------------------------------------------------------- |
-|                | `dryrun`                     | When set, don't create attestations.                                                                  |
-|                | `scanner`                    | The vulnerability scanner to use ("clair" or "gca").                                                  |
-|                | `failon`                     | The minimum vulnerability to fail on. Discussed below.                                                |
-|                | `valid_repos`                | A list of repos that are owned by your team/organization.                                             |
-|                | `trusted_builder_identities` | A list of email addresses. Owners of these emails are considered "trusted" (and will pass Provenance) |
-|                | `trusted_projects`           | A list of projects that are considered "trusted" (and will pass Provenance)                           |
-|                | `image_project`              | The project in the metadata server that image information is stored.                                  |
-|                | `binauth_project`            | The project in the metadata server that the binauth information is stored.                            |
-| `checks`       | (test name here)             | A test that is active when running "all" tests.                                                       |
-| `server`       | `port`                       | The port that the server can be reached on.                                                           |
-| `server`       | `timeout`                    | The number of seconds to spend checking an image, before failing.                                     |
-| `server`       | `require_auth`               | Require the use of Basic Auth, with the username and password from the configuration.                 |
-| `server`       | `username`                   | The username that Voucher server users must use.                                                      |
-| `server`       | `password`                   | A password hashed with the bcrypt algorithm, for use with the username.                               |
-| `ejson`        | `dir`                        | The path to the ejson keys directory.                                                                 |
-| `ejson`        | `secrets`                    | The path to the ejson secrets.                                                                        |
-| `clair`        | `address`                    | The hostname that Clair exists at. If "http://" or "https://" is omitted, this will default to HTTPS. |
-| `repositories` | `org-name`                   | The name of the organization that owns certain repositories.                                          |
-| `repositories` | `org-url`                    | The URL used to determine if a repository is owned by a organization.                                 |
+| Group            | Key                          | Description                                                                                           |
+| :-------------   | :--------------------------- | :---------------------------------------------------------------------------------------------------- |
+|                  | `dryrun`                     | When set, don't create attestations.                                                                  |
+|                  | `scanner`                    | The vulnerability scanner to use ("clair" or "gca").                                                  |
+|                  | `failon`                     | The minimum vulnerability to fail on. Discussed below.                                                |
+|                  | `valid_repos`                | A list of repos that are owned by your team/organization.                                             |
+|                  | `trusted_builder_identities` | A list of email addresses. Owners of these emails are considered "trusted" (and will pass Provenance) |
+|                  | `trusted_projects`           | A list of projects that are considered "trusted" (and will pass Provenance)                           |
+|                  | `image_project`              | The project in the metadata server that image information is stored.                                  |
+|                  | `binauth_project`            | The project in the metadata server that the binauth information is stored.                            |
+| `checks`         | (test name here)             | A test that is active when running "all" tests.                                                       |
+| `server`         | `port`                       | The port that the server can be reached on.                                                           |
+| `server`         | `timeout`                    | The number of seconds to spend checking an image, before failing.                                     |
+| `server`         | `require_auth`               | Require the use of Basic Auth, with the username and password from the configuration.                 |
+| `server`         | `username`                   | The username that Voucher server users must use.                                                      |
+| `server`         | `password`                   | A password hashed with the bcrypt algorithm, for use with the username.                               |
+| `ejson`          | `dir`                        | The path to the ejson keys directory.                                                                 |
+| `ejson`          | `secrets`                    | The path to the ejson secrets.                                                                        |
+| `clair`          |  `address`                   | The hostname that Clair exists at. If "http://" or "https://" is omitted, this will default to HTTPS. |
+| `repositories`   | `org-name`                   | The name of the organization that owns certain repositories.                                          |
+| `repositories`   | `org-url`                    | The URL used to determine if a repository is owned by a organization.                                 |
+| `required.[env]` | (test name here)             | A test that is active when running "env" tests.                                                       |
 
 Configuration options can be overridden at runtime by setting the appropriate flag. For example, if you set the "port" flag when running `voucher_server`, that value will override whatever is in the configuration.
 
@@ -192,7 +193,24 @@ snakeoil = true
 is_shopify = true
 ```
 
-With this configuration, the `diy`, `nobody`, `snakeoil`, and `is_shopify` checks would run when running `all` checks. The "provenance" check will be ignored unless called directly.
+With this configuration, the `diy`, `nobody`, `snakeoil`, and `is_shopify` checks would run when running `all` checks. The `provenance` check will be ignored unless called directly.
+
+### Required Checks
+
+You can configure named groups of checks the same as the `checks` block except by replacing `checks` with `required.[env]` where `[env]` is a name of your choosing.
+
+For example:
+
+```toml
+[required.myenv]
+diy      = true
+nobody   = true
+provenance = false
+snakeoil = true
+is_shopify = true
+```
+
+With this configuration, the `diy`, `nobody`, `snakeoil`, and `is_shopify` checks would run when running `myenv` checks. The `provenance` check will be ignored unless called directly.
 
 
 ## Usage
