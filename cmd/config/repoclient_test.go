@@ -13,6 +13,8 @@ import (
 
 func TestValidRepo(t *testing.T) {
 	viper.Set("ejson.secrets", "../../testdata/test_repo.ejson")
+	viper.Set("ejson.dir", "../../testdata/key")
+	viper.Set("repositories", []interface{}{map[string]interface{}{"alias": "shopify", "org-url": "github.com/Shopify"}})
 	repoURL := "https://github.com/Shopify/my-app"
 	client, err := NewRepositoryClient(context.Background(), repoURL)
 	assert.NoError(t, err)
@@ -22,34 +24,37 @@ func TestValidRepo(t *testing.T) {
 
 func TestInvalidRepo(t *testing.T) {
 	viper.Set("ejson.secrets", "../../testdata/test_repo.ejson")
+	viper.Set("ejson.dir", "../../testdata/key")
+	viper.Set("repositories", []interface{}{map[string]interface{}{"alias": "shopify", "org-url": "github.com/Shopify"}})
 	repoURL := "https://gitlab.com/TestOrg/my-app"
 	client, _ := NewRepositoryClient(context.Background(), repoURL)
 
 	assert.False(t, github.IsGithubRepoClient(client), "received github client with invalid org for ", repoURL)
 }
 
-func TestFindLongestKeyMatch(t *testing.T) {
-	keyRing := repository.KeyRing{
-		"github.com":        repository.Auth{},
-		"github.com/my-org": repository.Auth{},
+func TestGetOrgAlias(t *testing.T) {
+	orgs := map[string]repository.Organization{
+		"apple":  {Alias: "apple", VCS: "github.com", Name: "my-org"},
+		"banana": {Alias: "banana", VCS: "github.com", Name: ""},
 	}
 
 	cases := []struct {
-		str         string
-		matchingKey string
-		foundMatch  bool
+		str                string
+		expectedAlias      string
+		expectedFoundMatch bool
 	}{
-		{str: "github.com/my-org/my-repo", matchingKey: "github.com/my-org", foundMatch: true},
-		{str: "github.com/my-org", matchingKey: "github.com/my-org", foundMatch: true},
-		{str: "github.com/other-org", matchingKey: "github.com", foundMatch: true},
-		{str: "gitea.com/hello", matchingKey: "", foundMatch: false},
+		{str: "github.com/my-org/my-repo", expectedAlias: "apple", expectedFoundMatch: true},
+		{str: "github.com/my-org", expectedAlias: "apple", expectedFoundMatch: true},
+		{str: "github.com/other-org", expectedAlias: "banana", expectedFoundMatch: true},
+		{str: "github.com", expectedAlias: "banana", expectedFoundMatch: true},
+		{str: "gitea.com/hello", expectedAlias: "", expectedFoundMatch: false},
 	}
 
 	for _, testCase := range cases {
 		t.Run(testCase.str, func(t *testing.T) {
-			matchingKey, foundMatch := findLongestKeyMatch(keyRing, testCase.str)
-			assert.Equal(t, testCase.foundMatch, foundMatch)
-			assert.Equal(t, testCase.matchingKey, matchingKey)
+			matchingKey, foundMatch := getOrgAlias(orgs, *repository.NewOrganization("", testCase.str))
+			assert.Equal(t, testCase.expectedFoundMatch, foundMatch)
+			assert.Equal(t, testCase.expectedAlias, matchingKey)
 		})
 	}
 }

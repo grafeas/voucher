@@ -25,8 +25,7 @@ secrets         = "../testdata/test.ejson"
 [clair]
 address         = "localhost:6060"
 
-[[repositories]]
-org-name = "Shopify"
+[repository.shopify]
 org-url = "https://github.com/Shopify"
 
 [required.env1]

@@ -98,6 +98,27 @@ func (c *check) SetMetadataClient(client voucher.MetadataClient) {
 
 Checks that implement MetadataCheck will automatically have their `SetMetadataClient` method called with the configured MetadataClient. MetadataChecks can also be AuthorizedChecks.
 
+### RepositoryChecks
+
+Some checks require interacting with the code repository client. These checks should implement RepositoryCheck, which requires a new method:
+
+```golang
+type RepositoryCheck interface {
+	MetadataCheck
+	SetRepositoryClient(repository.Client)
+}
+```
+
+For example, if your check has a `repositoryClient` field, you could write:
+
+```golang
+func (c *check) SetRepositoryClient(client repository.Client) {
+    c.repositoryClient = client
+}
+```
+
+Checks that implement RepositoryCheck will automatically have their `SetRepositoryClient` method called with the configured repository client.
+
 ## Implement the CheckFactory
 
 CheckFactories are functions which return a new Check.

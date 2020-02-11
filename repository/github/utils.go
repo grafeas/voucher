@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/url"
 
+	"github.com/Shopify/voucher/repository"
 	"github.com/shurcooL/githubv4"
 )
 
@@ -75,17 +76,11 @@ func (s checkStatusState) isValidCheckStatusState() bool {
 }
 
 func (s statusState) isValidStatusState() bool {
-	const (
-		errorString    = "ERROR"
-		expectedString = "EXPECTED"
-		failureString  = "FAILURE"
-		pendingString  = "PENDING"
-		successString  = "SUCCESS"
-	)
 	switch s {
 	case "": // statusState can be inconclusive/empty
 		return true
-	case errorString, expectedString, failureString, pendingString, successString:
+	case repository.CommitStatusError, repository.CommitStatusExpected, repository.CommitStatusFAilure,
+		repository.CommitStatusPending, repository.CommitStatusSuccess:
 		return true
 	default:
 		return false

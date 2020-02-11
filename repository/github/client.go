@@ -2,6 +2,7 @@ package github
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -65,12 +66,12 @@ func NewClient(ctx context.Context, auth *repository.Auth) (repository.Client, e
 
 // GetOrganization retrieves the necessary GitHub organizational information used in Voucher's checks
 func (ghc *client) GetOrganization(ctx context.Context, details repository.BuildDetail) (repository.Organization, error) {
-	repoURI, err := GetRepositoryURL(&details)
-	if err != nil {
-		return repository.Organization{}, fmt.Errorf("Error creating a repository url. Error: %s", err)
+	repo := repository.NewRepositoryMetadata(details.RepositoryURL)
+	if nil == repo {
+		return repository.Organization{}, errors.New("Error parsing repository url " + details.RepositoryURL)
 	}
 
-	organization, err := newRepositoryOrgInfoResult(ctx, ghc.ghClient, repoURI)
+	organization, err := newRepositoryOrgInfoResult(ctx, ghc.ghClient, repo.String())
 	if err != nil {
 		return repository.Organization{}, err
 	}
@@ -94,12 +95,12 @@ func (ghc *client) GetCommit(ctx context.Context, details repository.BuildDetail
 
 // GetDefaultBranch retrieves the necessary GitHub default branch information used in Voucher's checks
 func (ghc *client) GetDefaultBranch(ctx context.Context, details repository.BuildDetail) (repository.Branch, error) {
-	repoURI, err := GetRepositoryURL(&details)
-	if err != nil {
-		return repository.Branch{}, fmt.Errorf("Error creating a repository url. Error: %s", err)
+	repo := repository.NewRepositoryMetadata(details.RepositoryURL)
+	if nil == repo {
+		return repository.Branch{}, errors.New("Error creating a repository url")
 	}
 
-	defaultBranchResult, err := newDefaultBranchResult(ctx, ghc.ghClient, repoURI)
+	defaultBranchResult, err := newDefaultBranchResult(ctx, ghc.ghClient, repo.String())
 	if err != nil {
 		return repository.Branch{}, fmt.Errorf("GetDefaultBranch query could not be completed. Error: %s", err)
 	}
@@ -108,12 +109,12 @@ func (ghc *client) GetDefaultBranch(ctx context.Context, details repository.Buil
 
 // GetBranch retrieves the necessary GitHub branch information used in Voucher's checks given the name of the branch
 func (ghc *client) GetBranch(ctx context.Context, details repository.BuildDetail, name string) (repository.Branch, error) {
-	repoURI, err := GetRepositoryURL(&details)
-	if err != nil {
-		return repository.Branch{}, fmt.Errorf("Error creating a repository url. Error: %s", err)
+	repo := repository.NewRepositoryMetadata(details.RepositoryURL)
+	if nil == repo {
+		return repository.Branch{}, errors.New("Error creating a repository url")
 	}
 
-	branchResult, err := newBranchResult(ctx, ghc.ghClient, repoURI, name)
+	branchResult, err := newBranchResult(ctx, ghc.ghClient, repo.String(), name)
 	if err != nil {
 		return repository.Branch{}, fmt.Errorf("GetBranch query could not be completed. Error: %s", err)
 	}

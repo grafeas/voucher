@@ -16,6 +16,8 @@ import (
 	_ "github.com/Shopify/voucher/checks/provenance"
 	// Register the Snakeoil check
 	_ "github.com/Shopify/voucher/checks/snakeoil"
+	// Register the Repo check
+	_ "github.com/Shopify/voucher/checks/approved"
 )
 
 // EnabledChecks returns a slice of strings with the check names, based on a
@@ -94,9 +96,9 @@ func NewCheckSuite(metadataClient voucher.MetadataClient, repositoryClient repos
 	trustedProjects := viper.GetStringSlice("trusted_projects")
 
 	orgs := GetOrganizationsFromConfig()
-	for name, organization := range orgs {
+	for alias, organization := range orgs {
 		orgCheck := org.NewOrganizationCheckFactory(organization)
-		voucher.RegisterCheckFactory("is_"+strings.ToLower(name), orgCheck)
+		voucher.RegisterCheckFactory("is_"+strings.ToLower(alias), orgCheck)
 	}
 
 	checks, err := voucher.GetCheckFactories(names...)

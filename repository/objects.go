@@ -1,18 +1,60 @@
 package repository
 
+import (
+	"net/url"
+	"path"
+	"regexp"
+)
+
+const (
+	Protocol      = "((?P<protocol>https?|git)(?:://|@))?"
+	VCSName       = "(?P<vcs>[^/:]+)"
+	OrgName       = "(?P<org>[^/.]+)"
+	RepoName      = "(?P<repo>[^/.]+)"
+	RepoExtension = "(?:.git)?"
+
+	VCSRegex  = "^" + Protocol + VCSName + "/?$"
+	OrgRegex  = "^" + Protocol + VCSName + "[/:]" + OrgName + "/?$"
+	RepoRegex = "^" + Protocol + VCSName + "[/:]" + OrgName + "/" + RepoName + RepoExtension + "$"
+)
+
 // Organization contains repository information pertaining to an organization
 type Organization struct {
-	Name string
-	URL  string
+	Alias string
+	VCS   string
+	Name  string
 }
 
-// NewOrganization returns a new Organization object
-func NewOrganization(name string, url string) Organization {
-	return Organization{
-		Name: name,
-		URL:  url,
+func NewOrganization(alias string, url string) *Organization {
+	for _, regex := range []string{
+		RepoRegex,
+		OrgRegex,
+		VCSRegex,
+	} {
+		if matched, err := regexp.MatchString(regex, url); nil == err && matched {
+			match := getMatchGroups(regex, url)
+
+			if "" == alias {
+				alias = match["org"]
+			}
+
+			return &Organization{
+				Alias: alias,
+				VCS:   match["vcs"],
+				Name:  match["org"],
+			}
+		}
 	}
+	return nil
 }
+
+const (
+	CommitStatusError    = "ERROR"
+	CommitStatusExpected = "EXPECTED"
+	CommitStatusFAilure  = "FAILURE"
+	CommitStatusPending  = "PENDING"
+	CommitStatusSuccess  = "SUCCESS"
+)
 
 // Commit contains information pertaining to the validity of a commit
 type Commit struct {
@@ -56,11 +98,12 @@ func NewCommitRef(commitURL string) CommitRef {
 }
 
 // NewPullRequest returns a new PullRequest object
-func NewPullRequest(baseBranchName string, headBranchName string, isMerged bool) PullRequest {
+func NewPullRequest(baseBranchName string, headBranchName string, isMerged bool, mergeCommit CommitRef) PullRequest {
 	return PullRequest{
 		BaseBranchName: baseBranchName,
 		HeadBranchName: headBranchName,
 		IsMerged:       isMerged,
+		MergeCommit:    mergeCommit,
 	}
 }
 
@@ -99,21 +142,55 @@ type PullRequest struct {
 	BaseBranchName string
 	HeadBranchName string
 	IsMerged       bool
+	MergeCommit    CommitRef
 }
 
 // Metadata describes the top level metadata information about a repo
 // that one can get from the gitUrl
 type Metadata struct {
-	Vcs          string `json:"vcs"`
+	VCS          string `json:"vcs"`
 	Organization string `json:"organization"`
 	Name         string `json:"name"`
 }
 
-// NewOrganization returns a new Organization object
-func NewRepositoryMetadata(vcs, org, name string) Metadata {
-	return Metadata{
-		Vcs:          vcs,
-		Organization: org,
-		Name:         name,
+func NewRepositoryMetadata(url string) *Metadata {
+	for _, regex := range []string{
+		RepoRegex,
+		OrgRegex,
+		VCSRegex,
+	} {
+		if matched, err := regexp.MatchString(regex, url); nil == err && matched {
+			match := getMatchGroups(regex, url)
+			return &Metadata{
+				VCS:          match["vcs"],
+				Organization: match["org"],
+				Name:         match["repo"],
+			}
+		}
 	}
+	return nil
+}
+
+func (metadata *Metadata) String() string {
+	scheme, _ := url.Parse("https://")
+	scheme.Path = path.Join(
+		scheme.Path,
+		metadata.VCS,
+		metadata.Organization,
+		metadata.Name,
+	)
+	return scheme.String()
+}
+
+func getMatchGroups(regEx, url string) (paramsMap map[string]string) {
+	var compRegEx = regexp.MustCompile(regEx)
+	match := compRegEx.FindStringSubmatch(url)
+
+	paramsMap = make(map[string]string)
+	for i, name := range compRegEx.SubexpNames() {
+		if i > 0 && i <= len(match) {
+			paramsMap[name] = match[i]
+		}
+	}
+	return
 }

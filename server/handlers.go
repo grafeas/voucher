@@ -51,7 +51,7 @@ func handleChecks(w http.ResponseWriter, r *http.Request, name ...string) {
 
 	buildDetail, err := metadataClient.GetBuildDetail(ctx, imageData)
 	if nil != err {
-		LogWarning("failed to get buildDetail for image", err)
+		LogWarning(fmt.Sprintf("could not get image metadata for %s", imageData), err)
 	} else {
 		repositoryClient, err = config.NewRepositoryClient(ctx, buildDetail.RepositoryURL)
 		if nil != err {

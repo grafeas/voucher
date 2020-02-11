@@ -50,7 +50,7 @@ func (o *check) Check(ctx context.Context, i voucher.ImageData) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	if org != o.org {
+	if org.Name != o.org.Name {
 		return false, nil
 	}
 

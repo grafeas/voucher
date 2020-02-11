@@ -2,6 +2,7 @@ package github
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/shurcooL/githubv4"
@@ -61,7 +62,12 @@ func newRepositoryOrgInfoResult(ctx context.Context, ghc ghGraphQLClient, uri st
 	}
 	organization := queryResult.Resource.Repository.Owner.Organization
 
-	return repository.NewOrganization(organization.Name, organization.URL), nil
+	org := repository.NewOrganization(organization.Name, organization.URL)
+	if org == nil {
+		return repository.Organization{}, errors.New("error parsing url" + organization.URL)
+	}
+
+	return *org, nil
 }
 
 // newCommitInfoResult calls the commitInfoQuery and populates the respective variables
@@ -96,7 +102,7 @@ func getAllCheckSuites(ctx context.Context, ghc ghGraphQLClient, queryResult *co
 			return false, newTypeMismatchError("commitInfoQuery", ciq)
 		}
 		commit := ciq.Resource.Commit
-		resourceType := v.(*commitInfoQuery).Resource.Typename
+		resourceType := ciq.Resource.Typename
 		if resourceType != commitType {
 			return false, repository.NewTypeMismatchError(commitType, resourceType)
 		}
@@ -126,7 +132,7 @@ func getAllAssociatedPullRequests(ctx context.Context, ghc ghGraphQLClient, quer
 			return false, newTypeMismatchError("commitInfoQuery", ciq)
 		}
 		commit := ciq.Resource.Commit
-		resourceType := v.(*commitInfoQuery).Resource.Typename
+		resourceType := ciq.Resource.Typename
 		if resourceType != commitType {
 			return false, repository.NewTypeMismatchError(commitType, resourceType)
 		}
@@ -154,7 +160,8 @@ func createNewCommitInfo(queryResult *commitInfoQuery, checkSuites []checkSuite,
 	pullRequests := make([]repository.PullRequest, 0)
 
 	for _, pr := range associatedPullRequests {
-		pullRequests = append(pullRequests, repository.NewPullRequest(pr.BaseRefName, pr.HeadRefName, pr.Merged))
+		commit := repository.NewCommitRef(pr.MergeCommit.URL)
+		pullRequests = append(pullRequests, repository.NewPullRequest(pr.BaseRefName, pr.HeadRefName, pr.Merged, commit))
 	}
 	for _, checkSuite := range checkSuites {
 		if !checkSuite.Status.isValidCheckStatusState() {
@@ -273,6 +280,7 @@ type app struct {
 // pullRequest contains the relevant information associated with a pull request
 type pullRequest struct {
 	Merged      bool
+	MergeCommit commit
 	BaseRefName string
 	HeadRefName string
 }

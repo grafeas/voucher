@@ -7,21 +7,21 @@ import (
 	"github.com/Shopify/voucher/repository"
 )
 
-func GetOrganizationsFromConfig() (orgs map[string]repository.Organization) {
-	orgs = make(map[string]repository.Organization)
-	repositories, ok := viper.Get("repositories").([]interface{})
-	if !ok {
-		repositories = []interface{}{}
+func GetOrganizationsFromConfig() map[string]repository.Organization {
+	orgs := make(map[string]repository.Organization)
+	repositories := viper.GetStringMap("repository")
+	if nil == repositories {
+		repositories = map[string]interface{}{}
 	}
-	for _, row := range repositories {
-		if m, ok := row.(map[string]interface{}); ok {
-			name := m["org-name"].(string)
+	for alias, val := range repositories {
+		if m, ok := val.(map[string]interface{}); ok {
 			url := m["org-url"].(string)
-			orgs[name] = repository.Organization{Name: name, URL: url}
+			org := *repository.NewOrganization(alias, url)
+			orgs[org.Alias] = *repository.NewOrganization(alias, url)
 		}
 	}
 	if len(orgs) == 0 {
 		log.Warning("no repositories found")
 	}
-	return
+	return orgs
 }

@@ -17,12 +17,13 @@ Voucher was designed to be called from your CI/DC pipeline, after an image is bu
 
 Voucher presently includes the following checks:
 
-| Test Name    | Description                                                                    |
-| :--------    | :----------------------------------------------------------------------------- |
-| `diy`        | Can the image be downloaded from our container registry?                       |
-| `nobody`     | Was the image built to run as a user who is not root?                          |
-| `snakeoil`   | Is the image free of known security issues?                                    |
-| `provenance` | Was the image built by us or a trusted system?                                 |
+| Test Name    | Description                                                                        |
+| :--------    | :--------------------------------------------------------------------------------- |
+| `diy`        | Can the image be downloaded from our container registry?                           |
+| `nobody`     | Was the image built to run as a user who is not root?                              |
+| `snakeoil`   | Is the image free of known security issues?                                        |
+| `provenance` | Was the image built by us or a trusted system?                                     |
+| `approved`   | Did the source code for the image pass all required checks in the code repository? |
 
 As well as the following dynamic check:
 

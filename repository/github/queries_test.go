@@ -61,8 +61,9 @@ func TestNewRepositoryOrgInfoResult(t *testing.T) {
 			}(),
 			mask: []string{"Resource.Repository.Owner.Typename", "Resource.Repository.Owner.Organization"},
 			expected: repository.Organization{
-				URL:  "https://github.com/Shopify",
-				Name: "Shopify",
+				Alias: "Shopify",
+				VCS:   "github.com",
+				Name:  "Shopify",
 			},
 			shouldError: false,
 		},
@@ -340,6 +341,7 @@ func TestNewCommitInfo(t *testing.T) {
 						BaseRefName: "master",
 						HeadRefName: "fix-broken-response",
 						Merged:      true,
+						MergeCommit: commit{URL: "https://github.com/Shopify/voucher/commit/8c235f3bd57393c53037b032e6da3e2b48aa0428"},
 					},
 				}
 				res.Resource.Commit.Signature.IsValid = true
@@ -361,6 +363,7 @@ func TestNewCommitInfo(t *testing.T) {
 					BaseRefName: "master",
 					HeadRefName: "fix-broken-response",
 					Merged:      true,
+					MergeCommit: commit{URL: "https://github.com/Shopify/voucher/commit/8c235f3bd57393c53037b032e6da3e2b48aa0428"},
 				},
 			},
 			expected: repository.Commit{
@@ -382,6 +385,9 @@ func TestNewCommitInfo(t *testing.T) {
 						BaseBranchName: "master",
 						HeadBranchName: "fix-broken-response",
 						IsMerged:       true,
+						MergeCommit: repository.CommitRef{
+							URL: "https://github.com/Shopify/voucher/commit/8c235f3bd57393c53037b032e6da3e2b48aa0428",
+						},
 					},
 				},
 			},
@@ -529,6 +535,7 @@ func TestCreateNewDefaultBranch(t *testing.T) {
 						BaseRefName: "master",
 						HeadRefName: "fix-broken-response",
 						Merged:      true,
+						MergeCommit: commit{URL: "https://github.com/Shopify/voucher/commit/8c235f3bd57393c53037b032e6da3e2b48aa0428"},
 					},
 				}
 				res.Resource.Commit.Signature.IsValid = true
@@ -550,6 +557,9 @@ func TestCreateNewDefaultBranch(t *testing.T) {
 					BaseRefName: "master",
 					HeadRefName: "fix-broken-response",
 					Merged:      true,
+					MergeCommit: commit{
+						URL: "https://github.com/Shopify/voucher/commit/8c235f3bd57393c53037b032e6da3e2b48aa0428",
+					},
 				},
 			},
 			expected: repository.Commit{
@@ -571,6 +581,9 @@ func TestCreateNewDefaultBranch(t *testing.T) {
 						BaseBranchName: "master",
 						HeadBranchName: "fix-broken-response",
 						IsMerged:       true,
+						MergeCommit: repository.CommitRef{
+							URL: "https://github.com/Shopify/voucher/commit/8c235f3bd57393c53037b032e6da3e2b48aa0428",
+						},
 					},
 				},
 			},
@@ -714,6 +727,7 @@ func TestNewCommitInfoResult(t *testing.T) {
 						BaseRefName: "master",
 						HeadRefName: "fix-broken-response",
 						Merged:      true,
+						MergeCommit: commit{URL: "https://github.com/Shopify/voucher/commit/8c235f3bd57393c53037b032e6da3e2b48aa0428"},
 					},
 				}
 				res.Resource.Commit.Signature.IsValid = true
@@ -755,6 +769,9 @@ func TestNewCommitInfoResult(t *testing.T) {
 						BaseBranchName: "master",
 						HeadBranchName: "fix-broken-response",
 						IsMerged:       true,
+						MergeCommit: repository.CommitRef{
+							URL: "https://github.com/Shopify/voucher/commit/8c235f3bd57393c53037b032e6da3e2b48aa0428",
+						},
 					},
 				},
 			},

@@ -37,12 +37,10 @@ secrets = "/etc/voucher/secrets.production.ejson"
 [clair]
 address = "localhost:6060"
 
-[[repositories]]
-org-name = "Shopify"
+[repository.shopify]
 org-url = "https://github.com/Shopify"
 
-[[repositories]]
-org-name = "Grafeas"
+[repository.grafeas]
 org-url = "https://github.com/grafeas"
 
 [[kms_keys]]
