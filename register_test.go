@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
 func TestRegisterCheckFactory(t *testing.T) {
@@ -13,19 +14,22 @@ func TestRegisterCheckFactory(t *testing.T) {
 	ctx := context.Background()
 
 	factories := make(CheckFactories)
+	i := newTestImageData(t)
 
 	factories.Register("goodcheck", func() Check {
-		return newTestCheck(true)
+		check := new(MockCheck)
+		check.On("Check", mock.Anything, i).Return(true, nil)
+		return check
 	})
 	factories.Register("badcheck", func() Check {
-		return newTestCheck(false)
+		check := new(MockCheck)
+		check.On("Check", mock.Anything, i).Return(false, nil)
+		return check
 	})
 
 	checks, err := factories.GetNewChecks("goodcheck", "badcheck")
 	assert.NoError(err)
 	assert.Len(checks, 2)
-
-	i := newTestImageData(t)
 
 	if assert.NotNil(checks["goodcheck"]) {
 		ok, checkErr := checks["goodcheck"].Check(ctx, i)
@@ -53,10 +57,14 @@ func TestRegisterDefaultCheckFactories(t *testing.T) {
 	DefaultCheckFactories = make(CheckFactories)
 
 	RegisterCheckFactory("goodcheck", func() Check {
-		return newTestCheck(true)
+		check := new(MockCheck)
+		check.On("Check", mock.Anything, mock.Anything).Return(true, nil)
+		return check
 	})
 	RegisterCheckFactory("badcheck", func() Check {
-		return newTestCheck(false)
+		check := new(MockCheck)
+		check.On("Check", mock.Anything, mock.Anything).Return(false, nil)
+		return check
 	})
 	assert.Truef(IsCheckFactoryRegistered("goodcheck"), "goodcheck was registered but IsCheckRegistered is false")
 	assert.Truef(IsCheckFactoryRegistered("badcheck"), "badcheck was registered but IsCheckRegistered is false")

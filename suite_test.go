@@ -2,30 +2,13 @@ package voucher
 
 import (
 	"context"
-	"os"
+	"errors"
 	"testing"
 
-	"github.com/Shopify/voucher/signer/pgp"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
-
-func newTestKeyRing(t *testing.T) *pgp.KeyRing {
-	t.Helper()
-
-	require := require.New(t)
-
-	keyring := pgp.NewKeyRing()
-
-	keyFile, err := os.Open("testdata/testkey.asc")
-	require.NoErrorf(err, "failed to open key file: %s", err)
-	defer keyFile.Close()
-
-	err = pgp.AddKeyToKeyRingFromReader(keyring, "snakeoil", keyFile)
-	require.NoErrorf(err, "Failed to add key to keyring: %s", err)
-
-	return keyring
-}
 
 func newTestImageData(t *testing.T) ImageData {
 	t.Helper()
@@ -43,12 +26,23 @@ func TestNewSuite(t *testing.T) {
 	results := suite.Run(context.Background(), imageData)
 	require.Equal(t, []CheckResult{}, results)
 
-	brokenCheck := new(testBrokenCheck)
+	errBrokenTest := errors.New("this test is broken")
 
-	// Add our three checks.
-	suite.Add("passer", newTestCheck(true))
-	suite.Add("failer", newTestCheck(false))
-	suite.Add("broken", brokenCheck)
+	checks := make(map[string]Check)
+	for _, check := range []struct {
+		name string
+		pass bool
+		err  error
+	}{
+		{"passer", true, nil},
+		{"failer", false, nil},
+		{"broken", false, errBrokenTest},
+	} {
+		mockCheck := new(MockCheck)
+		mockCheck.On("Check", mock.Anything, imageData).Return(check.pass, check.err)
+		checks[check.name] = mockCheck
+		suite.Add(check.name, mockCheck)
+	}
 
 	expectedResults := []CheckResult{
 		{
@@ -90,7 +84,7 @@ func TestNewSuite(t *testing.T) {
 	assert.Nil(t, err)
 
 	if assert.NotNil(t, gottenCheck) {
-		assert.Equal(t, gottenCheck, brokenCheck)
+		assert.Equal(t, checks["broken"], gottenCheck)
 	}
 }
 
@@ -98,11 +92,13 @@ func TestMakeSuccessfulSuite(t *testing.T) {
 	suite := NewSuite()
 	assert.NotNilf(t, suite, "could not make CheckSuite")
 
-	suite.Add("pass1", newTestCheck(true))
-	suite.Add("pass2", newTestCheck(true))
-	suite.Add("pass3", newTestCheck(true))
-
 	imageData := newTestImageData(t)
+
+	for _, name := range []string{"pass1", "pass2", "pass3"} {
+		check := new(MockCheck)
+		check.On("Check", mock.Anything, imageData).Return(true, nil)
+		suite.Add(name, check)
+	}
 
 	results := suite.Run(context.Background(), imageData)
 
@@ -114,11 +110,13 @@ func TestMakeFailingSuite(t *testing.T) {
 	suite := NewSuite()
 	assert.NotNilf(t, suite, "could not make CheckSuite")
 
-	suite.Add("fail1", newTestCheck(false))
-	suite.Add("fail2", newTestCheck(false))
-	suite.Add("fail3", newTestCheck(false))
-
 	imageData := newTestImageData(t)
+
+	for _, name := range []string{"fail1", "fail2", "fail3"} {
+		check := new(MockCheck)
+		check.On("Check", mock.Anything, imageData).Return(false, nil)
+		suite.Add(name, check)
+	}
 
 	results := suite.Run(context.Background(), imageData)
 
@@ -127,18 +125,24 @@ func TestMakeFailingSuite(t *testing.T) {
 }
 
 func TestAttestSuite(t *testing.T) {
-	keyring := newTestKeyRing(t)
-
-	metadataClient := newTestMetadataClient(keyring, true)
-
 	suite := NewSuite()
 	assert.NotNilf(t, suite, "could not make CheckSuite")
 
-	suite.Add("snakeoil", newTestCheck(true))
-	suite.Add("pass2", newTestCheck(true))
-	suite.Add("pass3", newTestCheck(true))
-
 	imageData := newTestImageData(t)
+	errNoSigningEntity := errors.New("no signging entity exists for check")
+
+	metadataClient := new(MockMetadataClient)
+	metadataClient.
+		On("NewPayloadBody", imageData).Return(imageData.String(), nil).
+		On("AddAttestationToImage", mock.Anything, imageData, NewAttestationPayload("snakeoil", imageData.String())).Return(nil, nil).
+		On("AddAttestationToImage", mock.Anything, imageData, NewAttestationPayload("pass2", imageData.String())).Return(nil, errNoSigningEntity).
+		On("AddAttestationToImage", mock.Anything, imageData, NewAttestationPayload("pass3", imageData.String())).Return(nil, errNoSigningEntity)
+
+	for _, name := range []string{"snakeoil", "pass2", "pass3"} {
+		check := new(MockCheck)
+		check.On("Check", mock.Anything, imageData).Return(true, nil)
+		suite.Add(name, check)
+	}
 
 	results := suite.RunAndAttest(context.Background(), metadataClient, imageData)
 
@@ -154,7 +158,7 @@ func TestAttestSuite(t *testing.T) {
 		{
 			Name:      "pass2",
 			ImageData: imageData,
-			Err:       "no signing entity exists for check",
+			Err:       errNoSigningEntity.Error(),
 			Success:   true,
 			Attested:  false,
 			Details:   nil,
@@ -162,7 +166,7 @@ func TestAttestSuite(t *testing.T) {
 		{
 			Name:      "pass3",
 			ImageData: imageData,
-			Err:       "no signing entity exists for check",
+			Err:       errNoSigningEntity.Error(),
 			Success:   true,
 			Attested:  false,
 			Details:   nil,
@@ -173,24 +177,26 @@ func TestAttestSuite(t *testing.T) {
 }
 
 func TestNonattestingSuite(t *testing.T) {
-	keyring := newTestKeyRing(t)
+	imageData := newTestImageData(t)
+	errCreatingPayload := errors.New("cannot create payload body")
 
-	metadataClient := newTestMetadataClient(keyring, false)
+	metadataClient := new(MockMetadataClient)
+	metadataClient.On("NewPayloadBody", imageData).Return("", errCreatingPayload)
 
 	suite := NewSuite()
 	assert.NotNilf(t, suite, "could not make CheckSuite")
 
 	// only adding the snakeoil check, since that's the one we'll be attesting with
-	suite.Add("snakeoil", newTestCheck(true))
-
-	imageData := newTestImageData(t)
+	check := new(MockCheck)
+	check.On("Check", mock.Anything, imageData).Return(true, nil)
+	suite.Add("snakeoil", check)
 
 	results := suite.RunAndAttest(context.Background(), metadataClient, imageData)
 
 	expectedResult := CheckResult{
 		Name:      "snakeoil",
 		ImageData: imageData,
-		Err:       "cannot create payload body",
+		Err:       errCreatingPayload.Error(),
 		Success:   true,
 		Attested:  false,
 		Details:   nil,

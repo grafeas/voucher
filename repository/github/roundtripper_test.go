@@ -50,18 +50,3 @@ func TestAddPreviewSchemaHeaders(t *testing.T) {
 		})
 	}
 }
-
-func TestRoundTrip(t *testing.T) {
-	client := &http.Client{
-		Transport: new(http.Transport),
-	}
-	rtw := newRoundTripperWrapper(client.Transport)
-	req, err := http.NewRequest("GET", "https://github.com/", nil)
-
-	assert.NoError(t, err)
-
-	res, err := rtw.RoundTrip(req)
-
-	assert.NoError(t, err)
-	assert.Equal(t, res.StatusCode, 200)
-}
