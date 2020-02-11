@@ -6,6 +6,7 @@ require (
 	cloud.google.com/go v0.52.0
 	github.com/Shopify/ejson v1.2.0
 	github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973 // indirect
+	github.com/bradleyfalzon/ghinstallation v1.1.1
 	github.com/coreos/clair v2.0.5+incompatible
 	github.com/coreos/pkg v0.0.0-20180108230652-97fdf19511ea // indirect
 	github.com/docker/distribution v2.6.0-rc.1.0.20180913220339-b089e9168825+incompatible

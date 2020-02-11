@@ -49,7 +49,7 @@ func getTokenForRepo(repo *repository.Metadata) (*repository.Auth, error) {
 		return &token, nil
 	}
 
-	return nil, fmt.Errorf("failed to get token for %s: %w", orgURL, err)
+	return nil, fmt.Errorf("failed to get token for %s: %s", orgURL, err)
 }
 
 func findLongestKeyMatch(keyRing repository.KeyRing, toMatch string) (matchingKey string, foundMatch bool) {

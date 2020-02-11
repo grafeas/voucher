@@ -3,7 +3,10 @@ package github
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"strconv"
 
+	"github.com/bradleyfalzon/ghinstallation"
 	"github.com/shurcooL/githubv4"
 	"golang.org/x/oauth2"
 
@@ -25,16 +28,36 @@ func NewClient(ctx context.Context, auth *repository.Auth) (repository.Client, e
 	if auth == nil {
 		return nil, fmt.Errorf("Must provide authentication")
 	}
-	if auth.Type() != repository.TokenAuthType {
+
+	var httpClient *http.Client
+	if auth.Type() == repository.TokenAuthType {
+		sts := oauth2.StaticTokenSource(
+			&oauth2.Token{AccessToken: auth.Token},
+		)
+		httpClient = oauth2.NewClient(ctx, sts)
+		rtw := newRoundTripperWrapper(httpClient.Transport)
+		httpClient.Transport = rtw
+	} else if auth.Type() == repository.GithubInstallType {
+		appId, err := strconv.Atoi(auth.AppID)
+		if err != nil {
+			return nil, fmt.Errorf("Invalid application ID: %v", err)
+		}
+
+		installId, err := strconv.Atoi(auth.InstallationID)
+		if err != nil {
+			return nil, fmt.Errorf("Invalid installation ID: %v", err)
+		}
+
+		appsTransport, err := ghinstallation.New(http.DefaultTransport, int64(appId), int64(installId), []byte(auth.PrivateKey))
+		if err != nil {
+			return nil, fmt.Errorf("Error configuring Github App transport: %v", err)
+		}
+		httpClient = &http.Client{}
+		httpClient.Transport = appsTransport
+	} else {
 		return nil, fmt.Errorf("Unsupported auth type: %s", auth.Type())
 	}
 
-	sts := oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: auth.Token},
-	)
-	httpClient := oauth2.NewClient(ctx, sts)
-	rtw := newRoundTripperWrapper(httpClient.Transport)
-	httpClient.Transport = rtw
 	return &client{
 		ghClient: githubv4.NewClient(httpClient),
 	}, nil
