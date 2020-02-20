@@ -41,11 +41,11 @@ func NewSigner(keys map[string]Key) (*Signer, error) {
 func (s *Signer) Sign(checkName, body string) (string, string, error) {
 	key, ok := s.keys[checkName]
 	if !ok {
-		return "", "", signer.NoKeyForCheckError
+		return "", "", signer.ErrNoKeyForCheck
 	}
 
 	if key.Algo != AlgoSHA512 {
-		return "", "", fmt.Errorf("Unable to hash algorithm %q, must be SHA512", key.Algo)
+		return "", "", fmt.Errorf("unable to hash algorithm %q, must be SHA512", key.Algo)
 	}
 
 	resp, err := s.client.AsymmetricSign(context.Background(), &kms_pb.AsymmetricSignRequest{

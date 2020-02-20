@@ -57,7 +57,7 @@ func (g *check) Check(ctx context.Context, i voucher.ImageData) (bool, error) {
 
 	if !isFromBranch(defaultBranch, commit) ||
 		!isSigned(commit) ||
-		!isMergeCommit(commit, defaultBranch) ||
+		!isMergeCommit(commit) ||
 		!passedCI(commit) {
 		return false, nil
 	}
@@ -76,7 +76,7 @@ func isSigned(commit repository.Commit) bool {
 }
 
 // isMergeCommit checks that the commit is a merge commit
-func isMergeCommit(commit repository.Commit, branch repository.Branch) bool {
+func isMergeCommit(commit repository.Commit) bool {
 	for _, pullRequest := range commit.AssociatedPullRequests {
 		if pullRequest.IsMerged && pullRequest.MergeCommit.URL == commit.URL {
 			return true

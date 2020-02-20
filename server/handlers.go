@@ -23,7 +23,7 @@ func (s *Server) handleChecks(w http.ResponseWriter, r *http.Request, name ...st
 	defer r.Body.Close()
 
 	if err = s.isAuthorized(r); nil != err {
-		http.Error(w, "username or password is incorrect", 401)
+		http.Error(w, "username or password is incorrect", http.StatusUnauthorized)
 		LogError("username or password is incorrect", err)
 		return
 	}
@@ -34,7 +34,7 @@ func (s *Server) handleChecks(w http.ResponseWriter, r *http.Request, name ...st
 
 	imageData, err = handleInput(r)
 	if nil != err {
-		http.Error(w, err.Error(), 422)
+		http.Error(w, err.Error(), http.StatusUnprocessableEntity)
 		LogError(err.Error(), err)
 		return
 	}
@@ -42,9 +42,9 @@ func (s *Server) handleChecks(w http.ResponseWriter, r *http.Request, name ...st
 	ctx, cancel := context.WithTimeout(context.Background(), s.serverConfig.TimeoutDuration())
 	defer cancel()
 
-	metadataClient, err := config.NewMetadataClient(s.secrets, ctx)
+	metadataClient, err := config.NewMetadataClient(ctx, s.secrets)
 	if nil != err {
-		http.Error(w, "server has been misconfigured", 500)
+		http.Error(w, "server has been misconfigured", http.StatusInternalServerError)
 		LogError("failed to create MetadataClient", err)
 		return
 	}
@@ -62,12 +62,11 @@ func (s *Server) handleChecks(w http.ResponseWriter, r *http.Request, name ...st
 		} else {
 			log.Warning("failed to create repository client, no secrets configured")
 		}
-
 	}
 
 	checksuite, err := config.NewCheckSuite(s.secrets, metadataClient, repositoryClient, name...)
 	if nil != err {
-		http.Error(w, "server has been misconfigured", 500)
+		http.Error(w, "server has been misconfigured", http.StatusInternalServerError)
 		LogError("failed to create CheckSuite", err)
 		return
 	}
@@ -87,7 +86,7 @@ func (s *Server) handleChecks(w http.ResponseWriter, r *http.Request, name ...st
 	err = json.NewEncoder(w).Encode(checkResponse)
 	if nil != err {
 		// if all else fails
-		http.Error(w, err.Error(), 500)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		LogError("failed to encode respoonse as JSON", err)
 		return
 	}
@@ -104,7 +103,7 @@ func (s *Server) HandleIndividualCheck(w http.ResponseWriter, r *http.Request) {
 	checkName := variables["check"]
 
 	if "" == checkName {
-		http.Error(w, "failure", 500)
+		http.Error(w, "failure", http.StatusInternalServerError)
 		return
 	}
 
@@ -120,7 +119,7 @@ func (s *Server) HandleCheckGroup(w http.ResponseWriter, r *http.Request) {
 	groupName := r.URL.Path
 
 	if "" == groupName {
-		http.Error(w, "failure", 500)
+		http.Error(w, "failure", http.StatusInternalServerError)
 		return
 	}
 

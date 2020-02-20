@@ -1,6 +1,7 @@
 # Go parameters
 GOCMD=go
 GORELEASER=goreleaser
+GOLANGCI-LINT=golangci-lint
 DOCKER=docker
 GOPATH?=`echo $$GOPATH`
 GOBUILD=$(GOCMD) build
@@ -28,6 +29,9 @@ endif
 ifeq ($(shell $(DOCKER) -v dot 2> /dev/null) , "")
 	$(error "docker is not installed")
 endif
+ifeq ($(shell $(GOLANGCI-LINT) version 2> /dev/null) , "")
+	$(error "golangci-lint is not installed")
+endif
 ifeq ($(shell $(GORELEASER) version dot 2> /dev/null) , "")
 	$(error "goreleaser is not installed")
 endif
@@ -38,6 +42,12 @@ show-coverage: test
 
 test:
 	go test ./... -race -coverprofile=coverage.txt -covermode=atomic
+
+lint:
+	golangci-lint run
+
+lint-new:
+	golangci-lint run --new-from-rev master
 
 clean:
 	$(GOCLEAN)

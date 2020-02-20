@@ -12,7 +12,7 @@ func TestGetOrganizationsFromConfig(t *testing.T) {
 	InitConfig()
 
 	expected := map[string]repository.Organization{
-		"shopify": repository.Organization{
+		"shopify": {
 			Alias: "shopify",
 			Name:  "Shopify",
 			VCS:   "github.com",

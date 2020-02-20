@@ -39,7 +39,9 @@ func (c *Client) Check(ctx context.Context, check string, image reference.Canoni
 		return checkResp, fmt.Errorf("could not parse image, error: %s", err)
 	}
 
-	req, err := http.NewRequestWithContext(
+	var req *http.Request
+
+	req, err = http.NewRequestWithContext(
 		ctx,
 		http.MethodPost,
 		toVoucherURL(c.hostname, check),
@@ -59,7 +61,8 @@ func (c *Client) Check(ctx context.Context, check string, image reference.Canoni
 	}
 
 	if !strings.Contains(resp.Header.Get("Content-Type"), "application/json") {
-		b, err := ioutil.ReadAll(resp.Body)
+		var b []byte
+		b, err = ioutil.ReadAll(resp.Body)
 		if nil == err {
 			err = fmt.Errorf("failed to get response: %s", strings.TrimSpace(string(b)))
 		}

@@ -35,7 +35,7 @@ func TestNewClient(t *testing.T) {
 
 		require.Error(t, err)
 		assert.Nil(t, client)
-		assert.Equal(t, "Unsupported auth type: userpassword", err.Error())
+		assert.Equal(t, "unsupported auth type: userpassword", err.Error())
 	})
 
 	t.Run("Test with nil auth method", func(t *testing.T) {
@@ -45,6 +45,6 @@ func TestNewClient(t *testing.T) {
 
 		require.Error(t, err)
 		assert.Nil(t, client)
-		assert.Equal(t, "Must provide authentication", err.Error())
+		assert.Equal(t, "must provide authentication", err.Error())
 	})
 }

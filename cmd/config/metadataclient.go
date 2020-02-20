@@ -12,7 +12,7 @@ import (
 )
 
 // NewMetadataClient creates a new MetadataClient.
-func NewMetadataClient(secrets *Secrets, ctx context.Context) (voucher.MetadataClient, error) {
+func NewMetadataClient(ctx context.Context, secrets *Secrets) (voucher.MetadataClient, error) {
 	var keyring signer.AttestationSigner
 	var err error
 

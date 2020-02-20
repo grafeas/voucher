@@ -61,7 +61,7 @@ func (keyring *KeyRing) GetSignerByName(name string) (*openpgp.Entity, error) {
 		}
 	}
 
-	return nil, signer.NoKeyForCheckError
+	return nil, signer.ErrNoKeyForCheck
 }
 
 // AddEntities adds new keys from the passed EntityList to the keyring for

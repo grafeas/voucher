@@ -152,9 +152,9 @@ func getAllAssociatedPullRequests(ctx context.Context, ghc ghGraphQLClient, quer
 func createNewCommitInfo(queryResult *commitInfoQuery, checkSuites []checkSuite, associatedPullRequests []pullRequest) (repository.Commit, error) {
 	commit := queryResult.Resource.Commit
 
-	statusState := commit.Status.State
-	if !statusState.isValidStatusState() {
-		return repository.Commit{}, newTypeMismatchError("statusState", statusState)
+	commitStatusState := commit.Status.State
+	if !commitStatusState.isValidStatusState() {
+		return repository.Commit{}, newTypeMismatchError("commitStatusState", commitStatusState)
 	}
 	checks := make([]repository.Check, 0)
 	pullRequests := make([]repository.PullRequest, 0)
@@ -176,7 +176,7 @@ func createNewCommitInfo(queryResult *commitInfoQuery, checkSuites []checkSuite,
 
 	isSigned := commit.Signature.IsValid
 
-	return repository.NewCommit(commit.URL, checks, string(statusState), isSigned, pullRequests), nil
+	return repository.NewCommit(commit.URL, checks, string(commitStatusState), isSigned, pullRequests), nil
 }
 
 // newDefaultBranchResult calls the defaultBranchQuery and populates the results with the respective variables

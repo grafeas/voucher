@@ -1,5 +1,10 @@
 package main
 
+import (
+	"fmt"
+	"os"
+)
+
 var (
 	version = "dev"
 	commit  = "none"
@@ -8,5 +13,9 @@ var (
 
 func main() {
 	serverCmd.Version = version
-	serverCmd.Execute()
+
+	if err := serverCmd.Execute(); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 }

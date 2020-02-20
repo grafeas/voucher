@@ -1,7 +1,9 @@
 package signer
 
 import (
-	"fmt"
+	"errors"
 )
 
-var NoKeyForCheckError = fmt.Errorf("no signing entity exists for check")
+// ErrNoKeyForCheck is the error returned when Voucher does not have a key
+// for the Check in question.
+var ErrNoKeyForCheck = errors.New("no signing entity exists for check")

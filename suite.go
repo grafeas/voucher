@@ -39,7 +39,7 @@ func (cs *Suite) Get(name string) (Check, error) {
 func runner(ctx context.Context, name string, check Check, imageData ImageData, resultsChan chan CheckResult, metricsClient metrics.Client) {
 	checkStart := time.Now()
 	ok, err := check.Check(ctx, imageData)
-	metricsClient.CheckRunLatency(name, time.Now().Sub(checkStart))
+	metricsClient.CheckRunLatency(name, time.Since(checkStart))
 	if err == nil {
 		if !ok {
 			metricsClient.CheckRunFailure(name)
@@ -93,7 +93,7 @@ func (cs *Suite) Attest(ctx context.Context, metricsClient metrics.Client, metad
 				results[i].Err = err.Error()
 			}
 		}
-		metricsClient.CheckAttestationLatency(result.Name, time.Now().Sub(checkStart))
+		metricsClient.CheckAttestationLatency(result.Name, time.Since(checkStart))
 	}
 
 	return results

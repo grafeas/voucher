@@ -6,8 +6,8 @@ import (
 
 type NoopClient struct{}
 
-func (_ *NoopClient) CheckRunLatency(string, time.Duration)         {}
-func (_ *NoopClient) CheckAttestationLatency(string, time.Duration) {}
-func (_ *NoopClient) CheckRunFailure(string)                        {}
-func (_ *NoopClient) CheckRunError(string)                          {}
-func (_ *NoopClient) CheckAttestationError(string)                  {}
+func (*NoopClient) CheckRunLatency(string, time.Duration)         {}
+func (*NoopClient) CheckAttestationLatency(string, time.Duration) {}
+func (*NoopClient) CheckRunFailure(string)                        {}
+func (*NoopClient) CheckRunError(string)                          {}
+func (*NoopClient) CheckAttestationError(string)                  {}

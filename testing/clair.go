@@ -24,7 +24,7 @@ type clairAPIMock struct {
 func (mock *clairAPIMock) ServeHTTP(writer http.ResponseWriter, req *http.Request) {
 	user, pass, _ := req.BasicAuth()
 	if user != basicUsername || pass != basicPassword {
-		http.Error(writer, fmt.Sprintf("Unauthorized: %s", req.URL.Path), 401)
+		http.Error(writer, fmt.Sprintf("Unauthorized: %s", req.URL.Path), http.StatusUnauthorized)
 	}
 
 	switch req.URL.Path {
@@ -48,7 +48,7 @@ func (mock *clairAPIMock) ServeHTTP(writer http.ResponseWriter, req *http.Reques
 			}
 		}
 	}
-	http.Error(writer, fmt.Sprintf("failed to handle request: %s", req.URL.Path), 500)
+	http.Error(writer, fmt.Sprintf("failed to handle request: %s", req.URL.Path), http.StatusInternalServerError)
 }
 
 // NewTestClairServer creates a mock of Clair with a list of pre-defined clair

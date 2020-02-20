@@ -14,6 +14,10 @@ import (
 	"github.com/Shopify/voucher/repository"
 )
 
+// errCreatingRepositoryMetadata is the error returned when we fail to create
+// repository metadata.
+var errCreatingRepositoryMetadata = errors.New("failed to create repository metadata")
+
 // ghGraphQLClient represents a GraphQL client to interact with the GitHub API
 type ghGraphQLClient interface {
 	Query(ctx context.Context, q interface{}, variables map[string]interface{}) error
@@ -27,7 +31,7 @@ type client struct {
 // NewClient creates a new GitHub client
 func NewClient(ctx context.Context, auth *repository.Auth) (repository.Client, error) {
 	if auth == nil {
-		return nil, fmt.Errorf("Must provide authentication")
+		return nil, fmt.Errorf("must provide authentication")
 	}
 
 	var httpClient *http.Client
@@ -39,24 +43,24 @@ func NewClient(ctx context.Context, auth *repository.Auth) (repository.Client, e
 		rtw := newRoundTripperWrapper(httpClient.Transport)
 		httpClient.Transport = rtw
 	} else if auth.Type() == repository.GithubInstallType {
-		appId, err := strconv.Atoi(auth.AppID)
+		appID, err := strconv.Atoi(auth.AppID)
 		if err != nil {
-			return nil, fmt.Errorf("Invalid application ID: %v", err)
+			return nil, fmt.Errorf("invalid application ID: %v", err)
 		}
 
-		installId, err := strconv.Atoi(auth.InstallationID)
+		installID, err := strconv.Atoi(auth.InstallationID)
 		if err != nil {
-			return nil, fmt.Errorf("Invalid installation ID: %v", err)
+			return nil, fmt.Errorf("invalid installation ID: %v", err)
 		}
 
-		appsTransport, err := ghinstallation.New(http.DefaultTransport, int64(appId), int64(installId), []byte(auth.PrivateKey))
+		appsTransport, err := ghinstallation.New(http.DefaultTransport, int64(appID), int64(installID), []byte(auth.PrivateKey))
 		if err != nil {
-			return nil, fmt.Errorf("Error configuring Github App transport: %v", err)
+			return nil, fmt.Errorf("error configuring Github App transport: %v", err)
 		}
 		httpClient = &http.Client{}
 		httpClient.Transport = appsTransport
 	} else {
-		return nil, fmt.Errorf("Unsupported auth type: %s", auth.Type())
+		return nil, fmt.Errorf("unsupported auth type: %s", auth.Type())
 	}
 
 	return &client{
@@ -68,7 +72,7 @@ func NewClient(ctx context.Context, auth *repository.Auth) (repository.Client, e
 func (ghc *client) GetOrganization(ctx context.Context, details repository.BuildDetail) (repository.Organization, error) {
 	repo := repository.NewRepositoryMetadata(details.RepositoryURL)
 	if nil == repo {
-		return repository.Organization{}, errors.New("Error parsing repository url " + details.RepositoryURL)
+		return repository.Organization{}, fmt.Errorf("error parsing repository url %s", details.RepositoryURL)
 	}
 
 	organization, err := newRepositoryOrgInfoResult(ctx, ghc.ghClient, repo.String())
@@ -83,7 +87,7 @@ func (ghc *client) GetOrganization(ctx context.Context, details repository.Build
 func (ghc *client) GetCommit(ctx context.Context, details repository.BuildDetail) (repository.Commit, error) {
 	commitURI, err := GetCommitURL(&details)
 	if err != nil {
-		return repository.Commit{}, fmt.Errorf("Error creating a commit url. Error: %s", err)
+		return repository.Commit{}, fmt.Errorf("error creating a commit url. Error: %s", err)
 	}
 
 	commit, err := newCommitInfoResult(ctx, ghc.ghClient, commitURI)
@@ -97,7 +101,7 @@ func (ghc *client) GetCommit(ctx context.Context, details repository.BuildDetail
 func (ghc *client) GetDefaultBranch(ctx context.Context, details repository.BuildDetail) (repository.Branch, error) {
 	repo := repository.NewRepositoryMetadata(details.RepositoryURL)
 	if nil == repo {
-		return repository.Branch{}, errors.New("Error creating a repository url")
+		return repository.Branch{}, errCreatingRepositoryMetadata
 	}
 
 	defaultBranchResult, err := newDefaultBranchResult(ctx, ghc.ghClient, repo.String())
@@ -111,7 +115,7 @@ func (ghc *client) GetDefaultBranch(ctx context.Context, details repository.Buil
 func (ghc *client) GetBranch(ctx context.Context, details repository.BuildDetail, name string) (repository.Branch, error) {
 	repo := repository.NewRepositoryMetadata(details.RepositoryURL)
 	if nil == repo {
-		return repository.Branch{}, errors.New("Error creating a repository url")
+		return repository.Branch{}, errCreatingRepositoryMetadata
 	}
 
 	branchResult, err := newBranchResult(ctx, ghc.ghClient, repo.String(), name)

@@ -14,12 +14,17 @@ func init() {
 
 // LogRequests logs the request fields to stdout as Info
 func LogRequests(r *http.Request) {
-	r.ParseForm()
+	err := r.ParseForm()
+	if err != nil {
+		log.WithError(err).Info("received request with malformed form")
+		return
+	}
+
 	log.WithFields(log.Fields{
 		"url":  r.URL,
 		"path": r.URL.Path,
 		"form": r.Form,
-	}).Info("Request Info")
+	}).Info("received request")
 }
 
 // LogResult logs each test run as Info
