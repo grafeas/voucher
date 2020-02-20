@@ -20,6 +20,8 @@ var testParams = []byte(`
 }
 `)
 
+var server *Server
+
 const testUsername = "vouchertester"
 const testPassword = "testingvoucher"
 const testPasswordHash = "$2a$10$.PaOjV8GdqSHSmUtfolsJeF6LsAq/3CNsFCYGb3IoN/mO9xj1c/yG"
@@ -29,13 +31,15 @@ func TestMain(m *testing.M) {
 
 	config.InitConfig()
 
-	serverConfig = &Config{
+	serverConfig := &Config{
 		Port:        viper.GetInt("server.port"),
 		Timeout:     viper.GetInt("server.timeout"),
 		RequireAuth: true,
 		Username:    testUsername,
 		PassHash:    testPasswordHash,
 	}
+	secrets, _ := config.ReadSecrets()
+	server = &Server{serverConfig, secrets}
 
 	os.Exit(m.Run())
 }
@@ -47,7 +51,7 @@ func TestGoodAuthentication(t *testing.T) {
 	req.SetBasicAuth(testUsername, testPassword)
 
 	recorder := httptest.NewRecorder()
-	handler := http.HandlerFunc(HandleAll)
+	handler := http.HandlerFunc(server.HandleAll)
 
 	handler.ServeHTTP(recorder, req)
 
@@ -58,7 +62,7 @@ func TestBadAuthentication(t *testing.T) {
 	req, err := http.NewRequest(http.MethodPost, "/all", bytes.NewReader(testParams))
 	require.NoError(t, err)
 
-	router := NewRouter()
+	router := NewRouter(server)
 
 	req.SetBasicAuth(testUsername, "not the password")
 
@@ -76,13 +80,13 @@ func TestInvalidJSON(t *testing.T) {
 		}
 		`)
 
-	router := NewRouter()
+	router := NewRouter(server)
 
 	// Use the check groups configured in the test config
 	config.FileName = "../testdata/config.toml"
 	config.InitConfig()
 
-	for _, route := range getRoutes() {
+	for _, route := range getRoutes(server) {
 		path := route.Path
 		if "/{check}" == path {
 			path = "/diy"
@@ -106,7 +110,7 @@ func TestHandlerStatus(t *testing.T) {
 	req, err := http.NewRequest(http.MethodGet, healthCheckPath, nil)
 	require.NoError(t, err)
 
-	router := NewRouter()
+	router := NewRouter(server)
 
 	recorder := httptest.NewRecorder()
 	router.ServeHTTP(recorder, req)

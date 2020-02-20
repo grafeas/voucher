@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
@@ -14,14 +16,18 @@ var serverCmd = &cobra.Command{
 	Long: `Run the go server on the specified port
 	use --port=<port> to specify the port you want the server to run on`,
 	Run: func(cmd *cobra.Command, args []string) {
-		config := server.Config{
+		serverConfig := server.Config{
 			Port:        viper.GetInt("server.port"),
 			Timeout:     viper.GetInt("server.timeout"),
 			RequireAuth: viper.GetBool("server.require_auth"),
 			Username:    viper.GetString("server.username"),
 			PassHash:    viper.GetString("server.password"),
 		}
-		server.Serve(&config)
+		secrets, err := config.ReadSecrets()
+		if err != nil {
+			log.Printf("Error loading EJSON file, no secrets loaded: %v", err)
+		}
+		server.Serve(&serverConfig, secrets)
 	},
 }
 

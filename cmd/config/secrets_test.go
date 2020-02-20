@@ -15,9 +15,7 @@ func TestNonExistantEjson(t *testing.T) {
 	viper.Set("ejson.secrets", "../../testdata/bad.ejson")
 	viper.Set("ejson.dir", "../../testdata/key")
 
-	data := new(struct{})
-
-	err := readEjson(data)
+	_, err := ReadSecrets()
 	require.Equal(
 		t,
 		err.Error(),
@@ -31,9 +29,8 @@ func TestGetRepositoryKeyRing(t *testing.T) {
 	viper.Set("ejson.secrets", "../../testdata/test.ejson")
 	viper.Set("ejson.dir", "../../testdata/key")
 
-	repoKeyRing, err := getRepositoryKeyRing()
+	data, err := ReadSecrets()
 	require.NoError(t, err)
-	assert.NotNil(t, repoKeyRing)
 	assert.Equal(t, repository.KeyRing{
 		"organization-name": repository.Auth{
 			Token: "asdf1234",
@@ -42,15 +39,15 @@ func TestGetRepositoryKeyRing(t *testing.T) {
 			Username: "testUser",
 			Password: "testPassword",
 		},
-	}, repoKeyRing)
+	}, data.RepositoryAuthentication)
 }
 
 func TestGetRepositoryKeyRingNoEjson(t *testing.T) {
 	viper.Set("ejson.secrets", "../../testdata/test.ejson")
 	viper.Set("ejson.dir", "../../testdata/nokey")
 
-	repoKeyRing, err := getRepositoryKeyRing()
-	require.Nil(t, repoKeyRing)
+	data, err := ReadSecrets()
+	require.Nil(t, data)
 	assert.Error(t, err)
 }
 
@@ -58,20 +55,21 @@ func TestGetClairConfig(t *testing.T) {
 	viper.Set("ejson.secrets", "../../testdata/test.ejson")
 	viper.Set("ejson.dir", "../../testdata/key")
 
-	clairConfig, err := getClairConfig()
+	data, err := ReadSecrets()
 	require.NoError(t, err)
-	require.NotNil(t, clairConfig)
 	assert.Equal(t, clair.Config{
 		Username: "testuser",
 		Password: "testpassword",
-	}, clairConfig)
+	}, data.ClairConfig)
 }
 
 func TestGetPGPKeyRing(t *testing.T) {
 	viper.Set("ejson.secrets", "../../testdata/test.ejson")
 	viper.Set("ejson.dir", "../../testdata/key")
 
-	keyRing, err := getPGPKeyRing()
+	data, err := ReadSecrets()
+	require.NoError(t, err)
+	keyRing, err := data.getPGPKeyRing()
 	require.NoError(t, err)
 	assert.NotNil(t, keyRing)
 }

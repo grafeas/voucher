@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
 	"github.com/Shopify/voucher"
@@ -14,14 +15,14 @@ import (
 	"github.com/Shopify/voucher/repository"
 )
 
-func handleChecks(w http.ResponseWriter, r *http.Request, name ...string) {
+func (s *Server) handleChecks(w http.ResponseWriter, r *http.Request, name ...string) {
 	var imageData voucher.ImageData
 	var repositoryClient repository.Client
 	var err error
 
 	defer r.Body.Close()
 
-	if err = isAuthorized(r); nil != err {
+	if err = s.isAuthorized(r); nil != err {
 		http.Error(w, "username or password is incorrect", 401)
 		LogError("username or password is incorrect", err)
 		return
@@ -38,10 +39,10 @@ func handleChecks(w http.ResponseWriter, r *http.Request, name ...string) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), serverConfig.TimeoutDuration())
+	ctx, cancel := context.WithTimeout(context.Background(), s.serverConfig.TimeoutDuration())
 	defer cancel()
 
-	metadataClient, err := config.NewMetadataClient(ctx)
+	metadataClient, err := config.NewMetadataClient(s.secrets, ctx)
 	if nil != err {
 		http.Error(w, "server has been misconfigured", 500)
 		LogError("failed to create MetadataClient", err)
@@ -53,13 +54,18 @@ func handleChecks(w http.ResponseWriter, r *http.Request, name ...string) {
 	if nil != err {
 		LogWarning(fmt.Sprintf("could not get image metadata for %s", imageData), err)
 	} else {
-		repositoryClient, err = config.NewRepositoryClient(ctx, buildDetail.RepositoryURL)
-		if nil != err {
-			LogWarning("failed to create repository client, continuing without git repo support:", err)
+		if s.secrets != nil {
+			repositoryClient, err = config.NewRepositoryClient(ctx, s.secrets.RepositoryAuthentication, buildDetail.RepositoryURL)
+			if nil != err {
+				LogWarning("failed to create repository client, continuing without git repo support:", err)
+			}
+		} else {
+			log.Warning("failed to create repository client, no secrets configured")
 		}
+
 	}
 
-	checksuite, err := config.NewCheckSuite(metadataClient, repositoryClient, name...)
+	checksuite, err := config.NewCheckSuite(s.secrets, metadataClient, repositoryClient, name...)
 	if nil != err {
 		http.Error(w, "server has been misconfigured", 500)
 		LogError("failed to create CheckSuite", err)
@@ -88,12 +94,12 @@ func handleChecks(w http.ResponseWriter, r *http.Request, name ...string) {
 }
 
 // HandleAll is a request handler that makes the calls to create all attestations, this includes DIY, Nobody, Snakeoil
-func HandleAll(w http.ResponseWriter, r *http.Request) {
-	handleChecks(w, r, config.EnabledChecks(voucher.ToMapStringBool(viper.GetStringMap("checks")))...)
+func (s *Server) HandleAll(w http.ResponseWriter, r *http.Request) {
+	s.handleChecks(w, r, config.EnabledChecks(voucher.ToMapStringBool(viper.GetStringMap("checks")))...)
 }
 
 // HandleIndividualCheck is a request handler that executes an individual check and creates an attestation if applicable.
-func HandleIndividualCheck(w http.ResponseWriter, r *http.Request) {
+func (s *Server) HandleIndividualCheck(w http.ResponseWriter, r *http.Request) {
 	variables := mux.Vars(r)
 	checkName := variables["check"]
 
@@ -103,14 +109,14 @@ func HandleIndividualCheck(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if voucher.IsCheckFactoryRegistered(checkName) {
-		handleChecks(w, r, checkName)
+		s.handleChecks(w, r, checkName)
 		return
 	}
 
 	http.Error(w, fmt.Sprintf("check %s is not available", checkName), 404)
 }
 
-func HandleCheckGroup(w http.ResponseWriter, r *http.Request) {
+func (s *Server) HandleCheckGroup(w http.ResponseWriter, r *http.Request) {
 	groupName := r.URL.Path
 
 	if "" == groupName {
@@ -124,7 +130,7 @@ func HandleCheckGroup(w http.ResponseWriter, r *http.Request) {
 
 	requiredChecks := config.GetRequiredChecksFromConfig()
 	if checkNames, ok := requiredChecks[groupName]; ok {
-		handleChecks(w, r, checkNames...)
+		s.handleChecks(w, r, checkNames...)
 		return
 	}
 
@@ -132,4 +138,4 @@ func HandleCheckGroup(w http.ResponseWriter, r *http.Request) {
 }
 
 // HandleHealthCheck is a request handler that returns HTTP Status Code 200 when it is called from shopify cloud
-func HandleHealthCheck(w http.ResponseWriter, r *http.Request) { w.WriteHeader(200) }
+func (s *Server) HandleHealthCheck(w http.ResponseWriter, r *http.Request) { w.WriteHeader(200) }

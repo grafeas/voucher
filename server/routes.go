@@ -18,9 +18,9 @@ type Route struct {
 }
 
 // NewRouter creates a mux router with the specified routes and handlers
-func NewRouter() *mux.Router {
+func NewRouter(s *Server) *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
-	for _, route := range getRoutes() {
+	for _, route := range getRoutes(s) {
 		router.
 			Methods(route.Method).
 			Path(route.Path).
@@ -30,12 +30,32 @@ func NewRouter() *mux.Router {
 	return router
 }
 
-func getRoutes() []Route {
-	return append(getCheckGroupRoutes(), Routes...)
+func getRoutes(s *Server) []Route {
+	return append(getCheckGroupRoutes(s), []Route{
+		{
+			"All",
+			"POST",
+			"/all",
+			s.HandleAll,
+		},
+		{
+			"Individual Check",
+			"POST",
+			"/{check}",
+			s.HandleIndividualCheck,
+		},
+		{
+			"healthcheck: /services/ping",
+			"GET",
+			healthCheckPath,
+			s.HandleHealthCheck,
+		},
+	}...,
+	)
 }
 
 // getCheckGroupRoutes creates Route objects for each group of required checks configured in the configuration file
-func getCheckGroupRoutes() []Route {
+func getCheckGroupRoutes(s *Server) []Route {
 	groups := config.GetRequiredChecksFromConfig()
 	routes := make([]Route, 0, len(groups))
 	for groupName := range groups {
@@ -43,31 +63,9 @@ func getCheckGroupRoutes() []Route {
 			Name:        groupName,
 			Method:      "POST",
 			Path:        "/" + groupName,
-			HandlerFunc: HandleCheckGroup,
+			HandlerFunc: s.HandleCheckGroup,
 		}
 		routes = append(routes, route)
 	}
 	return routes
-}
-
-// Routes an array of type Route
-var Routes = []Route{
-	{
-		"All",
-		"POST",
-		"/all",
-		HandleAll,
-	},
-	{
-		"Individual Check",
-		"POST",
-		"/{check}",
-		HandleIndividualCheck,
-	},
-	{
-		"healthcheck: /services/ping",
-		"GET",
-		healthCheckPath,
-		HandleHealthCheck,
-	},
 }

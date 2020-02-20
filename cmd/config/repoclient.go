@@ -10,13 +10,13 @@ import (
 
 // NewRepositoryClient creates a new repository.Client for the given repository URL. The URL may be in any known
 // format including, but not limited to, urls starting with 'http://', 'https://', 'git@', etc.
-func NewRepositoryClient(ctx context.Context, repoURL string) (repository.Client, error) {
+func NewRepositoryClient(ctx context.Context, keyring repository.KeyRing, repoURL string) (repository.Client, error) {
 	org := repository.NewOrganization("", repoURL)
 	if nil == org {
 		return nil, fmt.Errorf("error parsing url %s", repoURL)
 	}
 
-	token, err := getTokenForOrg(*org)
+	token, err := getTokenForOrg(keyring, *org)
 	if nil != err {
 		return nil, err
 	}
@@ -29,19 +29,14 @@ func NewRepositoryClient(ctx context.Context, repoURL string) (repository.Client
 	return nil, fmt.Errorf("unknown repository %s", repoURL)
 }
 
-func getTokenForOrg(org repository.Organization) (*repository.Auth, error) {
-	keyring, err := getRepositoryKeyRing()
-	if nil != err {
-		return nil, fmt.Errorf("failed to get repository key ring: %w", err)
-	}
-
+func getTokenForOrg(keyring repository.KeyRing, org repository.Organization) (*repository.Auth, error) {
 	orgs := GetOrganizationsFromConfig()
 	if alias, ok := getOrgAlias(orgs, org); ok {
 		token := keyring[alias]
 		return &token, nil
 	}
 
-	return nil, fmt.Errorf("failed to get token for %s: %s", org.Alias, err)
+	return nil, fmt.Errorf("failed to get token for %s", org.Alias)
 }
 
 func getOrgAlias(orgs map[string]repository.Organization, repoOrg repository.Organization) (matchingKey string, foundMatch bool) {

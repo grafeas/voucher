@@ -12,16 +12,21 @@ import (
 )
 
 // NewMetadataClient creates a new MetadataClient.
-func NewMetadataClient(ctx context.Context) (voucher.MetadataClient, error) {
+func NewMetadataClient(secrets *Secrets, ctx context.Context) (voucher.MetadataClient, error) {
 	var keyring signer.AttestationSigner
 	var err error
 
 	signerName := viper.GetString("signer")
 	if signerName == "pgp" || signerName == "" {
-		keyring, err = getPGPKeyRing()
-		if nil != err {
-			log.Println("could not load PGP keyring from ejson, continuing without attestation support: ", err)
+		if secrets == nil {
+			log.Println("could not load PGP keyring from ejson - no secrets configured")
 			keyring = nil
+		} else {
+			keyring, err = secrets.getPGPKeyRing()
+			if nil != err {
+				log.Println("could not load PGP keyring from ejson, continuing without attestation support: ", err)
+				keyring = nil
+			}
 		}
 	} else if signerName == "kms" {
 		keyring, err = getKMSKeyRing()

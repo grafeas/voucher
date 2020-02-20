@@ -16,7 +16,10 @@ func TestValidRepo(t *testing.T) {
 	viper.Set("ejson.dir", "../../testdata/key")
 	viper.Set("repositories", []interface{}{map[string]interface{}{"alias": "shopify", "org-url": "github.com/Shopify"}})
 	repoURL := "https://github.com/Shopify/my-app"
-	client, err := NewRepositoryClient(context.Background(), repoURL)
+	secrets, err := ReadSecrets()
+	assert.NoError(t, err)
+
+	client, err := NewRepositoryClient(context.Background(), secrets.RepositoryAuthentication, repoURL)
 	assert.NoError(t, err)
 
 	assert.True(t, github.IsGithubRepoClient(client), "received client is not a github client for ", repoURL)
@@ -27,7 +30,10 @@ func TestInvalidRepo(t *testing.T) {
 	viper.Set("ejson.dir", "../../testdata/key")
 	viper.Set("repositories", []interface{}{map[string]interface{}{"alias": "shopify", "org-url": "github.com/Shopify"}})
 	repoURL := "https://gitlab.com/TestOrg/my-app"
-	client, _ := NewRepositoryClient(context.Background(), repoURL)
+	secrets, err := ReadSecrets()
+	assert.NoError(t, err)
+
+	client, _ := NewRepositoryClient(context.Background(), secrets.RepositoryAuthentication, repoURL)
 
 	assert.False(t, github.IsGithubRepoClient(client), "received github client with invalid org for ", repoURL)
 }

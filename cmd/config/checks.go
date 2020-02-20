@@ -86,10 +86,10 @@ func setCheckRepositoryClient(check voucher.Check, repositoryClient repository.C
 // NewCheckSuite creates a new checks.Suite with the requested
 // Checks, passing any necessary configuration details to the
 // checks.
-func NewCheckSuite(metadataClient voucher.MetadataClient, repositoryClient repository.Client, names ...string) (*voucher.Suite, error) {
+func NewCheckSuite(secrets *Secrets, metadataClient voucher.MetadataClient, repositoryClient repository.Client, names ...string) (*voucher.Suite, error) {
 	auth := newAuth()
 	repos := validRepos()
-	scanner := newScanner(metadataClient, auth)
+	scanner := newScanner(secrets, metadataClient, auth)
 	checksuite := voucher.NewSuite()
 
 	trustedBuildCreators := viper.GetStringSlice("trusted_builder_identities")

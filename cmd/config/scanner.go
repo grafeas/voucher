@@ -8,14 +8,14 @@ import (
 	"github.com/Shopify/voucher/clair"
 )
 
-func newScanner(metadataClient voucher.MetadataClient, auth voucher.Auth) (scanner voucher.VulnerabilityScanner) {
+func newScanner(secrets *Secrets, metadataClient voucher.MetadataClient, auth voucher.Auth) (scanner voucher.VulnerabilityScanner) {
 	scannerName := viper.GetString("scanner")
 	switch scannerName {
 	case "clair", "c":
-		config, err := getClairConfig()
-		if nil != err {
-			log.Fatalf("could not load clair configuration: %s", err)
+		if secrets == nil {
+			log.Fatalf("No secrets were configured, unable to use Clair as scanner")
 		}
+		config := secrets.ClairConfig
 		if "" == config.Hostname {
 			config.Hostname = viper.GetString("clair.address")
 		}
