@@ -27,7 +27,12 @@ var serverCmd = &cobra.Command{
 		if err != nil {
 			log.Printf("Error loading EJSON file, no secrets loaded: %v", err)
 		}
-		server.Serve(&serverConfig, secrets)
+
+		metricsClient, err := config.MetricsClient()
+		if err != nil {
+			log.Printf("Error configuring metrics client: %v", err)
+		}
+		server.Serve(&serverConfig, secrets, metricsClient)
 	},
 }
 

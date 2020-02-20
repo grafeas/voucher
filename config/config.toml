@@ -37,6 +37,11 @@ secrets = "/etc/voucher/secrets.production.ejson"
 [clair]
 address = "localhost:6060"
 
+[statsd]
+addr = "localhost:8125"
+sample_rate = 0.1
+tags = []
+
 [repository.shopify]
 org-url = "https://github.com/Shopify"
 

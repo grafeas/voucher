@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/Shopify/voucher/cmd/config"
+	"github.com/Shopify/voucher/metrics"
 )
 
 var testParams = []byte(`
@@ -39,7 +40,7 @@ func TestMain(m *testing.M) {
 		PassHash:    testPasswordHash,
 	}
 	secrets, _ := config.ReadSecrets()
-	server = &Server{serverConfig, secrets}
+	server = &Server{serverConfig, secrets, &metrics.NoopClient{}}
 
 	os.Exit(m.Run())
 }

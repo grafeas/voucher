@@ -4,6 +4,7 @@ go 1.13
 
 require (
 	cloud.google.com/go v0.52.0
+	github.com/DataDog/datadog-go v3.4.0+incompatible
 	github.com/Shopify/ejson v1.2.0
 	github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973 // indirect
 	github.com/bradleyfalzon/ghinstallation v1.1.1

@@ -15,6 +15,8 @@ dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7
 github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
+github.com/DataDog/datadog-go v3.4.0+incompatible h1:LZ0OTmlvhCBT0VYUvhGu8Lrc7WqNCj6Zw9HnMi0V6mA=
+github.com/DataDog/datadog-go v3.4.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3tL4fMGNddJ+vMq1mwgfaqoQ=
 github.com/Shopify/ejson v1.2.0 h1:EcdBmQhzDtRW0ZB5J5CBhYPkFWWZ6v0S/cG9XcbXR+g=
 github.com/Shopify/ejson v1.2.0/go.mod h1:J8cw5GOA0l/aMOPp+uDfwNYVbeqIaBhzRkv1+76UCvk=
 github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973 h1:xJ4a3vCFaGF/jqvzLMYoU8P317H5OQ+Via4RmuPwCS0=

@@ -75,9 +75,9 @@ func (s *Server) handleChecks(w http.ResponseWriter, r *http.Request, name ...st
 	var results []voucher.CheckResult
 
 	if viper.GetBool("dryrun") {
-		results = checksuite.Run(ctx, imageData)
+		results = checksuite.Run(ctx, s.metrics, imageData)
 	} else {
-		results = checksuite.RunAndAttest(ctx, metadataClient, imageData)
+		results = checksuite.RunAndAttest(ctx, metadataClient, s.metrics, imageData)
 	}
 
 	checkResponse := voucher.NewResponse(imageData, results)

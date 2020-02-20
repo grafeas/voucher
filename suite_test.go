@@ -5,6 +5,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/Shopify/voucher/metrics"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -23,7 +24,7 @@ func TestNewSuite(t *testing.T) {
 
 	imageData := newTestImageData(t)
 
-	results := suite.Run(context.Background(), imageData)
+	results := suite.Run(context.Background(), &metrics.NoopClient{}, imageData)
 	require.Equal(t, []CheckResult{}, results)
 
 	errBrokenTest := errors.New("this test is broken")
@@ -71,7 +72,7 @@ func TestNewSuite(t *testing.T) {
 		},
 	}
 
-	results = suite.Run(context.Background(), imageData)
+	results = suite.Run(context.Background(), &metrics.NoopClient{}, imageData)
 	assert.ElementsMatch(t, expectedResults, results)
 
 	fixedCheck, err := suite.Get("fixed")
@@ -100,7 +101,7 @@ func TestMakeSuccessfulSuite(t *testing.T) {
 		suite.Add(name, check)
 	}
 
-	results := suite.Run(context.Background(), imageData)
+	results := suite.Run(context.Background(), &metrics.NoopClient{}, imageData)
 
 	response := NewResponse(imageData, results)
 	assert.Equal(t, true, response.Success)
@@ -118,7 +119,7 @@ func TestMakeFailingSuite(t *testing.T) {
 		suite.Add(name, check)
 	}
 
-	results := suite.Run(context.Background(), imageData)
+	results := suite.Run(context.Background(), &metrics.NoopClient{}, imageData)
 
 	response := NewResponse(imageData, results)
 	assert.Equal(t, false, response.Success)
@@ -144,7 +145,7 @@ func TestAttestSuite(t *testing.T) {
 		suite.Add(name, check)
 	}
 
-	results := suite.RunAndAttest(context.Background(), metadataClient, imageData)
+	results := suite.RunAndAttest(context.Background(), metadataClient, &metrics.NoopClient{}, imageData)
 
 	expectedResults := []CheckResult{
 		{
@@ -191,7 +192,7 @@ func TestNonattestingSuite(t *testing.T) {
 	check.On("Check", mock.Anything, imageData).Return(true, nil)
 	suite.Add("snakeoil", check)
 
-	results := suite.RunAndAttest(context.Background(), metadataClient, imageData)
+	results := suite.RunAndAttest(context.Background(), metadataClient, &metrics.NoopClient{}, imageData)
 
 	expectedResult := CheckResult{
 		Name:      "snakeoil",

@@ -2,6 +2,9 @@ package voucher
 
 import (
 	"context"
+	"time"
+
+	"github.com/Shopify/voucher/metrics"
 )
 
 // Suite is a suite of Checks, which
@@ -33,11 +36,17 @@ func (cs *Suite) Get(name string) (Check, error) {
 
 // runner runs the passed check against the passed ImageData, and pushes results to the
 // CheckResults channel.
-func runner(ctx context.Context, name string, check Check, imageData ImageData, resultsChan chan CheckResult) {
+func runner(ctx context.Context, name string, check Check, imageData ImageData, resultsChan chan CheckResult, metricsClient metrics.Client) {
+	checkStart := time.Now()
 	ok, err := check.Check(ctx, imageData)
+	metricsClient.CheckRunLatency(name, time.Now().Sub(checkStart))
 	if err == nil {
+		if !ok {
+			metricsClient.CheckRunFailure(name)
+		}
 		resultsChan <- CheckResult{Name: name, Err: "", Success: ok, ImageData: imageData}
 	} else {
+		metricsClient.CheckRunError(name)
 		resultsChan <- CheckResult{Name: name, Err: err.Error(), Success: false, ImageData: imageData}
 	}
 }
@@ -51,13 +60,13 @@ func runner(ctx context.Context, name string, check Check, imageData ImageData, 
 // will run the "diy" and "nobody" tests.
 //
 // Run returns a []CheckResult with a CheckResult for each Check that was run.
-func (cs *Suite) Run(ctx context.Context, imageData ImageData) []CheckResult {
+func (cs *Suite) Run(ctx context.Context, metricsClient metrics.Client, imageData ImageData) []CheckResult {
 	results := make([]CheckResult, 0, len(cs.checks))
 	resultsChan := make(chan CheckResult, len(cs.checks))
 	defer close(resultsChan)
 
 	for name, check := range cs.checks {
-		go runner(ctx, name, check, imageData, resultsChan)
+		go runner(ctx, name, check, imageData, resultsChan, metricsClient)
 	}
 
 	for range cs.checks {
@@ -71,25 +80,29 @@ func (cs *Suite) Run(ctx context.Context, imageData ImageData) []CheckResult {
 // runs the CreateAttestion function in the Check corresponding to that CheckResult. Each
 // CheckResult is updated with the details (or error) and the resulting []CheckResult is
 // returned.
-func (cs *Suite) Attest(ctx context.Context, metadataClient MetadataClient, results []CheckResult) []CheckResult {
+func (cs *Suite) Attest(ctx context.Context, metricsClient metrics.Client, metadataClient MetadataClient, results []CheckResult) []CheckResult {
 	for i, result := range results {
+		checkStart := time.Now()
 		if result.Success {
 			details, err := createAttestation(ctx, metadataClient, result)
 			results[i].Details = details
 			if nil == err {
 				results[i].Attested = true
 			} else {
+				metricsClient.CheckAttestationError(result.Name)
 				results[i].Err = err.Error()
 			}
 		}
+		metricsClient.CheckAttestationLatency(result.Name, time.Now().Sub(checkStart))
 	}
+
 	return results
 }
 
 // RunAndAttest calls Run, followed by Attest, and returns the final []CheckResult.
-func (cs *Suite) RunAndAttest(ctx context.Context, metadataClient MetadataClient, imageData ImageData) []CheckResult {
-	results := cs.Run(ctx, imageData)
-	return cs.Attest(ctx, metadataClient, results)
+func (cs *Suite) RunAndAttest(ctx context.Context, metadataClient MetadataClient, metricsClient metrics.Client, imageData ImageData) []CheckResult {
+	results := cs.Run(ctx, metricsClient, imageData)
+	return cs.Attest(ctx, metricsClient, metadataClient, results)
 }
 
 // createAttestation generates an attestation for the image Check described by CheckResult.
