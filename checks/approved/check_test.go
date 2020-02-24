@@ -25,46 +25,61 @@ func TestApprovedCheck(t *testing.T) {
 		status               string
 		pullRequest          r.PullRequest
 		shouldPass           bool
+		err                  error
 	}{
 		{
 			name:                 "Should pass",
 			defaultBranchCommits: []r.CommitRef{{URL: commitURL}},
 			isSigned:             true,
 			status:               "SUCCESS",
-			pullRequest:          r.PullRequest{IsMerged: true, MergeCommit: r.CommitRef{URL: commitURL}},
+			pullRequest:          r.PullRequest{IsMerged: true, MergeCommit: r.CommitRef{URL: commitURL}, HasRequiredApprovals: true},
 			shouldPass:           true,
+			err:                  nil,
 		},
 		{
 			name:                 "Not built off default branch",
 			defaultBranchCommits: []r.CommitRef{{URL: "otherCommit"}},
 			isSigned:             true,
 			status:               "SUCCESS",
-			pullRequest:          r.PullRequest{IsMerged: true, MergeCommit: r.CommitRef{URL: commitURL}},
+			pullRequest:          r.PullRequest{IsMerged: true, MergeCommit: r.CommitRef{URL: commitURL}, HasRequiredApprovals: true},
 			shouldPass:           false,
+			err:                  ErrNotOnDefaultBranch,
 		},
 		{
 			name:                 "Commit not signed",
 			defaultBranchCommits: []r.CommitRef{{URL: commitURL}},
 			isSigned:             false,
 			status:               "SUCCESS",
-			pullRequest:          r.PullRequest{IsMerged: true, MergeCommit: r.CommitRef{URL: commitURL}},
+			pullRequest:          r.PullRequest{IsMerged: true, MergeCommit: r.CommitRef{URL: commitURL}, HasRequiredApprovals: true},
 			shouldPass:           false,
+			err:                  ErrNotSigned,
 		},
 		{
 			name:                 "Commit not a merge commit",
 			defaultBranchCommits: []r.CommitRef{{URL: commitURL}},
 			isSigned:             true,
 			status:               "SUCCESS",
-			pullRequest:          r.PullRequest{IsMerged: true, MergeCommit: r.CommitRef{URL: "otherURL"}},
+			pullRequest:          r.PullRequest{IsMerged: true, MergeCommit: r.CommitRef{URL: "otherURL"}, HasRequiredApprovals: true},
 			shouldPass:           false,
+			err:                  ErrNotMergeCommit,
+		},
+		{
+			name:                 "Commit PR does not have required approvals",
+			defaultBranchCommits: []r.CommitRef{{URL: commitURL}},
+			isSigned:             true,
+			status:               "SUCCESS",
+			pullRequest:          r.PullRequest{IsMerged: true, MergeCommit: r.CommitRef{URL: commitURL}, HasRequiredApprovals: false},
+			shouldPass:           false,
+			err:                  ErrMissingRequiredApprovals,
 		},
 		{
 			name:                 "CI check not successful",
 			defaultBranchCommits: []r.CommitRef{{URL: commitURL}},
 			isSigned:             true,
 			status:               "FAILURE",
-			pullRequest:          r.PullRequest{IsMerged: true, MergeCommit: r.CommitRef{URL: commitURL}},
+			pullRequest:          r.PullRequest{IsMerged: true, MergeCommit: r.CommitRef{URL: commitURL}, HasRequiredApprovals: true},
 			shouldPass:           false,
+			err:                  ErrNotPassedCI,
 		},
 	}
 
@@ -91,8 +106,10 @@ func TestApprovedCheck(t *testing.T) {
 
 			status, err := orgCheck.Check(ctx, imageData)
 
-			assert.NoErrorf(t, err, "check failed with error: %s", err)
 			assert.Equal(t, testCase.shouldPass, status)
+			if testCase.err != nil {
+				assert.EqualError(t, testCase.err, err.Error())
+			}
 		})
 	}
 }

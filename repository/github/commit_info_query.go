@@ -31,6 +31,24 @@ type commitInfoQuery struct {
 			Signature struct {
 				IsValid bool
 			}
+			Repository struct {
+				URL string
+			}
 		} `graphql:"... on Commit"`
 	} `graphql:"resource(url: $url)"`
+}
+
+// checkSuite is a collection of the check runs created by a CI/CD App
+type checkSuite struct {
+	Status     checkStatusState
+	Conclusion checkConclusionState
+}
+
+// pullRequest contains the relevant information associated with a pull request
+type pullRequest struct {
+	Merged      bool
+	MergeCommit commit
+	BaseRefName string
+	HeadRefName string
+	URL         string
 }

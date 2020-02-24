@@ -13,6 +13,8 @@ const (
 	organizationType = "Organization"
 	// commitType is one of GitHub's GraphQL schema types representing a Git commit
 	commitType = "Commit"
+	// pullRequestType is one of GitHub's GraphQL schema types representing a Git pull request
+	pullRequestType = "PullRequest"
 )
 
 // pagination query limit
@@ -29,3 +31,7 @@ type checkStatusState string
 // statusState is a string that represents the combined commit status
 // statusState is a type in the Github v4 GraphQL Schema
 type statusState string
+
+// pullRequestState is a string that represents the state for a pull request review
+// pullRequestReviewState is a type in the Github v4 GraphQL Schema
+type pullRequestReviewState string

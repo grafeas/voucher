@@ -16,6 +16,12 @@ var ErrNoBuildData = errors.New("no build metadata associated with this image")
 // configured for an image
 var ErrNeedsRepositoryClient = errors.New("this check requires a repository client")
 
+var ErrNotSigned = errors.New("commit was not signed by a valid key")
+var ErrNotOnDefaultBranch = errors.New("commit is not the latest commit on the production branch")
+var ErrNotMergeCommit = errors.New("commit is not a merge commit")
+var ErrMissingRequiredApprovals = errors.New("the PR associated with this commit does not have the required number of approvals")
+var ErrNotPassedCI = errors.New("commit did not pass CI in source code repository")
+
 type check struct {
 	metadataClient   voucher.MetadataClient
 	repositoryClient repository.Client
@@ -55,11 +61,20 @@ func (g *check) Check(ctx context.Context, i voucher.ImageData) (bool, error) {
 		return false, err
 	}
 
-	if !isFromBranch(defaultBranch, commit) ||
-		!isSigned(commit) ||
-		!isMergeCommit(commit) ||
-		!passedCI(commit) {
-		return false, nil
+	if !isFromBranch(defaultBranch, commit) {
+		return false, ErrNotOnDefaultBranch
+	}
+
+	if !isSigned(commit) {
+		return false, ErrNotSigned
+	}
+
+	if result, reason := isApprovedMergeCommit(commit); !result {
+		return result, reason
+	}
+
+	if !passedCI(commit) {
+		return false, ErrNotPassedCI
 	}
 
 	return true, nil
@@ -75,14 +90,17 @@ func isSigned(commit repository.Commit) bool {
 	return commit.IsSigned
 }
 
-// isMergeCommit checks that the commit is a merge commit
-func isMergeCommit(commit repository.Commit) bool {
+// isApprovedMergeCommit checks that the commit is a merge commit
+func isApprovedMergeCommit(commit repository.Commit) (passed bool, reason error) {
 	for _, pullRequest := range commit.AssociatedPullRequests {
 		if pullRequest.IsMerged && pullRequest.MergeCommit.URL == commit.URL {
-			return true
+			if !pullRequest.HasRequiredApprovals {
+				return false, ErrMissingRequiredApprovals
+			}
+			return true, nil
 		}
 	}
-	return false
+	return false, ErrNotMergeCommit
 }
 
 // passedCI checks that all Github CI checks have completed and passed

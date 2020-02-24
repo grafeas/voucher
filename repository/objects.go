@@ -67,44 +67,22 @@ type Commit struct {
 
 // Check is a collection of the check runs created by a single CI/CD App for a specific commit
 type Check struct {
-	App        App
 	Status     string
 	Conclusion string
+}
+
+// NewCheck returns a new Check object
+func NewCheck(status string, conclusion string) Check {
+	return Check{
+		Status:     status,
+		Conclusion: conclusion,
+	}
 }
 
 // App contains the relevant information associated with a CI/CD app
 type App struct {
 	Name string
 	URL  string
-}
-
-// NewCheck returns a new Check object
-func NewCheck(appName string, appURL string, status string, conclusion string) Check {
-	return Check{
-		App: App{
-			Name: appName,
-			URL:  appURL,
-		},
-		Status:     status,
-		Conclusion: conclusion,
-	}
-}
-
-// NewCommitRef returns a new CommitRef object
-func NewCommitRef(commitURL string) CommitRef {
-	return CommitRef{
-		URL: commitURL,
-	}
-}
-
-// NewPullRequest returns a new PullRequest object
-func NewPullRequest(baseBranchName string, headBranchName string, isMerged bool, mergeCommit CommitRef) PullRequest {
-	return PullRequest{
-		BaseBranchName: baseBranchName,
-		HeadBranchName: headBranchName,
-		IsMerged:       isMerged,
-		MergeCommit:    mergeCommit,
-	}
 }
 
 // NewCommit returns a new Commit object
@@ -137,12 +115,31 @@ type CommitRef struct {
 	URL string
 }
 
+// NewCommitRef returns a new CommitRef object
+func NewCommitRef(commitURL string) CommitRef {
+	return CommitRef{
+		URL: commitURL,
+	}
+}
+
 // PullRequest contains information pertaining to a pull request
 type PullRequest struct {
-	BaseBranchName string
-	HeadBranchName string
-	IsMerged       bool
-	MergeCommit    CommitRef
+	BaseBranchName       string
+	HeadBranchName       string
+	IsMerged             bool
+	MergeCommit          CommitRef
+	HasRequiredApprovals bool
+}
+
+// NewPullRequest returns a new PullRequest object
+func NewPullRequest(baseBranchName string, headBranchName string, isMerged bool, mergeCommit CommitRef, hasRequiredApprovals bool) PullRequest {
+	return PullRequest{
+		BaseBranchName:       baseBranchName,
+		HeadBranchName:       headBranchName,
+		IsMerged:             isMerged,
+		MergeCommit:          mergeCommit,
+		HasRequiredApprovals: hasRequiredApprovals,
+	}
 }
 
 // Metadata describes the top level metadata information about a repo

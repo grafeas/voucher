@@ -14,7 +14,7 @@ This will download and install the voucher client into `$GOPATH/bin` directory.
 
 ## Configuration
 
-The configuration for Voucher Client can be written as a toml, json, or yaml file, and you can specify the path to the configuration file using "-c". By default, the configuration is expected to be located at `~/.voucher{.yaml,.toml,.json}`.
+The configuration for Voucher Client can be written as a toml, json, or yaml file, and you can specify the path to the configuration file using "--config". By default, the configuration is expected to be located at `~/.voucher{.yaml,.toml,.json}`.
 
 Below are the configuration options for Voucher Client:
 

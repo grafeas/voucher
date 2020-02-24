@@ -58,7 +58,7 @@ func NewClient(ctx context.Context, auth *repository.Auth) (repository.Client, e
 			return nil, fmt.Errorf("error configuring Github App transport: %v", err)
 		}
 		httpClient = &http.Client{}
-		httpClient.Transport = appsTransport
+		httpClient.Transport = newRoundTripperWrapper(appsTransport)
 	} else {
 		return nil, fmt.Errorf("unsupported auth type: %s", auth.Type())
 	}

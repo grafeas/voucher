@@ -86,3 +86,22 @@ func (s statusState) isValidStatusState() bool {
 		return false
 	}
 }
+
+const (
+	pullRequestReviewApproved         = "APPROVED"
+	pullRequestReviewChangesRequested = "CHANGES_REQUESTED"
+	pullRequestReviewCommented        = "COMMENTED"
+	pullRequestReviewDismissed        = "DISMISSED"
+	pullRequestReviewPending          = "PENDING"
+)
+
+func (s pullRequestReviewState) isValidPullRequestReviewState() bool {
+	switch s {
+	case "": // pullRequestReviewState can be inconclusive/empty
+		return true
+	case pullRequestReviewApproved, pullRequestReviewChangesRequested, pullRequestReviewCommented, pullRequestReviewDismissed, pullRequestReviewPending:
+		return true
+	default:
+		return false
+	}
+}
