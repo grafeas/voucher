@@ -2,6 +2,8 @@ package voucher
 
 import (
 	"context"
+
+	"github.com/docker/distribution/reference"
 )
 
 // MetadataScanner implements voucher.VulnerabilityScanner, and connects to Grafeas
@@ -18,7 +20,7 @@ func (s *MetadataScanner) FailOn(severity Severity) {
 }
 
 // Scan gets the vulnerabilities for an Image.
-func (s *MetadataScanner) Scan(ctx context.Context, i ImageData) ([]Vulnerability, error) {
+func (s *MetadataScanner) Scan(ctx context.Context, i reference.Canonical) ([]Vulnerability, error) {
 	v, err := s.client.GetVulnerabilities(ctx, i)
 	if nil != err {
 		return []Vulnerability{}, err

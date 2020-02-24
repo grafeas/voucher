@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/docker/distribution/reference"
 	"github.com/grafeas/voucher"
 	"github.com/grafeas/voucher/repository"
 )
@@ -43,7 +44,7 @@ func (p *check) SetTrustedProjects(trustedProjects []string) {
 }
 
 // Check runs the check :)
-func (p *check) Check(ctx context.Context, i voucher.ImageData) (bool, error) {
+func (p *check) Check(ctx context.Context, i reference.Canonical) (bool, error) {
 	buildDetail, err := p.metadataClient.GetBuildDetail(ctx, i)
 	if err != nil {
 		if voucher.IsNoMetadataError(err) {
@@ -74,7 +75,7 @@ func validateProvenance(p *check, detail repository.BuildDetail) (trusted bool, 
 	return
 }
 
-func validateArtifacts(i voucher.ImageData, detail repository.BuildDetail) (matched bool) {
+func validateArtifacts(i reference.Canonical, detail repository.BuildDetail) (matched bool) {
 	// if an artifact built by this Build is the image, validate the SHAs match
 	for _, artifact := range detail.Artifacts {
 		if strings.HasSuffix(i.Digest().String(), artifact.Checksum) {

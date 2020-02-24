@@ -14,7 +14,7 @@ const testImageName = "gcr.io/alpine/alpine@sha256:297524b7375fbf09b3784f0bbd9cb
 const testResourceAddress = "resourceUrl=\"https://" + testImageName + "\""
 
 func TestGrafeasHelperFunctions(t *testing.T) {
-	imageData, err := voucher.NewImageData(testImageName)
+	imageData, err := voucher.NewImageReference(testImageName)
 	require.NoError(t, err)
 	assert.Equal(t, resourceURL(imageData), testResourceAddress)
 }

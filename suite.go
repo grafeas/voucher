@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"github.com/grafeas/voucher/metrics"
+
+	"github.com/docker/distribution/reference"
 )
 
 // Suite is a suite of Checks, which
@@ -34,9 +36,9 @@ func (cs *Suite) Get(name string) (Check, error) {
 	return nil, ErrNoCheck
 }
 
-// runner runs the passed check against the passed ImageData, and pushes results to the
+// runner runs the passed check against the passed reference.Canonical, and pushes results to the
 // CheckResults channel.
-func runner(ctx context.Context, name string, check Check, imageData ImageData, resultsChan chan CheckResult, metricsClient metrics.Client) {
+func runner(ctx context.Context, name string, check Check, imageData reference.Canonical, resultsChan chan CheckResult, metricsClient metrics.Client) {
 	metricsClient.CheckRunStart(name)
 	checkStart := time.Now()
 	ok, err := check.Check(ctx, imageData)
@@ -63,7 +65,7 @@ func runner(ctx context.Context, name string, check Check, imageData ImageData, 
 // will run the "diy" and "nobody" tests.
 //
 // Run returns a []CheckResult with a CheckResult for each Check that was run.
-func (cs *Suite) Run(ctx context.Context, metricsClient metrics.Client, imageData ImageData) []CheckResult {
+func (cs *Suite) Run(ctx context.Context, metricsClient metrics.Client, imageData reference.Canonical) []CheckResult {
 	results := make([]CheckResult, 0, len(cs.checks))
 	resultsChan := make(chan CheckResult, len(cs.checks))
 	defer close(resultsChan)
@@ -105,7 +107,7 @@ func (cs *Suite) Attest(ctx context.Context, metricsClient metrics.Client, metad
 }
 
 // RunAndAttest calls Run, followed by Attest, and returns the final []CheckResult.
-func (cs *Suite) RunAndAttest(ctx context.Context, metadataClient MetadataClient, metricsClient metrics.Client, imageData ImageData) []CheckResult {
+func (cs *Suite) RunAndAttest(ctx context.Context, metadataClient MetadataClient, metricsClient metrics.Client, imageData reference.Canonical) []CheckResult {
 	results := cs.Run(ctx, metricsClient, imageData)
 	return cs.Attest(ctx, metricsClient, metadataClient, results)
 }

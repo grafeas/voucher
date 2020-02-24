@@ -8,10 +8,12 @@ import (
 
 	"github.com/grafeas/voucher"
 	"github.com/grafeas/voucher/cmd/config"
+
+	"github.com/docker/distribution/reference"
 )
 
 func (s *Server) handleVerify(w http.ResponseWriter, r *http.Request, names ...string) {
-	var imageData voucher.ImageData
+	var ref reference.Canonical
 	var err error
 
 	defer r.Body.Close()
@@ -20,7 +22,7 @@ func (s *Server) handleVerify(w http.ResponseWriter, r *http.Request, names ...s
 
 	LogRequests(r)
 
-	imageData, err = handleInput(r)
+	ref, err = handleInput(r)
 	if nil != err {
 		http.Error(w, err.Error(), 422)
 		LogError(err.Error(), err)
@@ -38,13 +40,13 @@ func (s *Server) handleVerify(w http.ResponseWriter, r *http.Request, names ...s
 	}
 	defer metadataClient.Close()
 
-	attestations, err := metadataClient.GetAttestations(ctx, imageData)
+	attestations, err := metadataClient.GetAttestations(ctx, ref)
 	if nil != err {
-		LogWarning(fmt.Sprintf("could not get image attestations for %s", imageData), err)
+		LogWarning(fmt.Sprintf("could not get image attestations for %s", ref), err)
 	}
 
 	checkResponse := voucher.NewResponse(
-		imageData,
+		ref,
 		attestationsToResults(attestations, names),
 	)
 

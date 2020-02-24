@@ -43,7 +43,7 @@ func (g *Client) NewPayloadBody(ref reference.Canonical) (string, error) {
 }
 
 // AddAttestationToImage adds a new attestation with the passed Attestation
-// to the image described by ImageData.
+// to the image pointed to by the passed reference.
 func (g *Client) AddAttestationToImage(ctx context.Context, ref reference.Canonical, attestation voucher.Attestation) (voucher.SignedAttestation, error) {
 	if !g.CanAttest() {
 		return voucher.SignedAttestation{}, errCannotAttest
@@ -110,7 +110,7 @@ func (g *Client) GetAttestations(ctx context.Context, ref reference.Canonical) (
 	}
 }
 
-// GetVulnerabilities returns the detected vulnerabilities for the Image described by voucher.ImageData.
+// GetVulnerabilities returns the detected vulnerabilities for the Image at the passed reference.
 func (g *Client) GetVulnerabilities(ctx context.Context, ref reference.Canonical) (vulnerabilities []voucher.Vulnerability, err error) {
 	filterStr := kindFilterStr(ref, grafeas.NoteKind_VULNERABILITY)
 

@@ -12,11 +12,11 @@ import (
 // with the Metadata server.
 type MetadataClient interface {
 	CanAttest() bool
-	NewPayloadBody(ImageData) (string, error)
-	GetVulnerabilities(context.Context, ImageData) ([]Vulnerability, error)
+	NewPayloadBody(reference.Canonical) (string, error)
+	GetVulnerabilities(context.Context, reference.Canonical) ([]Vulnerability, error)
 	GetBuildDetail(context.Context, reference.Canonical) (repository.BuildDetail, error)
-	AddAttestationToImage(context.Context, ImageData, Attestation) (SignedAttestation, error)
-	GetAttestations(context.Context, ImageData) ([]SignedAttestation, error)
+	AddAttestationToImage(context.Context, reference.Canonical, Attestation) (SignedAttestation, error)
+	GetAttestations(context.Context, reference.Canonical) ([]SignedAttestation, error)
 	Close()
 }
 

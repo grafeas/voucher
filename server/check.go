@@ -10,12 +10,13 @@ import (
 	"github.com/grafeas/voucher/cmd/config"
 	"github.com/grafeas/voucher/repository"
 
+	"github.com/docker/distribution/reference"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
 func (s *Server) handleChecks(w http.ResponseWriter, r *http.Request, name ...string) {
-	var imageData voucher.ImageData
+	var ref reference.Canonical
 	var repositoryClient repository.Client
 	var err error
 
@@ -25,7 +26,7 @@ func (s *Server) handleChecks(w http.ResponseWriter, r *http.Request, name ...st
 
 	LogRequests(r)
 
-	imageData, err = handleInput(r)
+	ref, err = handleInput(r)
 	if nil != err {
 		http.Error(w, err.Error(), http.StatusUnprocessableEntity)
 		LogError(err.Error(), err)
@@ -43,9 +44,9 @@ func (s *Server) handleChecks(w http.ResponseWriter, r *http.Request, name ...st
 	}
 	defer metadataClient.Close()
 
-	buildDetail, err := metadataClient.GetBuildDetail(ctx, imageData)
+	buildDetail, err := metadataClient.GetBuildDetail(ctx, ref)
 	if nil != err {
-		LogWarning(fmt.Sprintf("could not get image metadata for %s", imageData), err)
+		LogWarning(fmt.Sprintf("could not get image metadata for %s", ref), err)
 	} else {
 		if s.secrets != nil {
 			repositoryClient, err = config.NewRepositoryClient(ctx, s.secrets.RepositoryAuthentication, buildDetail.RepositoryURL)
@@ -67,12 +68,12 @@ func (s *Server) handleChecks(w http.ResponseWriter, r *http.Request, name ...st
 	var results []voucher.CheckResult
 
 	if viper.GetBool("dryrun") {
-		results = checksuite.Run(ctx, s.metrics, imageData)
+		results = checksuite.Run(ctx, s.metrics, ref)
 	} else {
-		results = checksuite.RunAndAttest(ctx, metadataClient, s.metrics, imageData)
+		results = checksuite.RunAndAttest(ctx, metadataClient, s.metrics, ref)
 	}
 
-	checkResponse := voucher.NewResponse(imageData, results)
+	checkResponse := voucher.NewResponse(ref, results)
 
 	LogResult(checkResponse)
 

@@ -6,78 +6,77 @@ import (
 
 	"github.com/grafeas/voucher"
 	"github.com/grafeas/voucher/repository"
-	r "github.com/grafeas/voucher/repository"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestApprovedCheck(t *testing.T) {
 	ctx := context.Background()
-	imageData, err := voucher.NewImageData("gcr.io/voucher-test-project/apps/staging/voucher-internal@sha256:73d506a23331fce5cb6f49bfb4c27450d2ef4878efce89f03a46b27372a88430")
+	imageData, err := voucher.NewImageReference("gcr.io/voucher-test-project/apps/staging/voucher-internal@sha256:73d506a23331fce5cb6f49bfb4c27450d2ef4878efce89f03a46b27372a88430")
 	require.NoErrorf(t, err, "failed to get ImageData: %s", err)
-	buildDetail := r.BuildDetail{RepositoryURL: "https://github.com/grafeas/voucher-internal", Commit: "efgh6543"}
+	buildDetail := repository.BuildDetail{RepositoryURL: "https://github.com/grafeas/voucher-internal", Commit: "efgh6543"}
 	commitURL := "https://github.com/grafeas/voucher-internal/commit/efgh6543"
 
 	cases := []struct {
 		name                 string
-		defaultBranchCommits []r.CommitRef
+		defaultBranchCommits []repository.CommitRef
 		isSigned             bool
 		status               string
-		pullRequest          r.PullRequest
+		pullRequest          repository.PullRequest
 		shouldPass           bool
 		err                  error
 	}{
 		{
 			name:                 "Should pass",
-			defaultBranchCommits: []r.CommitRef{{URL: commitURL}},
+			defaultBranchCommits: []repository.CommitRef{{URL: commitURL}},
 			isSigned:             true,
 			status:               "SUCCESS",
-			pullRequest:          r.PullRequest{IsMerged: true, MergeCommit: r.CommitRef{URL: commitURL}, HasRequiredApprovals: true},
+			pullRequest:          repository.PullRequest{IsMerged: true, MergeCommit: repository.CommitRef{URL: commitURL}, HasRequiredApprovals: true},
 			shouldPass:           true,
 			err:                  nil,
 		},
 		{
 			name:                 "Not built off default branch",
-			defaultBranchCommits: []r.CommitRef{{URL: "otherCommit"}},
+			defaultBranchCommits: []repository.CommitRef{{URL: "otherCommit"}},
 			isSigned:             true,
 			status:               "SUCCESS",
-			pullRequest:          r.PullRequest{IsMerged: true, MergeCommit: r.CommitRef{URL: commitURL}, HasRequiredApprovals: true},
+			pullRequest:          repository.PullRequest{IsMerged: true, MergeCommit: repository.CommitRef{URL: commitURL}, HasRequiredApprovals: true},
 			shouldPass:           false,
 			err:                  ErrNotOnDefaultBranch,
 		},
 		{
 			name:                 "Commit not signed",
-			defaultBranchCommits: []r.CommitRef{{URL: commitURL}},
+			defaultBranchCommits: []repository.CommitRef{{URL: commitURL}},
 			isSigned:             false,
 			status:               "SUCCESS",
-			pullRequest:          r.PullRequest{IsMerged: true, MergeCommit: r.CommitRef{URL: commitURL}, HasRequiredApprovals: true},
+			pullRequest:          repository.PullRequest{IsMerged: true, MergeCommit: repository.CommitRef{URL: commitURL}, HasRequiredApprovals: true},
 			shouldPass:           false,
 			err:                  ErrNotSigned,
 		},
 		{
 			name:                 "Commit not a merge commit",
-			defaultBranchCommits: []r.CommitRef{{URL: commitURL}},
+			defaultBranchCommits: []repository.CommitRef{{URL: commitURL}},
 			isSigned:             true,
 			status:               "SUCCESS",
-			pullRequest:          r.PullRequest{IsMerged: true, MergeCommit: r.CommitRef{URL: "otherURL"}, HasRequiredApprovals: true},
+			pullRequest:          repository.PullRequest{IsMerged: true, MergeCommit: repository.CommitRef{URL: "otherURL"}, HasRequiredApprovals: true},
 			shouldPass:           false,
 			err:                  ErrNotMergeCommit,
 		},
 		{
 			name:                 "Commit PR does not have required approvals",
-			defaultBranchCommits: []r.CommitRef{{URL: commitURL}},
+			defaultBranchCommits: []repository.CommitRef{{URL: commitURL}},
 			isSigned:             true,
 			status:               "SUCCESS",
-			pullRequest:          r.PullRequest{IsMerged: true, MergeCommit: r.CommitRef{URL: commitURL}, HasRequiredApprovals: false},
+			pullRequest:          repository.PullRequest{IsMerged: true, MergeCommit: repository.CommitRef{URL: commitURL}, HasRequiredApprovals: false},
 			shouldPass:           false,
 			err:                  ErrMissingRequiredApprovals,
 		},
 		{
 			name:                 "CI check not successful",
-			defaultBranchCommits: []r.CommitRef{{URL: commitURL}},
+			defaultBranchCommits: []repository.CommitRef{{URL: commitURL}},
 			isSigned:             true,
 			status:               "FAILURE",
-			pullRequest:          r.PullRequest{IsMerged: true, MergeCommit: r.CommitRef{URL: commitURL}, HasRequiredApprovals: true},
+			pullRequest:          repository.PullRequest{IsMerged: true, MergeCommit: repository.CommitRef{URL: commitURL}, HasRequiredApprovals: true},
 			shouldPass:           false,
 			err:                  ErrNotPassedCI,
 		},
@@ -85,13 +84,13 @@ func TestApprovedCheck(t *testing.T) {
 
 	for _, testCase := range cases {
 		t.Run(testCase.name, func(t *testing.T) {
-			commit := r.Commit{
+			commit := repository.Commit{
 				URL:                    commitURL,
 				Status:                 testCase.status,
 				IsSigned:               testCase.isSigned,
-				AssociatedPullRequests: []r.PullRequest{testCase.pullRequest},
+				AssociatedPullRequests: []repository.PullRequest{testCase.pullRequest},
 			}
-			defaultBranch := r.Branch{Name: "production", CommitRefs: testCase.defaultBranchCommits}
+			defaultBranch := repository.Branch{Name: "production", CommitRefs: testCase.defaultBranchCommits}
 
 			metadataClient := new(voucher.MockMetadataClient)
 			metadataClient.On("GetBuildDetail", ctx, imageData).Return(buildDetail, nil)

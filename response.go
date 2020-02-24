@@ -9,7 +9,7 @@ type Response struct {
 	Results []CheckResult `json:"results"`
 }
 
-// NewResponse creates a new Response for the passed ImageData,
+// NewResponse creates a new Response for the passed reference.Canonical,
 // with the passed results.
 func NewResponse(reference reference.Reference, results []CheckResult) (checkResponse Response) {
 	checkResponse.Image = reference.String()

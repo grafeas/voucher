@@ -28,7 +28,7 @@ var buildDetailsTestData = repository.BuildDetail{
 }
 
 func TestArtifactIsImage(t *testing.T) {
-	imageDataTestData, err := voucher.NewImageData(imageURLTestData)
+	imageDataTestData, err := voucher.NewImageReference(imageURLTestData)
 	require.NoError(t, err)
 
 	assert := assert.New(t)

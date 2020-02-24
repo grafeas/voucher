@@ -5,6 +5,8 @@ import (
 	"testing"
 
 	"github.com/grafeas/voucher"
+
+	"github.com/docker/distribution/reference"
 )
 
 type testVulnerabilityScanner struct {
@@ -23,7 +25,7 @@ func (t *testVulnerabilityScanner) FailOn(failOn voucher.Severity) {
 
 // Scan runs a scan against the passed ImageData and returns a slice of
 // Vulnerabilities.
-func (t *testVulnerabilityScanner) Scan(ctx context.Context, i voucher.ImageData) ([]voucher.Vulnerability, error) {
+func (t *testVulnerabilityScanner) Scan(ctx context.Context, i reference.Canonical) ([]voucher.Vulnerability, error) {
 	return t.vulnerabilities, nil
 }
 

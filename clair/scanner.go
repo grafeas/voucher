@@ -25,7 +25,7 @@ func (scanner *Scanner) FailOn(severity voucher.Severity) {
 }
 
 // Scan runs a scan in the Clair namespace.
-func (scanner *Scanner) Scan(ctx context.Context, i voucher.ImageData) ([]voucher.Vulnerability, error) {
+func (scanner *Scanner) Scan(ctx context.Context, i reference.Canonical) ([]voucher.Vulnerability, error) {
 	vulns := make([]voucher.Vulnerability, 0)
 
 	tokenSrc, err := scanner.auth.GetTokenSource(ctx, i)

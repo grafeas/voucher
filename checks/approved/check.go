@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/docker/distribution/reference"
 	"github.com/grafeas/voucher"
 	"github.com/grafeas/voucher/repository"
 )
@@ -38,7 +39,7 @@ func (g *check) SetRepositoryClient(repositoryClient repository.Client) {
 }
 
 // Check checks that the code used to built the image passed all required checks from its source repository
-func (g *check) Check(ctx context.Context, i voucher.ImageData) (bool, error) {
+func (g *check) Check(ctx context.Context, i reference.Canonical) (bool, error) {
 	buildDetail, err := g.metadataClient.GetBuildDetail(ctx, i)
 	if err != nil {
 		if voucher.IsNoMetadataError(err) {

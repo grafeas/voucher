@@ -14,7 +14,7 @@ func TestRegisterCheckFactory(t *testing.T) {
 	ctx := context.Background()
 
 	factories := make(CheckFactories)
-	i := newTestImageData(t)
+	i := newTestImageReference(t)
 
 	factories.Register("goodcheck", func() Check {
 		check := new(MockCheck)

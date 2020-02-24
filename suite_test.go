@@ -6,15 +6,17 @@ import (
 	"testing"
 
 	"github.com/grafeas/voucher/metrics"
+
+	"github.com/docker/distribution/reference"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
-func newTestImageData(t *testing.T) ImageData {
+func newTestImageReference(t *testing.T) reference.Canonical {
 	t.Helper()
-	imageData, err := NewImageData("localhost.local/path/to/image@sha256:b148c8af52ba402ed7dd98d73f5a41836ece508d1f4704b274562ac0c9b3b7da")
-	assert.Nilf(t, err, "could not make ImageData")
+	imageData, err := NewImageReference("localhost.local/path/to/image@sha256:b148c8af52ba402ed7dd98d73f5a41836ece508d1f4704b274562ac0c9b3b7da")
+	assert.Nilf(t, err, "could not make reference.Canonical")
 	return imageData
 }
 
@@ -22,7 +24,7 @@ func TestNewSuite(t *testing.T) {
 	suite := NewSuite()
 	require.NotNilf(t, suite, "could not make CheckSuite")
 
-	imageData := newTestImageData(t)
+	imageData := newTestImageReference(t)
 
 	results := suite.Run(context.Background(), &metrics.NoopClient{}, imageData)
 	require.Equal(t, []CheckResult{}, results)
@@ -93,7 +95,7 @@ func TestMakeSuccessfulSuite(t *testing.T) {
 	suite := NewSuite()
 	assert.NotNilf(t, suite, "could not make CheckSuite")
 
-	imageData := newTestImageData(t)
+	imageData := newTestImageReference(t)
 
 	for _, name := range []string{"pass1", "pass2", "pass3"} {
 		check := new(MockCheck)
@@ -111,7 +113,7 @@ func TestMakeFailingSuite(t *testing.T) {
 	suite := NewSuite()
 	assert.NotNilf(t, suite, "could not make CheckSuite")
 
-	imageData := newTestImageData(t)
+	imageData := newTestImageReference(t)
 
 	for _, name := range []string{"fail1", "fail2", "fail3"} {
 		check := new(MockCheck)
@@ -129,7 +131,7 @@ func TestAttestSuite(t *testing.T) {
 	suite := NewSuite()
 	assert.NotNilf(t, suite, "could not make CheckSuite")
 
-	imageData := newTestImageData(t)
+	imageData := newTestImageReference(t)
 	errNoSigningEntity := errors.New("no signging entity exists for check")
 
 	metadataClient := new(MockMetadataClient)
@@ -202,7 +204,7 @@ func TestAttestSuite(t *testing.T) {
 }
 
 func TestNonattestingSuite(t *testing.T) {
-	imageData := newTestImageData(t)
+	imageData := newTestImageReference(t)
 	errCreatingPayload := errors.New("cannot create payload body")
 
 	metadataClient := new(MockMetadataClient)

@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 
+	"github.com/docker/distribution/reference"
+
 	"github.com/grafeas/voucher"
 )
 
@@ -23,7 +25,7 @@ func (s *check) SetScanner(newScanner voucher.VulnerabilityScanner) {
 }
 
 // Check verifies if the image has known vulnerabilities
-func (s *check) Check(ctx context.Context, i voucher.ImageData) (bool, error) {
+func (s *check) Check(ctx context.Context, i reference.Canonical) (bool, error) {
 	if nil == s.scanner {
 		return false, ErrNoScanner
 	}

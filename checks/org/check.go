@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/docker/distribution/reference"
 	"github.com/grafeas/voucher"
 	"github.com/grafeas/voucher/repository"
 )
@@ -33,7 +34,7 @@ func (o *check) SetRepositoryClient(repositoryClient repository.Client) {
 }
 
 // Check runs the org check
-func (o *check) Check(ctx context.Context, i voucher.ImageData) (bool, error) {
+func (o *check) Check(ctx context.Context, i reference.Canonical) (bool, error) {
 	buildDetail, err := o.metadataClient.GetBuildDetail(ctx, i)
 	if err != nil {
 		if voucher.IsNoMetadataError(err) {

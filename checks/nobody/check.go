@@ -3,6 +3,7 @@ package nobody
 import (
 	"context"
 
+	"github.com/docker/distribution/reference"
 	"github.com/grafeas/voucher"
 	"github.com/grafeas/voucher/docker"
 )
@@ -21,7 +22,7 @@ func (n *check) SetAuth(auth voucher.Auth) {
 
 // Check verifies if the image runs as root and returns a boolean (true if
 // the user is not root, false otherwise) and an error as response.
-func (n *check) Check(ctx context.Context, i voucher.ImageData) (bool, error) {
+func (n *check) Check(ctx context.Context, i reference.Canonical) (bool, error) {
 	if nil == n.auth {
 		return false, voucher.ErrNoAuth
 	}

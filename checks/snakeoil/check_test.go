@@ -15,8 +15,8 @@ import (
 func TestSnakeoilWithBadScanner(t *testing.T) {
 	check := new(check)
 
-	i, err := voucher.NewImageData("gcr.io/path/to/image@sha256:97db2bc359ccc94d3b2d6f5daa4173e9e91c513b0dcd961408adbb95ec5e5ce5")
-	require.NoErrorf(t, err, "failed to get ImageData: %s", err)
+	i, err := voucher.NewImageReference("gcr.io/path/to/image@sha256:97db2bc359ccc94d3b2d6f5daa4173e9e91c513b0dcd961408adbb95ec5e5ce5")
+	require.NoErrorf(t, err, "failed to get ImageReference: %s", err)
 
 	status, err := check.Check(context.Background(), i)
 
@@ -27,8 +27,8 @@ func TestSnakeoilWithBadScanner(t *testing.T) {
 func TestSnakeoil(t *testing.T) {
 	check := new(check)
 
-	i, err := voucher.NewImageData("gcr.io/path/to/image@sha256:97db2bc359ccc94d3b2d6f5daa4173e9e91c513b0dcd961408adbb95ec5e5ce5")
-	require.NoErrorf(t, err, "failed to get ImageData: %s", err)
+	i, err := voucher.NewImageReference("gcr.io/path/to/image@sha256:97db2bc359ccc94d3b2d6f5daa4173e9e91c513b0dcd961408adbb95ec5e5ce5")
+	require.NoErrorf(t, err, "failed to get ImageReference: %s", err)
 
 	check.SetScanner(vtesting.NewScanner(t))
 
@@ -41,8 +41,8 @@ func TestSnakeoil(t *testing.T) {
 func TestSnakeoilWithVulnerabilities(t *testing.T) {
 	check := new(check)
 
-	i, err := voucher.NewImageData("gcr.io/path/to/image@sha256:97db2bc359ccc94d3b2d6f5daa4173e9e91c513b0dcd961408adbb95ec5e5ce5")
-	require.NoErrorf(t, err, "failed to get ImageData: %s", err)
+	i, err := voucher.NewImageReference("gcr.io/path/to/image@sha256:97db2bc359ccc94d3b2d6f5daa4173e9e91c513b0dcd961408adbb95ec5e5ce5")
+	require.NoErrorf(t, err, "failed to get ImageReference: %s", err)
 
 	scanner := vtesting.NewScanner(t,
 		voucher.Vulnerability{

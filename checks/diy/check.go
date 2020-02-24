@@ -5,6 +5,7 @@ import (
 	"errors"
 	"strings"
 
+	"github.com/docker/distribution/reference"
 	"github.com/grafeas/voucher"
 	"github.com/grafeas/voucher/docker"
 )
@@ -33,7 +34,7 @@ func (d *check) SetAuth(auth voucher.Auth) {
 }
 
 // isFromValidrepo returns true if the passed image is from a valid repo.
-func (d *check) isFromValidRepo(i voucher.ImageData) bool {
+func (d *check) isFromValidRepo(i reference.Canonical) bool {
 	for _, repo := range d.validRepos {
 		if strings.HasPrefix(i.Name(), repo) {
 			return true
@@ -43,7 +44,7 @@ func (d *check) isFromValidRepo(i voucher.ImageData) bool {
 }
 
 // check checks if an image was built by a trusted source
-func (d *check) Check(ctx context.Context, i voucher.ImageData) (bool, error) {
+func (d *check) Check(ctx context.Context, i reference.Canonical) (bool, error) {
 	if !d.isFromValidRepo(i) {
 		return false, ErrNotFromRepo
 	}
