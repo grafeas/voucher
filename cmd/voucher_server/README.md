@@ -8,8 +8,13 @@
   - [Trusted Builder Identities and Trusted Builder Projects](#trusted-builder-identities-and-trusted-builder-projects)
   - [Repository Checks](#repository-checks)
     - [Repository Groups](#repository-groups)
+    - [Repository Authentication](#repository-authentication)
     - [Organization Check](#organization-check)
   - [Enabling Checks](#enabling-checks)
+  - [Checks Groups](#check-groups)
+  - [Signing Keys](#signing-keys)
+    - [OpenPGP Keys](#openpgp-keys)
+    - [Google KMS Keys](#google-kms-keys)
 - [Usage](#usage)
 
 ## Installation
@@ -129,7 +134,7 @@ Repository Groups are used to determine which Repository client should be used
 to connect to a Repository.
 
 They are defined as an alias (usually matching the name of the organization in the repository system) and a URL. Note that
-the alias can contain only lower cases letters, dashes and underscores (`[a-z_-]`)
+the alias can contain only lower cases letters, dashes, and underscores (`[a-z_-]`).
 
 The URL is used to determine if a repository is owned by a repository group.
 
@@ -145,6 +150,47 @@ org-url = "https://github.com/Shopify"
 
 [repository.grafeas]
 org-url = "https://github.com/grafeas"
+```
+
+#### Repository Authentication
+
+For the repository groups to authenticate with a repository server, you will
+need to create secrets matching the alias name in your `ejson` file.
+
+For example, for the `repository.shopify` block, you would need a `repositories`
+block in your `ejson` with a `shopify` block inside of it:
+
+```json
+{
+  "_public_key" : "cb0849626842a90427a026dc78ab39f8ded6f3180477c848ed3fe7c9c85da93d",
+  "repositories": {
+    "shopify": {
+      "token": "EJ[1:vt978NEKynsJhZlCvg5XdSE2S2PM1JBPK0tlC05cQAc=:4mDZCykfieedtHGoM0UT+Wr6zPO9J6XO:/AuGJ3I2QVnk52qOLo0sQ+EzEAk=]"
+    }
+  }
+}
+```
+
+Note that like aliases, the name of the block must only contain lower cases
+letters, dashes, and underscores (`[a-z_-]`).
+
+If your repository server supports personal access token, you can specify it
+by setting the `token` key (as in the example above).
+
+If your repository server supports app based authentication (as Github does),
+you can specify the App ID, Installation ID, and the private key as follows:
+
+```json
+{
+  "_public_key" : "cb0849626842a90427a026dc78ab39f8ded6f3180477c848ed3fe7c9c85da93d",
+  "repositories": {
+    "shopify": {
+      "_id": "1234",
+      "_installation_id": "123456789",
+      "private_key": "EJ[1:vt978NEKynsJhZlCvg5XdSE2S2PM1JBPK0tlC05cQAc=:4mDZCykfieedtHGoM0UT+Wr6zPO9J6XO:/AuGJ3I2QVnk52qOLo0sQ+EzEAk=]"
+    }
+  }
+}
 ```
 
 #### Organization Check
@@ -192,9 +238,11 @@ is_shopify = true
 
 With this configuration, the `diy`, `nobody`, `snakeoil`, and `is_shopify` checks would run when running `all` checks. The `provenance` check will be ignored unless called directly.
 
-### Required Checks
+### Check Groups
 
-You can configure named groups of checks the same as the `checks` block except by replacing `checks` with `required.[env]` where `[env]` is a name of your choosing.
+You can configure named groups of checks identically to how you would define an [enable 
+checks](#enabling-checks) block, by replacing the block heading with `required.[env]`
+where `[env]` is a name of your choosing.
 
 For example:
 
@@ -207,8 +255,46 @@ snakeoil = true
 is_shopify = true
 ```
 
-With this configuration, the `diy`, `nobody`, `snakeoil`, and `is_shopify` checks would run when running `myenv` checks. The `provenance` check will be ignored unless called directly.
+With this configuration, the `diy`, `nobody`, `snakeoil`, and `is_shopify`
+checks would run when running `myenv` checks. The `provenance` check will be
+ignored unless called directly.
 
+### Signing Keys
+
+#### OpenPGP Keys
+
+You can use OpenPGP keys by encrypting them in your ejson secrets file.
+
+First, ensure the signer is set to `pgp` in the configuration:
+
+```toml
+signer = "pgp"
+```
+
+Then add keys to your ejson secrets file. [This is documented more completely
+in the Tutorial](TUTORIAL.md#generating-keys-for-attestation).
+
+#### Google KMS Keys
+
+You can use Google KMS signing keys by switching the signer in the
+configuration:
+
+```toml
+signer = "kms"
+```
+
+Then you would specify the KMS keys in the configuration file, by adding
+`[[kms_keys]]` blocks.
+
+For example, to have the DIY Check use a KMS key in the project `binauth` with
+the name `diy-attestor`, you would use the following:
+
+```toml
+[[kms_keys]]
+check = "diy"
+path  = "projects/binauth-staging/locations/global/keyRings/binauthz-keys/cryptoKeys/diy-attestor/cryptoKeyVersions/1"
+algo  = "SHA512"
+```
 
 ## Usage
 
@@ -277,5 +363,3 @@ The response will be something along the following lines:
 ```
 
 More details about Voucher server can be read in the [API documentation](../../server/README.md).
-
-
