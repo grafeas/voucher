@@ -2,10 +2,8 @@ package config
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/Shopify/voucher"
-	"github.com/Shopify/voucher/checks/org"
 	"github.com/Shopify/voucher/repository"
 	"github.com/spf13/viper"
 	// Register the DIY check
@@ -19,19 +17,6 @@ import (
 	// Register the Repo check
 	_ "github.com/Shopify/voucher/checks/approved"
 )
-
-// EnabledChecks returns a slice of strings with the check names, based on a
-// map[string]bool (with a check name in the key, and the value storing whether
-// or not to run the check). The returned map contains enabled checks.
-func EnabledChecks(checks map[string]bool) (enabledChecks []string) {
-	enabledChecks = make([]string, 0, len(checks))
-	for name, check := range checks {
-		if check {
-			enabledChecks = append(enabledChecks, name)
-		}
-	}
-	return
-}
 
 // setAuth sets the Auth for the passed Check, if that Check implements
 // AuthorizedCheck.
@@ -94,12 +79,6 @@ func NewCheckSuite(secrets *Secrets, metadataClient voucher.MetadataClient, repo
 
 	trustedBuildCreators := viper.GetStringSlice("trusted_builder_identities")
 	trustedProjects := viper.GetStringSlice("trusted_projects")
-
-	orgs := GetOrganizationsFromConfig()
-	for alias, organization := range orgs {
-		orgCheck := org.NewOrganizationCheckFactory(organization)
-		voucher.RegisterCheckFactory("is_"+strings.ToLower(alias), orgCheck)
-	}
 
 	checks, err := voucher.GetCheckFactories(names...)
 	if nil != err {

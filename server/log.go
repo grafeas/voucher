@@ -49,3 +49,8 @@ func LogError(message string, err error) {
 func LogWarning(message string, err error) {
 	log.Warningf("Server warning: %s: %s", message, err)
 }
+
+// LogInfo logs server information to stdout as Information.
+func LogInfo(message string) {
+	log.Infof("Server info: %s", message)
+}

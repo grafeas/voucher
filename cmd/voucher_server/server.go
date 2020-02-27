@@ -23,6 +23,7 @@ var serverCmd = &cobra.Command{
 			Username:    viper.GetString("server.username"),
 			PassHash:    viper.GetString("server.password"),
 		}
+
 		secrets, err := config.ReadSecrets()
 		if err != nil {
 			log.Printf("Error loading EJSON file, no secrets loaded: %v", err)
@@ -32,7 +33,16 @@ var serverCmd = &cobra.Command{
 		if err != nil {
 			log.Printf("Error configuring metrics client: %v", err)
 		}
-		server.Serve(&serverConfig, secrets, metricsClient)
+
+		config.RegisterDynamicChecks()
+
+		voucherServer := server.NewServer(&serverConfig, secrets, metricsClient)
+
+		for groupName, checks := range config.GetRequiredChecksFromConfig() {
+			voucherServer.SetCheckGroup(groupName, checks)
+		}
+
+		voucherServer.Serve()
 	},
 }
 

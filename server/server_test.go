@@ -40,7 +40,11 @@ func TestMain(m *testing.M) {
 		PassHash:    testPasswordHash,
 	}
 	secrets, _ := config.ReadSecrets()
-	server = &Server{serverConfig, secrets, &metrics.NoopClient{}}
+	server = NewServer(serverConfig, secrets, &metrics.NoopClient{})
+
+	for groupName, checks := range config.GetRequiredChecksFromConfig() {
+		server.SetCheckGroup(groupName, checks)
+	}
 
 	os.Exit(m.Run())
 }
@@ -49,14 +53,14 @@ func TestGoodAuthentication(t *testing.T) {
 	req, err := http.NewRequest(http.MethodPost, "/all", bytes.NewReader(testParams))
 	require.NoError(t, err)
 
+	router := NewRouter(server)
+
 	req.SetBasicAuth(testUsername, testPassword)
 
 	recorder := httptest.NewRecorder()
-	handler := http.HandlerFunc(server.HandleAll)
+	router.ServeHTTP(recorder, req)
 
-	handler.ServeHTTP(recorder, req)
-
-	assert.Equal(t, recorder.Code, http.StatusOK)
+	assert.Equal(t, http.StatusOK, recorder.Code)
 }
 
 func TestBadAuthentication(t *testing.T) {
@@ -71,7 +75,7 @@ func TestBadAuthentication(t *testing.T) {
 	router.ServeHTTP(recorder, req)
 
 	// Check if the status code is not 401 Unauthorized
-	assert.Equal(t, recorder.Code, http.StatusUnauthorized)
+	assert.Equal(t, http.StatusUnauthorized, recorder.Code)
 }
 
 func TestInvalidJSON(t *testing.T) {
@@ -103,7 +107,7 @@ func TestInvalidJSON(t *testing.T) {
 		recorder := httptest.NewRecorder()
 		router.ServeHTTP(recorder, req)
 
-		assert.Equal(t, recorder.Code, http.StatusUnprocessableEntity)
+		assert.Equalf(t, http.StatusUnprocessableEntity, recorder.Code, "failed to get Unprocessable Entity status on %s", path)
 	}
 }
 
@@ -117,5 +121,5 @@ func TestHandlerStatus(t *testing.T) {
 	router.ServeHTTP(recorder, req)
 
 	// Check the status code is what we expect
-	assert.Equal(t, recorder.Code, http.StatusOK, "handler for health check failed")
+	assert.Equal(t, http.StatusOK, recorder.Code, "handler for health check failed")
 }
