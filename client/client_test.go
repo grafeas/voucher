@@ -28,10 +28,10 @@ func TestVoucherURL(t *testing.T) {
 	client, err := NewClient("localhost")
 	require.NoError(t, err, "failed to create client: ", err)
 
-	allTestURL := toVoucherURL(client.hostname, "all")
+	allTestURL := toVoucherCheckURL(client.hostname, "all")
 	assert.Equalf(allTestURL, "https://localhost/all", "url is incorrect, should be \"%s\" instead of \"%s\"", "https://localhost/all", allTestURL)
 
-	allEmptyURL := toVoucherURL(nil, "all")
+	allEmptyURL := toVoucherCheckURL(nil, "all")
 	assert.Equal(allEmptyURL, "/all")
 }
 

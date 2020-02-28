@@ -6,6 +6,7 @@ import (
 	"github.com/Shopify/voucher"
 	"github.com/Shopify/voucher/repository"
 	"github.com/spf13/viper"
+
 	// Register the DIY check
 	_ "github.com/Shopify/voucher/checks/diy"
 	// Register the Nobody check

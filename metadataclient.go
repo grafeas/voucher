@@ -15,7 +15,8 @@ type MetadataClient interface {
 	NewPayloadBody(ImageData) (string, error)
 	GetVulnerabilities(context.Context, ImageData) ([]Vulnerability, error)
 	GetBuildDetail(context.Context, reference.Canonical) (repository.BuildDetail, error)
-	AddAttestationToImage(context.Context, ImageData, AttestationPayload) (interface{}, error)
+	AddAttestationToImage(context.Context, ImageData, Attestation) (SignedAttestation, error)
+	GetAttestations(context.Context, ImageData) ([]SignedAttestation, error)
 	Close()
 }
 

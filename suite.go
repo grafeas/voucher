@@ -113,8 +113,8 @@ func createAttestation(ctx context.Context, client MetadataClient, result CheckR
 		return nil, err
 	}
 
-	attestationPayload := NewAttestationPayload(result.Name, payload)
-	details, err := client.AddAttestationToImage(ctx, result.ImageData, attestationPayload)
+	attestation := NewAttestation(result.Name, payload)
+	details, err := client.AddAttestationToImage(ctx, result.ImageData, attestation)
 	return details, err
 }
 

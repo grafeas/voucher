@@ -42,43 +42,72 @@ func (g *Client) NewPayloadBody(reference reference.Canonical) (string, error) {
 	return payload, err
 }
 
-// AddAttestationToImage adds a new attestation with the passed AttestationPayload
+// AddAttestationToImage adds a new attestation with the passed Attestation
 // to the image described by ImageData.
-func (g *Client) AddAttestationToImage(ctx context.Context, reference reference.Canonical, payload voucher.AttestationPayload) (interface{}, error) {
+func (g *Client) AddAttestationToImage(ctx context.Context, reference reference.Canonical, attestation voucher.Attestation) (voucher.SignedAttestation, error) {
 	if !g.CanAttest() {
-		return nil, errCannotAttest
+		return voucher.SignedAttestation{}, errCannotAttest
 	}
 
-	signed, keyID, err := payload.Sign(g.keyring)
+	signedAttestation, err := voucher.SignAttestation(g.keyring, attestation)
 	if nil != err {
-		return nil, err
+		return voucher.SignedAttestation{}, err
 	}
 
-	attestation := newOccurrenceAttestation(payload.Body, signed, keyID)
-	occurrenceRequest := g.getCreateOccurrenceRequest(reference, payload.CheckName, attestation)
-	occ, err := g.containeranalysis.CreateOccurrence(ctx, occurrenceRequest)
+	_, err = g.containeranalysis.CreateOccurrence(
+		ctx,
+		newOccurrenceAttestation(
+			reference,
+			signedAttestation,
+			g.binauthProject,
+		),
+	)
 
 	if isAttestionExistsErr(err) {
 		err = nil
-		occ = nil
+
+		signedAttestation.Signature = ""
 	}
 
-	return occ, err
+	return signedAttestation, err
 }
 
-func (g *Client) getCreateOccurrenceRequest(reference reference.Canonical, parentNoteID string, attestation *grafeas.Occurrence_Attestation) *grafeas.CreateOccurrenceRequest {
-	binauthProjectPath := "projects/" + g.binauthProject
-	noteName := binauthProjectPath + "/notes/" + parentNoteID
+// GetAttestations returns all of the attestations associated with an image.
+func (g *Client) GetAttestations(ctx context.Context, reference reference.Canonical) ([]voucher.SignedAttestation, error) {
+	filterStr := kindFilterStr(reference, grafeas.NoteKind_ATTESTATION)
 
-	occurrence := grafeas.Occurrence{
-		NoteName:    noteName,
-		ResourceUri: "https://" + reference.Name() + "@" + reference.Digest().String(),
-		Details:     attestation,
+	var attestations []voucher.SignedAttestation
+
+	project := projectPath(g.binauthProject)
+	req := &grafeas.ListOccurrencesRequest{Parent: project, Filter: filterStr}
+	occIterator := g.containeranalysis.ListOccurrences(ctx, req)
+
+	for {
+		occ, err := occIterator.Next()
+		if nil != err {
+			if iterator.Done == err {
+				return attestations, nil
+			}
+			return nil, err
+		}
+
+		note, err := g.containeranalysis.GetOccurrenceNote(
+			ctx,
+			&grafeas.GetOccurrenceNoteRequest{
+				Name: occ.GetName(),
+			},
+		)
+		if nil != err {
+			return nil, err
+		}
+
+		name := getCheckNameFromNoteName(g.binauthProject, note.GetName())
+
+		attestations = append(
+			attestations,
+			OccurrenceToAttestation(name, occ),
+		)
 	}
-
-	req := &grafeas.CreateOccurrenceRequest{Parent: binauthProjectPath, Occurrence: &occurrence}
-
-	return req
 }
 
 // GetVulnerabilities returns the detected vulnerabilities for the Image described by voucher.ImageData.

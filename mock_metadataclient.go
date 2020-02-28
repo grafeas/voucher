@@ -33,9 +33,14 @@ func (m *MockMetadataClient) GetBuildDetail(ctx context.Context, ref reference.C
 	return args.Get(0).(repository.BuildDetail), args.Error(1)
 }
 
-func (m *MockMetadataClient) AddAttestationToImage(ctx context.Context, imageData ImageData, attestationPayload AttestationPayload) (interface{}, error) {
-	args := m.Called(ctx, imageData, attestationPayload)
-	return args.Get(0), args.Error(1)
+func (m *MockMetadataClient) AddAttestationToImage(ctx context.Context, imageData ImageData, attestation Attestation) (SignedAttestation, error) {
+	args := m.Called(ctx, imageData, attestation)
+	return args.Get(0).(SignedAttestation), args.Error(1)
+}
+
+func (m *MockMetadataClient) GetAttestations(ctx context.Context, imageData ImageData) ([]SignedAttestation, error) {
+	args := m.Called(ctx, imageData)
+	return args.Get(0).([]SignedAttestation), args.Error(1)
 }
 
 func (m *MockMetadataClient) Close() {

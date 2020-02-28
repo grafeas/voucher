@@ -44,6 +44,14 @@ The each of the objects in the `results` array are structured as follows:
 | `attested`  | A boolean, true if an attestation was created for the check.                       |
 | `err`       | Any error message or structure that was thrown during the course of the execution. |
 
+### POST /all/verify
+
+Verify the existence of attestations on the passed image for all enabled checks.
+
+The input and output of this API call is identical to that described in
+[`POST /all`](#post-all), and like that call, authorization may
+be handled by Basic Authentication.
+
 ### POST /{test name here}
 
 Run the test specified in the URL.
@@ -54,9 +62,25 @@ This can also be used to run all tests required for an environment as specified 
 
 For example, if the API call is `POST /myenv`, this will run the all tests enabled for `myenv`.
 
-
-The input and output of this API call is identical to that described in [`POST /all`](#post-all), 
+The input and output of this API call is identical to that described in [`POST /all`](#post-all),
 and like that call, authorization may be handled by Basic Authentication.
+
+### POST /{test name here}/verify
+
+Verify the existence of attestations for the passed check or check group.
+
+For example, if the API call is `POST /diy/verify`, this will verify the passed
+image reference has a DIY attestation.
+
+Likewise this API call can also be used to verify the existence of attestations
+for all tests required for an environment as specified in the configuration.
+
+For example, if the API call is `POST /myenv/verify`, this will verify that an
+attestation exists for each of the checks enabled for `myenv`.
+
+The input and output of this API call is identical to that described in
+[`POST /all/verify`](#post-all-verify), and like that call, authorization may
+be handled by Basic Authentication.
 
 ### GET /services/ping
 

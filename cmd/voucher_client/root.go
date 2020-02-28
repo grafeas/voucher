@@ -10,7 +10,10 @@ import (
 	"github.com/spf13/viper"
 )
 
-var cfgFile string
+var (
+	cfgFile string
+	verify  bool
+)
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -26,7 +29,11 @@ them.`,
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		LookupAndSubmit(args)
+		if verify {
+			LookupAndVerify(args)
+			return
+		}
+		LookupAndCheck(args)
 	},
 }
 
@@ -34,6 +41,7 @@ them.`,
 func init() {
 	cobra.OnInitialize(initConfig)
 
+	rootCmd.Flags().BoolVar(&verify, "verify", false, "Verify instead of check an image.")
 	rootCmd.Flags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.voucher.yaml)")
 	rootCmd.Flags().StringVarP(&defaultConfig.Hostname, "voucher", "v", "http://localhost:8000", "Voucher server to connect to.")
 	viper.BindPFlag("hostname", rootCmd.Flags().Lookup("voucher"))

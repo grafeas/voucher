@@ -93,8 +93,11 @@ func TestInvalidJSON(t *testing.T) {
 
 	for _, route := range getRoutes(server) {
 		path := route.Path
-		if "/{check}" == path {
+
+		if individualCheckPath == path {
 			path = "/diy"
+		} else if verifyCheckPath == path {
+			path = "/diy/verify"
 		} else if healthCheckPath == path {
 			continue
 		}

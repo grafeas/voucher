@@ -135,9 +135,21 @@ func TestAttestSuite(t *testing.T) {
 	metadataClient := new(MockMetadataClient)
 	metadataClient.
 		On("NewPayloadBody", imageData).Return(imageData.String(), nil).
-		On("AddAttestationToImage", mock.Anything, imageData, NewAttestationPayload("snakeoil", imageData.String())).Return(nil, nil).
-		On("AddAttestationToImage", mock.Anything, imageData, NewAttestationPayload("pass2", imageData.String())).Return(nil, errNoSigningEntity).
-		On("AddAttestationToImage", mock.Anything, imageData, NewAttestationPayload("pass3", imageData.String())).Return(nil, errNoSigningEntity)
+		On("AddAttestationToImage", mock.Anything, imageData, NewAttestation("snakeoil", imageData.String())).Return(SignedAttestation{
+		Attestation: Attestation{
+			CheckName: "snakeoil",
+		},
+	}, nil).
+		On("AddAttestationToImage", mock.Anything, imageData, NewAttestation("pass2", imageData.String())).Return(SignedAttestation{
+		Attestation: Attestation{
+			CheckName: "pass2",
+		},
+	}, errNoSigningEntity).
+		On("AddAttestationToImage", mock.Anything, imageData, NewAttestation("pass3", imageData.String())).Return(SignedAttestation{
+		Attestation: Attestation{
+			CheckName: "pass3",
+		},
+	}, errNoSigningEntity)
 
 	for _, name := range []string{"snakeoil", "pass2", "pass3"} {
 		check := new(MockCheck)
@@ -154,7 +166,11 @@ func TestAttestSuite(t *testing.T) {
 			Err:       "",
 			Success:   true,
 			Attested:  true,
-			Details:   nil,
+			Details: SignedAttestation{
+				Attestation: Attestation{
+					CheckName: "snakeoil",
+				},
+			},
 		},
 		{
 			Name:      "pass2",
@@ -162,7 +178,11 @@ func TestAttestSuite(t *testing.T) {
 			Err:       errNoSigningEntity.Error(),
 			Success:   true,
 			Attested:  false,
-			Details:   nil,
+			Details: SignedAttestation{
+				Attestation: Attestation{
+					CheckName: "pass2",
+				},
+			},
 		},
 		{
 			Name:      "pass3",
@@ -170,7 +190,11 @@ func TestAttestSuite(t *testing.T) {
 			Err:       errNoSigningEntity.Error(),
 			Success:   true,
 			Attested:  false,
-			Details:   nil,
+			Details: SignedAttestation{
+				Attestation: Attestation{
+					CheckName: "pass3",
+				},
+			},
 		},
 	}
 

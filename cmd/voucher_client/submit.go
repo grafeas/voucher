@@ -9,40 +9,12 @@ import (
 	"github.com/docker/distribution/reference"
 
 	"github.com/Shopify/voucher"
-	"github.com/Shopify/voucher/auth/google"
 )
 
 var errImageCheckFailed = errors.New("image failed to pass required check(s)")
 
-// lookupCanonical looks up the canonical version of the passed image path.
-func lookupCanonical(ctx context.Context, image string) (reference.Canonical, error) {
-	var ok bool
-	var namedRef reference.Named
-
-	ref, err := reference.Parse(image)
-	if nil != err {
-		return nil, fmt.Errorf("parsing image reference failed: %s", err)
-	}
-
-	if namedRef, ok = ref.(reference.Named); !ok {
-		return nil, fmt.Errorf("couldn't get named version of reference: %s", err)
-	}
-
-	voucherClient, err := voucher.AuthToClient(ctx, google.NewAuth(), namedRef)
-	if nil != err {
-		return nil, fmt.Errorf("creating authenticated client failed: %s", err)
-	}
-
-	canonicalRef, err := getCanonicalReference(voucherClient, namedRef)
-	if nil != err {
-		err = fmt.Errorf("getting image digest failed: %s", err)
-	}
-
-	return canonicalRef, err
-}
-
-// submit submits the passed image to the voucher server.
-func submit(ctx context.Context, client voucher.Interface, check string, canonicalRef reference.Canonical) error {
+// check checks the passed image to the voucher server.
+func check(ctx context.Context, client voucher.Interface, check string, canonicalRef reference.Canonical) error {
 	fmt.Printf("Submitting image to Voucher: %s\n", canonicalRef.String())
 
 	voucherResp, err := client.Check(ctx, check, canonicalRef)
@@ -59,8 +31,9 @@ func submit(ctx context.Context, client voucher.Interface, check string, canonic
 	return nil
 }
 
-// LookupAndSubmit looks up the passed image, and submits it with the Voucher server.
-func LookupAndSubmit(args []string) {
+// LookupAndCheck looks up the passed image, and checks it with the Voucher
+// server.
+func LookupAndCheck(args []string) {
 	var err error
 
 	client, err := getVoucherClient()
@@ -78,9 +51,9 @@ func LookupAndSubmit(args []string) {
 		os.Exit(1)
 	}
 
-	err = submit(ctx, client, getCheck(), canonicalRef)
+	err = check(ctx, client, getCheck(), canonicalRef)
 	if nil != err {
-		errorf("submitting image to voucher failed: %s", err)
+		errorf("checking image with voucher failed: %s", err)
 		os.Exit(1)
 	}
 }

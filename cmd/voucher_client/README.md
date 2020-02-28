@@ -41,19 +41,20 @@ password: "<password>"
 While you can use `curl` to make API calls against Voucher, you can also use `voucher_client` to save from making HTTP requests by hand. Unlike the other Voucher tools, `voucher_client` will look up the appropriate canonical version of an image reference if passed a tagged image reference.
 
 ```shell
-$ voucher_client [--voucher <server> --check <check to run>] <image path>
+$ voucher_client [--voucher <server> --verify --check <check to run>] <image path>
 ```
 
 `voucher_client` supports the following flags:
 
-| Flag        | Short Flag       | Description                                                                |
-| :--------   | :--------------- | :------------------------------------------------------------------------- |
-| `--config`  |                  | The path to your configuration file, (default is $HOME/.voucher.yaml)      |
-| `--check`   | `-c`             | The Check to run on the image ("all" for all checks).                      |
-| `--voucher` | `-v`             | The Voucher server to connect to.                                          |
-| `--username`|                  | Username to authenticate against Voucher with.                             |
-| `--password`|                  | Password to authenticate against Voucher with.                             |
-| `--timeout` | `-t`             | The number of seconds to wait before failing (defaults to 240).            |
+| Flag         | Short Flag       | Description                                                                   |
+| :--------    | :--------------- | :---------------------------------------------------------------------------- |
+| `--config`   |                  | The path to your configuration file, (default is $HOME/.voucher.yaml)         |
+| `--check`    | `-c`             | The Check to run on the image ("all" for all checks).                         |
+| `--voucher`  | `-v`             | The Voucher server to connect to.                                             |
+| `--verify`   |                  | Verify an image has attestations rather than checking and attesting an image. |
+| `--username` |                  | Username to authenticate against Voucher with.                                |
+| `--password` |                  | Password to authenticate against Voucher with.                                |
+| `--timeout`  | `-t`             | The number of seconds to wait before failing (defaults to 240).               |
 
 For example:
 
@@ -64,8 +65,11 @@ $ voucher_client -v http://localhost:8000 gcr.io/path/to/image:latest
 The output will be something along the following lines:
 
 ```json
- - Attesting image: gcr.io/path/to/image@sha256:ab7524b7375fbf09b3784f0bbd9cb2505700dd05e03ce5f5e6d262bf2f5ac51c
-   ✗ nobody failed
-   ✗ snakeoil failed, err: vulnernable to 1 vulnerabilities: CVE-2018-12345 (high)
-   ✓ diy succeeded, but wasn't attested, err: rpc error: code = AlreadyExists desc = Requested entity already exists
+Using config file: /Users/catherine/.voucher.yaml
+Submitting image to Voucher: gcr.io/path/to/image@sha256:ab7524b7375fbf09b3784f0bbd9cb2505700dd05e03ce5f5e6d262bf2f5ac51c
+image was rejected
+   ✓ passed diy
+   ✓ passed nobody
+   ✓ passed is_shopify
+   ✗ failed snakeoil, err: vulnernable to 2 vulnerabilities: CVE-2019-5481 (high), CVE-2019-5482 (high)
 ```

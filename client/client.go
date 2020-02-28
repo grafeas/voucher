@@ -44,7 +44,7 @@ func (c *Client) Check(ctx context.Context, check string, image reference.Canoni
 	req, err = http.NewRequestWithContext(
 		ctx,
 		http.MethodPost,
-		toVoucherURL(c.hostname, check),
+		toVoucherCheckURL(c.hostname, check),
 		&buffer,
 	)
 	if nil != err {

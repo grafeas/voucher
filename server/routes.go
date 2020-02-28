@@ -9,6 +9,7 @@ import (
 const (
 	healthCheckPath     = "/services/ping"
 	individualCheckPath = "/{check}"
+	verifyCheckPath     = individualCheckPath + "/verify"
 )
 
 // Route stores metadata about a particular endpoint
@@ -39,6 +40,12 @@ func getRoutes(s *Server) []Route {
 			"POST",
 			individualCheckPath,
 			s.HandleCheckImage,
+		},
+		{
+			"Verify Image",
+			"POST",
+			verifyCheckPath,
+			s.HandleVerifyImage,
 		},
 		{
 			"healthcheck: /services/ping",

@@ -15,14 +15,19 @@ func errorf(format string, v interface{}) {
 // formatResponse returns the response as a string.
 func formatResponse(resp *voucher.Response) string {
 	output := ""
+	if resp.Success {
+		fmt.Println("image is approved")
+	} else {
+		fmt.Println("image was rejected")
+	}
 	for _, result := range resp.Results {
 		if result.Success {
-			output += fmt.Sprintf("   ✓ %s succeeded", result.Name)
+			output += fmt.Sprintf("   ✓ passed %s", result.Name)
 			if !result.Attested {
 				output += ", but wasn't attested"
 			}
 		} else {
-			output += fmt.Sprintf("   ✗ %s failed", result.Name)
+			output += fmt.Sprintf("   ✗ failed %s", result.Name)
 		}
 
 		if "" != result.Err {
