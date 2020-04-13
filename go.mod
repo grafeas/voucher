@@ -14,6 +14,7 @@ require (
 	github.com/docker/docker v1.13.2-0.20170524085120-eef6495eddab
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.3.3 // indirect
+	github.com/docker/libtrust v0.0.0-20160708172513-aabc10ec26b7 // indirect
 	github.com/dustin/gojson v0.0.0-20160307161227-2e71ec9dd5ad // indirect
 	github.com/fernet/fernet-go v0.0.0-20180830025343-9eac43b88a5e // indirect
 	github.com/golang/protobuf v1.3.2

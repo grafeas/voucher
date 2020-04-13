@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/docker/distribution/manifest/schema1"
 	"github.com/docker/distribution/manifest/schema2"
 	"github.com/docker/distribution/reference"
 	"github.com/opencontainers/go-digest"
@@ -20,6 +21,8 @@ func GetDigestFromTagged(client *http.Client, image reference.NamedTagged) (dige
 	}
 
 	request.Header.Add("Accept", schema2.MediaTypeManifest)
+	request.Header.Add("Accept", schema1.MediaTypeManifest)
+	request.Header.Add("Accept", schema1.MediaTypeSignedManifest)
 
 	resp, err := client.Do(request)
 	if err != nil {
