@@ -75,6 +75,12 @@ func (keyring *KeyRing) AddEntities(name string, input openpgp.EntityList) {
 	}
 }
 
+// Close closes the open PGP signer. This function does nothing but satisifies
+// the interface.
+func (keyring *KeyRing) Close() error {
+	return nil
+}
+
 // NewKeyRing creates a new keyring from the passed EntityList. The keys in
 // the input EntityList are then associated with the
 func NewKeyRing() *KeyRing {

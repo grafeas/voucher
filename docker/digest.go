@@ -29,11 +29,11 @@ func GetDigestFromTagged(client *http.Client, image reference.NamedTagged) (dige
 		return blank, err
 	}
 
+	defer resp.Body.Close()
+
 	if resp.StatusCode >= 300 {
 		return blank, responseToError(resp)
 	}
-
-	_ = resp.Body.Close()
 
 	imageDigest := digest.Digest(resp.Header.Get("Docker-Content-Digest"))
 	if "" == string(imageDigest) {

@@ -62,6 +62,11 @@ func (s *Signer) Sign(checkName, body string) (string, string, error) {
 	return string(resp.Signature), fmt.Sprintf("//cloudkms.googleapis.com/%v", key.Path), nil
 }
 
+// Close closes the KMS signer's connections.
+func (s *Signer) Close() error {
+	return s.client.Close()
+}
+
 func sha512Digest(data []byte) []byte {
 	output := make([]byte, sha512.Size)
 	sha := sha512.Sum512(data)
