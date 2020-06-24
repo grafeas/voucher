@@ -144,6 +144,9 @@ func (g *Client) GetVulnerabilities(ctx context.Context, reference reference.Can
 
 // Close closes the containeranalysis Grafeas client.
 func (g *Client) Close() {
+	if nil != g.keyring {
+		_ = g.keyring.Close()
+	}
 	g.containeranalysis.Close()
 }
 
