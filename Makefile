@@ -32,7 +32,7 @@ endif
 ifeq ($(shell $(GOLANGCI-LINT) version 2> /dev/null) , "")
 	$(error "golangci-lint is not installed")
 endif
-ifeq ($(shell $(GORELEASER) version dot 2> /dev/null) , "")
+ifeq ($(shell $(GORELEASER) --version dot 2> /dev/null) , "")
 	$(error "goreleaser is not installed")
 endif
 	$(info "No missing dependencies")
