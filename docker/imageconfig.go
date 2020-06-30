@@ -4,15 +4,20 @@ import (
 	dockerTypes "github.com/docker/docker/api/types"
 )
 
-// ImageConfig is a structure that wraps a config manifest.
-type ImageConfig struct {
-	ContainerConfig dockerTypes.ExecConfig `json:"container_config"`
+// ImageConfig represents an Docker image configuration. This presently just
+// allows us to verify if an image runs as root or not.
+type ImageConfig interface {
+	// RunsAsRoot returns true if the passed image will run as the root user.
+	RunsAsRoot() bool
 }
 
-// RunsAsRoot returns true if the image the ImageConfig is associated with
-// runs as root (user 0).
-func (config *ImageConfig) RunsAsRoot() bool {
-	user := config.ContainerConfig.User
+type imageConfig struct {
+	dockerTypes.ExecConfig
+}
+
+// RunsAsRoot returns true if the image will run as the root user.
+func (config *imageConfig) RunsAsRoot() bool {
+	user := config.User
 
 	return ("" == user || "root" == user || "0:0" == user || "0" == user)
 }

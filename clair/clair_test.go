@@ -19,7 +19,7 @@ func TestGetClairVulnerabilites(t *testing.T) {
 	img, tokenSrc, clairServer := PrepareClairTest(t, ClairVulnerabilities())
 	defer clairServer.Close()
 
-	clairVulns, err := getClairVulnerabilities(vtesting.NewTestManifest(), createClairConfig(clairServer.URL), tokenSrc, img)
+	clairVulns, err := getClairVulnerabilities(vtesting.NewTestManifest().Manifest, createClairConfig(clairServer.URL), tokenSrc, img)
 	voucherVulns := convertToVoucherVulnerabilities(clairVulns, voucher.MediumSeverity)
 
 	assert.Nil(t, err)
@@ -31,7 +31,7 @@ func TestFilterClairVulnerabilities(t *testing.T) {
 	img, tokenSrc, clairServer := PrepareClairTest(t, ClairVulnerabilities())
 	defer clairServer.Close()
 
-	clairVulns, err := getClairVulnerabilities(vtesting.NewTestManifest(), createClairConfig(clairServer.URL), tokenSrc, img)
+	clairVulns, err := getClairVulnerabilities(vtesting.NewTestManifest().Manifest, createClairConfig(clairServer.URL), tokenSrc, img)
 	voucherVulns := convertToVoucherVulnerabilities(clairVulns, voucher.HighSeverity)
 
 	assert.Nil(t, err)

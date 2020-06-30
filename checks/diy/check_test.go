@@ -71,6 +71,6 @@ func TestFailingDIYCheck(t *testing.T) {
 	pass, err := diyCheck.Check(context.Background(), i)
 
 	require.Error(t, err, "check should have failed with error, but didn't")
-	assert.Containsf(t, err.Error(), "image doesn't exist", "check error format is incorrect: \"%s\"", err)
+	assert.Containsf(t, err.Error(), "image doesn't exist", "check error format is incorrect, should be \"image doesn't exist\": \"%s\"", err)
 	assert.False(t, pass, "check passed when it should have failed")
 }

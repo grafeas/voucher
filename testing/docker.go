@@ -7,9 +7,10 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/docker/distribution"
+	"github.com/docker/distribution/manifest/schema1"
 	"github.com/docker/distribution/manifest/schema2"
 	dockerTypes "github.com/docker/docker/api/types"
+	"github.com/docker/libtrust"
 )
 
 // RateLimitOutput is the data that is returned when we similuate a Docker
@@ -18,6 +19,7 @@ const RateLimitOutput = "<html><body>Rate Limited</body></html>"
 
 // dockerAPIMock mocks the Docker API.
 type dockerAPIMock struct {
+	privateKey libtrust.PrivateKey
 }
 
 // ServeHTTP implements the http.Handler interface, responding to valid requests with good data, and
@@ -26,7 +28,17 @@ func (mock *dockerAPIMock) ServeHTTP(writer http.ResponseWriter, req *http.Reque
 	switch req.URL.Path {
 	case "/v2/path/to/image/manifests/latest", "/v2/path/to/image/manifests/sha256:b148c8af52ba402ed7dd98d73f5a41836ece508d1f4704b274562ac0c9b3b7da":
 		writer.Header().Set("Docker-Content-Digest", "sha256:b148c8af52ba402ed7dd98d73f5a41836ece508d1f4704b274562ac0c9b3b7da")
-		jsonRespond(writer, schema2.MediaTypeManifest, NewTestManifest())
+		mimeType, raw, _ := NewTestManifest().Payload()
+		rawRespond(writer, mimeType, string(raw))
+		return
+	case "/v2/schema1image/manifests/latest", "/v2/schema1image/manifests/sha256:03f65aeeb2e8e8db022b297cae4cdce9248633f551452e63ba520d1f9ef2eca0":
+		writer.Header().Set("Docker-Content-Digest", "sha256:03f65aeeb2e8e8db022b297cae4cdce9248633f551452e63ba520d1f9ef2eca0")
+		jsonRespond(writer, schema1.MediaTypeManifest, NewTestSchema1Manifest())
+		return
+	case "/v2/schema1imagesigned/manifests/latest", "/v2/schema1imagesigned/manifests/sha256:18e6e7971438ab792d13563dcd8972acf4445bc0dcfdff84a6374d63a9c3ed62":
+		writer.Header().Set("Docker-Content-Digest", "sha256:18e6e7971438ab792d13563dcd8972acf4445bc0dcfdff84a6374d63a9c3ed62")
+		mimeType, raw, _ := NewTestSchema1SignedManifest(mock.privateKey).Payload()
+		rawRespond(writer, mimeType, string(raw))
 		return
 	case "/v2/path/to/ratelimited/manifests/latest", "/v2/path/to/ratelimited/manifests/sha256:b148c8af52ba402ed7dd98d73f5a41836ece508d1f4704b274562ac0c9b3b7da":
 		rawRespond(writer, "text/html", RateLimitOutput)
@@ -45,6 +57,8 @@ func (mock *dockerAPIMock) ServeHTTP(writer http.ResponseWriter, req *http.Reque
 // NewTestDockerServer creates a new mock of the Docker registry
 func NewTestDockerServer(t *testing.T) *httptest.Server {
 	handler := new(dockerAPIMock)
+
+	handler.privateKey = NewPrivateKey()
 
 	server := httptest.NewTLSServer(handler)
 	return server
@@ -70,39 +84,6 @@ func rawRespond(writer http.ResponseWriter, content, body string) {
 	if nil != err {
 		http.Error(writer, fmt.Sprintf("failed to handle request: %s", err), 500)
 	}
-}
-
-// NewTestManifest creates a test manifest for our mock Docker API.
-func NewTestManifest() schema2.Manifest {
-	manifest := schema2.Manifest{
-		Config: distribution.Descriptor{
-			MediaType: schema2.MediaTypeImageConfig,
-			Size:      7023,
-			Digest:    "sha256:b5b2b2c507a0944348e0303114d8d93aaaa081732b86451d9bce1f432a537bc7",
-		},
-		Layers: []distribution.Descriptor{
-			{
-				MediaType: schema2.MediaTypeLayer,
-				Size:      32654,
-				Digest:    "sha256:e692418e4cbaf90ca69d05a66403747baa33ee08806650b51fab815ad7fc331f",
-			},
-			{
-				MediaType: schema2.MediaTypeLayer,
-				Size:      16724,
-				Digest:    "sha256:3c3a4604a545cdc127456d94e421cd355bca5b528f4a9c1905b15da2eb4a4c6b",
-			},
-			{
-				MediaType: schema2.MediaTypeLayer,
-				Size:      73109,
-				Digest:    "sha256:ec4b8955958665577945c89419d1af06b5f7636b4ac3da7f12184802ad867736",
-			},
-		},
-	}
-
-	manifest.SchemaVersion = 2
-	manifest.MediaType = schema2.MediaTypeManifest
-
-	return manifest
 }
 
 // NewTestImageConfig creates a test image Config for our mock Docker API.

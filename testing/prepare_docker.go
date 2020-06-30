@@ -1,4 +1,4 @@
-package docker
+package vtesting
 
 import (
 	"context"
@@ -7,9 +7,6 @@ import (
 	"testing"
 
 	"github.com/docker/distribution/reference"
-	"github.com/stretchr/testify/require"
-
-	vtesting "github.com/Shopify/voucher/testing"
 )
 
 // PrepareDockerTest creates a new http.Client and httptest.Server for testing with.
@@ -17,14 +14,19 @@ import (
 func PrepareDockerTest(t *testing.T, ref reference.Named) (*http.Client, *httptest.Server) {
 	t.Helper()
 
-	server := vtesting.NewTestDockerServer(t)
+	server := NewTestDockerServer(t)
 
-	auth := vtesting.NewAuth(server)
+	auth := NewAuth(server)
 
 	client, err := auth.ToClient(context.TODO(), ref)
-	require.NoError(t, err, "failed to create client: %s", err)
+	if nil != err {
+		t.Fatalf("failed to create client for Docker API test: %s", err)
+	}
 
-	vtesting.UpdateClient(client, server)
+	err = UpdateClient(client, server)
+	if nil != err {
+		t.Fatalf("failed to update client for Docker API test: %s", err)
+	}
 
 	return client, server
 }

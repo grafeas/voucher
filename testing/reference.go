@@ -35,6 +35,24 @@ func NewRateLimitedTestReference(t *testing.T) reference.Canonical {
 	return parseReference(t, "localhost/path/to/ratelimited@sha256:b148c8af52ba402ed7dd98d73f5a41836ece508d1f4704b274562ac0c9b3b7da")
 }
 
+// NewTestSchema1Reference creates a new schema version 1 reference to be used
+// throughout the docker tests. The returned reference is assumed to exist, and
+// is assumed to have valid configuration and layers.
+func NewTestSchema1Reference(t *testing.T) reference.Canonical {
+	t.Helper()
+
+	return parseReference(t, "localhost/schema1image@sha256:03f65aeeb2e8e8db022b297cae4cdce9248633f551452e63ba520d1f9ef2eca0")
+}
+
+// NewTestSchema1SignedReference creates a new schema version 1 reference to be
+// used throughout the docker tests. The returned reference is assumed to
+// exist, be signed, and to have valid configuration and layers.
+func NewTestSchema1SignedReference(t *testing.T) reference.Canonical {
+	t.Helper()
+
+	return parseReference(t, "localhost/schema1imagesigned@sha256:18e6e7971438ab792d13563dcd8972acf4445bc0dcfdff84a6374d63a9c3ed62")
+}
+
 // parseReference parses the passed reference and returns it (or fails)
 func parseReference(t *testing.T, name string) reference.Canonical {
 	t.Helper()

@@ -1,4 +1,4 @@
-package docker
+package uri
 
 import (
 	"bytes"
@@ -41,6 +41,13 @@ func GetManifestURI(ref reference.Canonical) string {
 // tag.
 func GetTagManifestURI(ref reference.NamedTagged) string {
 	u := createURL(ref, reference.Path(ref), "manifests", ref.Tag())
+	return u.String()
+}
+
+// GetDigestManifestURI gets a manifest URI based on the passed repository and
+// tag.
+func GetDigestManifestURI(ref reference.Canonical) string {
+	u := createURL(ref, reference.Path(ref), "manifests", string(ref.Digest()))
 	return u.String()
 }
 

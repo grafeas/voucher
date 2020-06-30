@@ -6,39 +6,52 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/Shopify/voucher/docker/schema2"
 	vtesting "github.com/Shopify/voucher/testing"
 )
 
 func TestRequestManifest(t *testing.T) {
 	ref := vtesting.NewTestReference(t)
 
-	client, server := PrepareDockerTest(t, ref)
+	client, server := vtesting.PrepareDockerTest(t, ref)
 	defer server.Close()
 
 	manifest, err := RequestManifest(client, ref)
-	require.NoError(t, err, "failed to get manifest: %s", err)
+	require.NoError(t, err)
 
-	assert.Equal(t, vtesting.NewTestManifest(), manifest)
+	schema2Manifest := schema2.ToManifest(manifest)
+
+	assert.Equal(
+		t,
+		vtesting.NewTestManifest().Manifest,
+		schema2Manifest,
+	)
 }
 
 func TestRequestBadManifest(t *testing.T) {
 	ref := vtesting.NewBadTestReference(t)
 
-	client, server := PrepareDockerTest(t, ref)
+	client, server := vtesting.PrepareDockerTest(t, ref)
 	defer server.Close()
 
 	_, err := RequestManifest(client, ref)
-	assert.NotNilf(t, err, "should have failed to get manifest, but didn't")
-	assert.Contains(t, err.Error(), "failed to load resource with status \"404 Not Found\":")
+	require.NotNilf(t, err, "should have failed to get manifest, but didn't")
+	assert.Equal(t,
+		NewManifestErrorWithRequest("404 Not Found", []byte("image doesn't exist\n")),
+		err,
+	)
 }
 
 func TestRateLimitedBadManifest(t *testing.T) {
 	ref := vtesting.NewRateLimitedTestReference(t)
 
-	client, server := PrepareDockerTest(t, ref)
+	client, server := vtesting.PrepareDockerTest(t, ref)
 	defer server.Close()
 
 	_, err := RequestManifest(client, ref)
 	assert.NotNilf(t, err, "should have failed to get manifest, but didn't")
-	assert.Contains(t, err.Error(), "failed to load resource with status \"200 OK\": "+vtesting.RateLimitOutput)
+	assert.Equal(t,
+		NewManifestErrorWithRequest("200 OK", []byte(vtesting.RateLimitOutput+"\n")),
+		err,
+	)
 }

@@ -6,7 +6,7 @@ import (
 	"github.com/opencontainers/go-digest"
 	"golang.org/x/oauth2"
 
-	"github.com/Shopify/voucher/docker"
+	dockerURI "github.com/Shopify/voucher/docker/uri"
 )
 
 // LayerReference is a structure containing a Layer digest, as well as the repository
@@ -19,7 +19,7 @@ type LayerReference struct {
 
 // GetURI gets the URI that is described in the LayerReference.
 func (ref *LayerReference) GetURI() string {
-	return docker.GetBlobURI(ref.Image, ref.Current)
+	return dockerURI.GetBlobURI(ref.Image, ref.Current)
 }
 
 // GetLayer returns a layer description of the LayerReference.
