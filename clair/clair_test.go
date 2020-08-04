@@ -15,11 +15,23 @@ import (
 	vtesting "github.com/Shopify/voucher/testing"
 )
 
-func TestGetClairVulnerabilites(t *testing.T) {
+func TestGetClairVulnerabilitesSchema1(t *testing.T) {
 	img, tokenSrc, clairServer := PrepareClairTest(t, ClairVulnerabilities())
 	defer clairServer.Close()
 
-	clairVulns, err := getClairVulnerabilities(vtesting.NewTestManifest().Manifest, createClairConfig(clairServer.URL), tokenSrc, img)
+	clairVulns, err := getClairVulnerabilities(vtesting.NewTestSchema1SignedManifest(vtesting.NewPrivateKey()), createClairConfig(clairServer.URL), tokenSrc, img)
+	voucherVulns := convertToVoucherVulnerabilities(clairVulns, voucher.MediumSeverity)
+
+	assert.Nil(t, err)
+	assert.Equal(t, 3, len(voucherVulns))
+	require.ElementsMatch(t, VoucherVulnerabilities("medium", "high"), voucherVulns)
+}
+
+func TestGetClairVulnerabilitesSchema2(t *testing.T) {
+	img, tokenSrc, clairServer := PrepareClairTest(t, ClairVulnerabilities())
+	defer clairServer.Close()
+
+	clairVulns, err := getClairVulnerabilities(vtesting.NewTestManifest(), createClairConfig(clairServer.URL), tokenSrc, img)
 	voucherVulns := convertToVoucherVulnerabilities(clairVulns, voucher.MediumSeverity)
 
 	assert.Nil(t, err)
@@ -31,7 +43,7 @@ func TestFilterClairVulnerabilities(t *testing.T) {
 	img, tokenSrc, clairServer := PrepareClairTest(t, ClairVulnerabilities())
 	defer clairServer.Close()
 
-	clairVulns, err := getClairVulnerabilities(vtesting.NewTestManifest().Manifest, createClairConfig(clairServer.URL), tokenSrc, img)
+	clairVulns, err := getClairVulnerabilities(vtesting.NewTestManifest(), createClairConfig(clairServer.URL), tokenSrc, img)
 	voucherVulns := convertToVoucherVulnerabilities(clairVulns, voucher.HighSeverity)
 
 	assert.Nil(t, err)
@@ -51,5 +63,6 @@ func PrepareClairTest(t *testing.T, clairVulns map[string][]v1.Vulnerability) (r
 	img := vtesting.NewTestReference(t)
 	clairServer := vtesting.NewTestClairServer(t, clairVulns)
 	tokenSrc, _ := vtesting.NewAuth(clairServer).GetTokenSource(context.TODO(), img)
+
 	return img, tokenSrc, clairServer
 }

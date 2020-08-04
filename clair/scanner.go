@@ -2,7 +2,6 @@ package clair
 
 import (
 	"context"
-	"errors"
 
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/reference"
@@ -10,10 +9,7 @@ import (
 
 	"github.com/Shopify/voucher"
 	"github.com/Shopify/voucher/docker"
-	"github.com/Shopify/voucher/docker/schema2"
 )
-
-var errUnsupportedManifest = errors.New("manifests that are not schema version 2 are unsupported")
 
 // Scanner implements the interface SnakeoilScanner.
 type Scanner struct {
@@ -42,13 +38,7 @@ func (scanner *Scanner) Scan(ctx context.Context, i voucher.ImageData) ([]vouche
 		return vulns, err
 	}
 
-	if !schema2.IsManifest(manifest) {
-		return vulns, errUnsupportedManifest
-	}
-
-	s2Manifest := schema2.ToManifest(manifest)
-
-	clairVulns, err := getClairVulnerabilities(s2Manifest, scanner.config, tokenSrc, i)
+	clairVulns, err := getClairVulnerabilities(manifest, scanner.config, tokenSrc, i)
 	if nil != err {
 		return vulns, err
 	}
