@@ -12,6 +12,7 @@ import (
 
 const (
 	AlgoSHA512 = "SHA512"
+	APIPath    = "//cloudkms.googleapis.com/v1"
 )
 
 type Key struct {
@@ -59,7 +60,7 @@ func (s *Signer) Sign(checkName, body string) (string, string, error) {
 		return "", "", err
 	}
 
-	return string(resp.Signature), fmt.Sprintf("//cloudkms.googleapis.com/%v", key.Path), nil
+	return string(resp.Signature), fmt.Sprintf(APIPath+"/%v", key.Path), nil
 }
 
 // Close closes the KMS signer's connections.
