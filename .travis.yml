@@ -13,6 +13,7 @@ go:
 script:
   - make ensure-deps
   - make test
+  - make test-integrations
   
 after_success:
   - bash <(curl -s https://codecov.io/bash)
