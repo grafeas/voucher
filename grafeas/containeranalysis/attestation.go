@@ -6,6 +6,7 @@ import (
 	grafeas "google.golang.org/genproto/googleapis/grafeas/v1"
 
 	"github.com/Shopify/voucher"
+	vgrafeas "github.com/Shopify/voucher/grafeas"
 )
 
 // OccurrenceToAttestation converts an Occurrence to a Attestation
@@ -24,7 +25,7 @@ func OccurrenceToAttestation(checkName string, occ *grafeas.Occurrence) voucher.
 }
 
 func getCheckNameFromNoteName(project, value string) string {
-	projectPath := projectPath(project) + "/notes/"
+	projectPath := vgrafeas.ProjectPath(project) + "/notes/"
 	if strings.HasPrefix(value, projectPath) {
 		result := strings.Replace(
 			value,

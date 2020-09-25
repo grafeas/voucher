@@ -9,10 +9,12 @@ import (
 	"google.golang.org/api/iterator"
 
 	grafeasv1 "cloud.google.com/go/grafeas/apiv1"
-	grafeas "google.golang.org/genproto/googleapis/grafeas/v1"
+	grafeasapi "google.golang.org/genproto/googleapis/grafeas/v1"
 
 	"github.com/Shopify/voucher"
 	"github.com/Shopify/voucher/docker/uri"
+	"github.com/Shopify/voucher/grafeas"
+	vgrafeas "github.com/Shopify/voucher/grafeas"
 )
 
 const (
@@ -25,14 +27,14 @@ const (
 func vulnerabilityFilter(ref reference.Reference) string {
 	return fmt.Sprintf(
 		"%s AND noteProjectId=\"%s\" AND noteId=\"%s\"",
-		kindFilterStr(ref, grafeas.NoteKind_DISCOVERY),
+		vgrafeas.KindFilterStr(ref, grafeasapi.NoteKind_DISCOVERY),
 		caNoteProject,
 		caNoteID,
 	)
 }
 
-func getVulnerabilityDiscoveries(ctx context.Context, client *grafeasv1.Client, ref reference.Reference) ([]*grafeas.DiscoveryOccurrence, error) {
-	occurrences := make([]*grafeas.DiscoveryOccurrence, 0, 50)
+func getVulnerabilityDiscoveries(ctx context.Context, client *grafeasv1.Client, ref reference.Reference) ([]*grafeasapi.DiscoveryOccurrence, error) {
+	occurrences := make([]*grafeasapi.DiscoveryOccurrence, 0, 50)
 
 	var err error
 
@@ -41,8 +43,8 @@ func getVulnerabilityDiscoveries(ctx context.Context, client *grafeasv1.Client, 
 		return nil, err
 	}
 
-	reqOccurrences := &grafeas.ListOccurrencesRequest{
-		Parent:   projectPath(project),
+	reqOccurrences := &grafeasapi.ListOccurrencesRequest{
+		Parent:   vgrafeas.ProjectPath(project),
 		Filter:   vulnerabilityFilter(ref),
 		PageSize: discoPageSize,
 	}
@@ -50,7 +52,7 @@ func getVulnerabilityDiscoveries(ctx context.Context, client *grafeasv1.Client, 
 	occurrencesIterator := client.ListOccurrences(ctx, reqOccurrences)
 
 	for {
-		var occurrence *grafeas.Occurrence
+		var occurrence *grafeasapi.Occurrence
 
 		occurrence, err = occurrencesIterator.Next()
 		if nil != err {
@@ -69,8 +71,8 @@ func getVulnerabilityDiscoveries(ctx context.Context, client *grafeasv1.Client, 
 
 	if len(occurrences) == 0 && err == nil {
 		err = &voucher.NoMetadataError{
-			Type: DiscoveryType,
-			Err:  errNoOccurrences,
+			Type: grafeas.DiscoveryType,
+			Err:  vgrafeas.ErrNoOccurrences,
 		}
 	}
 
@@ -82,8 +84,8 @@ func getVulnerabilityDiscoveries(ctx context.Context, client *grafeasv1.Client, 
 }
 
 // isDone returns true if the passed discovery has finished, false otherwise.
-func isDone(occ *grafeas.DiscoveryOccurrence) bool {
-	return occ.GetAnalysisStatus() == grafeas.DiscoveryOccurrence_FINISHED_SUCCESS
+func isDone(occ *grafeasapi.DiscoveryOccurrence) bool {
+	return occ.GetAnalysisStatus() == grafeasapi.DiscoveryOccurrence_FINISHED_SUCCESS
 }
 
 const attempts = 5
@@ -113,5 +115,5 @@ func pollForDiscoveries(ctx context.Context, c *Client, ref reference.Reference)
 		time.Sleep(sleep)
 	}
 
-	return errDiscoveriesUnfinished
+	return vgrafeas.ErrDiscoveriesUnfinished
 }

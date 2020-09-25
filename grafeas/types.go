@@ -1,4 +1,4 @@
-package containeranalysis
+package grafeas
 
 import "github.com/Shopify/voucher"
 

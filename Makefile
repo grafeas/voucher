@@ -16,7 +16,7 @@ export GO111MODULE=on
 
 .PHONY: clean ensure-deps update-deps system-deps \
 	test show-coverage \
-	build release snapshot container \
+	build release snapshot container mocks \
 	$(PACKAGES)
 
 all: clean ensure-deps build
@@ -42,11 +42,6 @@ show-coverage: test
 
 test:
 	go test ./... -race -coverprofile=coverage.txt -covermode=atomic
-
-test-integrations:
-	docker ps -a | grep grafeasos || docker run -d -p 8080:8080 --name grafeasos us.gcr.io/grafeas/grafeas-server:v0.1.4
-	go test ./grafeasos -grafeasos="http://localhost:8080"
-	docker rm -f grafeasos
 
 lint:
 	golangci-lint run
@@ -85,3 +80,6 @@ release:
 
 snapshot:
 	$(GORELEASER) --snapshot
+
+mocks:
+	mockgen -source=grafeas/rest/grafeas_service.go -destination=grafeas/rest/mocks/grafeas_service_mock.go package=mocks

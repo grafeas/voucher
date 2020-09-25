@@ -7,7 +7,8 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/Shopify/voucher"
-	"github.com/Shopify/voucher/containeranalysis"
+	"github.com/Shopify/voucher/grafeas/containeranalysis"
+	"github.com/Shopify/voucher/grafeas/rest"
 	"github.com/Shopify/voucher/signer"
 )
 
@@ -49,6 +50,14 @@ func NewMetadataClient(ctx context.Context, secrets *Secrets) (voucher.MetadataC
 			ctx,
 			viper.GetString("binauth_project"),
 			keyring,
+		)
+	case "grafeasos":
+		return rest.NewClient(
+			ctx,
+			viper.GetString("image_project"),
+			viper.GetString("binauth_project"),
+			keyring,
+			rest.NewGrafeasAPIService(viper.GetString("grafeasos_base_path"), viper.GetString("grafeasos_version")),
 		)
 	default:
 		log.Warning("`metadata_client` option is not set, defaulting to \"containeranalysis\"")
