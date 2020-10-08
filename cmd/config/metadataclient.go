@@ -56,6 +56,7 @@ func NewMetadataClient(ctx context.Context, secrets *Secrets) (voucher.MetadataC
 			ctx,
 			viper.GetString("image_project"),
 			viper.GetString("binauth_project"),
+			viper.GetString("grafeasos_vul_project"),
 			keyring,
 			rest.NewGrafeasAPIService(viper.GetString("grafeasos_base_path"), viper.GetString("grafeasos_version")),
 		)

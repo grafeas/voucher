@@ -64,7 +64,7 @@ func TestCanAttest(t *testing.T) {
 	}
 	for tc, test := range tcs {
 		t.Run(tc, func(t *testing.T) {
-			client, err := NewClient(context.Background(), project, project, test.keyring, grafeas)
+			client, err := NewClient(context.Background(), project, project, project, test.keyring, grafeas)
 			canAttest := client.CanAttest()
 			assert.Equal(t, test.expectedResult, canAttest)
 			require.NoError(t, err)
@@ -77,7 +77,7 @@ func TestNewPayloadBody(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	grafeas := mocks.NewMockGrafeasAPIService(ctrl)
-	client, _ := NewClient(context.Background(), project, project, pgp.NewKeyRing(), grafeas)
+	client, _ := NewClient(context.Background(), project, project, project, pgp.NewKeyRing(), grafeas)
 	ref := getCanonicalRef(t)
 	tcs := map[string]struct {
 		reference       reference.Canonical
@@ -137,7 +137,7 @@ func TestAddAttestationToImage(t *testing.T) {
 	}
 	for tc, test := range tcs {
 		t.Run(tc, func(t *testing.T) {
-			client, _ := NewClient(context.Background(), project, project, test.keyring, grafeas)
+			client, _ := NewClient(context.Background(), project, project, project, test.keyring, grafeas)
 			_, err := client.AddAttestationToImage(ctx, test.reference, test.payload)
 			assert.Equal(t, test.expectedError, err)
 		})
@@ -150,7 +150,7 @@ func TestGetAttestations(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	grafeasMock := mocks.NewMockGrafeasAPIService(ctrl)
-	client, _ := NewClient(context.Background(), project, project, pgp.NewKeyRing(), grafeasMock)
+	client, _ := NewClient(context.Background(), project, project, project, pgp.NewKeyRing(), grafeasMock)
 	ref := getCanonicalRef(t)
 	occs := createAllOccurrences()
 	tcs := map[string]struct {
@@ -231,7 +231,7 @@ func TestGetVulnerabilities(t *testing.T) {
 	for tc, test := range tcs {
 		t.Run(tc, func(t *testing.T) {
 			grafeasMock := mocks.NewMockGrafeasAPIService(ctrl)
-			client, _ := NewClient(context.Background(), project, project, pgp.NewKeyRing(), grafeasMock)
+			client, _ := NewClient(context.Background(), project, project, project, pgp.NewKeyRing(), grafeasMock)
 			grafeasMock.EXPECT().ListOccurrences(gomock.Any(), gomock.Any(), gomock.Any()).Return(test.returnOccs, nil).AnyTimes()
 			attestations, err := client.GetVulnerabilities(ctx, ref)
 			assert.Equal(t, test.expectedError, err)
@@ -246,7 +246,7 @@ func TestGetBuildDetail(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	grafeasMock := mocks.NewMockGrafeasAPIService(ctrl)
-	client, _ := NewClient(context.Background(), project, project, pgp.NewKeyRing(), grafeasMock)
+	client, _ := NewClient(context.Background(), project, project, project, pgp.NewKeyRing(), grafeasMock)
 	ref := getCanonicalRef(t)
 	occs := createAllOccurrences()
 	tcs := map[string]struct {

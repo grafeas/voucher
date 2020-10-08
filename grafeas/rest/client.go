@@ -10,15 +10,12 @@ import (
 	"github.com/Shopify/voucher/grafeas/rest/objects"
 	"github.com/Shopify/voucher/repository"
 	"github.com/Shopify/voucher/signer"
+	"github.com/Shopify/voucher/signer/pgp"
 	"github.com/antihax/optional"
 	"github.com/docker/distribution/reference"
 )
 
 var errCannotAttest = errors.New("cannot create attestations, keyring is empty")
-
-// vulProject is the project that Google's Container Analysis writes vulnerability
-// occurrences to.
-const vulProject = "projects/goog-vulnz/notes/"
 
 // Client implements voucher.MetadataClient, connecting to Grafeas.
 type Client struct {
@@ -26,6 +23,7 @@ type Client struct {
 	keyring        signer.AttestationSigner // The keyring used for signing metadata.
 	binauthProject string                   // The project that Binauth Notes and Occurrences are written to.
 	imageProject   string                   // The project that image information is stored.
+	vulProject     string                   // The project to write vulnerability occurrences to.
 }
 
 // CanAttest returns true if the client can create and sign attestations.
@@ -58,11 +56,21 @@ func (g *Client) AddAttestationToImage(ctx context.Context, reference reference.
 	binauthProjectPath := vgrafeas.ProjectPath(g.binauthProject)
 	contentType := objects.AttestationSigningJSON
 
-	attestation := objects.AttestationDetails{Attestation: &objects.Attestation{
-		PgpSignedAttestation: &objects.AttestationPgpSigned{Signature: signedAttestation.Signature,
-			PgpKeyID: signedAttestation.KeyID, ContentType: &contentType}}}
+	attestation := objects.Attestation{}
+	if _, ok := g.keyring.(*pgp.KeyRing); ok {
+		attestation = objects.Attestation{
+			PgpSignedAttestation: &objects.AttestationPgpSigned{Signature: signedAttestation.Signature,
+				PgpKeyID: signedAttestation.KeyID, ContentType: &contentType}}
+	} else {
+		attestation = objects.Attestation{
+			GenericSignedAttestation: &objects.AttestationGenericSigned{
+				Signatures: []objects.Signature{{Signature: signedAttestation.Signature,
+					PublicKeyID: signedAttestation.KeyID}}, ContentType: &contentType}}
+	}
 
-	occurrence := objects.NewOccurrence(reference, payload.CheckName, &attestation, binauthProjectPath)
+	att := objects.AttestationDetails{Attestation: &attestation}
+
+	occurrence := objects.NewOccurrence(reference, payload.CheckName, &att, binauthProjectPath)
 	_, err = g.grafeas.CreateOccurrence(ctx, binauthProjectPath, occurrence)
 
 	if vgrafeas.IsAttestationExistsErr(err) {
@@ -117,7 +125,7 @@ func (g *Client) GetVulnerabilities(ctx context.Context, reference reference.Can
 		if *occ.Kind != objects.NoteKindVulnerability {
 			continue
 		}
-		item := objects.OccurrenceToVulnerability(&occ, vulProject)
+		item := objects.OccurrenceToVulnerability(&occ, g.vulProject)
 		items = append(items, item)
 	}
 
@@ -183,11 +191,12 @@ func (g *Client) getAllOccurrences(ctx context.Context) (items []objects.Occurre
 }
 
 // NewClient creates a new Grafeas Client.
-func NewClient(ctx context.Context, imageProject, binauthProject string, keyring signer.AttestationSigner, grafeas GrafeasAPIService) (*Client, error) {
+func NewClient(ctx context.Context, imageProject, binauthProject, vulProject string, keyring signer.AttestationSigner, grafeas GrafeasAPIService) (*Client, error) {
 	return &Client{
 		grafeas:        grafeas,
 		keyring:        keyring,
 		binauthProject: binauthProject,
 		imageProject:   imageProject,
+		vulProject:     vulProject,
 	}, nil
 }

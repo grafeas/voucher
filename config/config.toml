@@ -4,6 +4,7 @@ failon = "high"
 metadata_client = "containeranalysis"
 
 binauth_project = "your-project-here"
+grafeasos_vul_project =  "your-project-here"
 signer = "kms"
 valid_repos = [
     "gcr.io/path/to/my/project",
