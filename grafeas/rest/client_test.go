@@ -199,6 +199,7 @@ func TestGetVulnerabilities(t *testing.T) {
 	activeContAnalysis := objects.DiscoveredContinuousAnalysisActive
 	successStatus := objects.DiscoveredAnalysisStatusFinishedSuccess
 	noteKindD := objects.NoteKindDiscovery
+	setPollOptions(1, 0)
 	tcs := map[string]struct {
 		returnOccs     objects.ListOccurrencesResponse
 		expectedResult []voucher.Vulnerability
@@ -213,7 +214,7 @@ func TestGetVulnerabilities(t *testing.T) {
 				Severity: voucher.NegligibleSeverity,
 			}},
 		},
-		"no data": {
+		"no vulnerability data": {
 			returnOccs: objects.ListOccurrencesResponse{
 				Occurrences: []objects.Occurrence{{Name: "name4",
 					Resource: &objects.Resource{URI: "https://gcr.io/project/image@sha256:foo"},
@@ -227,6 +228,13 @@ func TestGetVulnerabilities(t *testing.T) {
 				Err:  vgrafeas.ErrNoOccurrences,
 			},
 		},
+		"no data": {
+			returnOccs: objects.ListOccurrencesResponse{
+				Occurrences: []objects.Occurrence{},
+			},
+			expectedError:  vgrafeas.ErrDiscoveriesUnfinished,
+			expectedResult: []voucher.Vulnerability{},
+		},
 	}
 	for tc, test := range tcs {
 		t.Run(tc, func(t *testing.T) {
@@ -238,6 +246,7 @@ func TestGetVulnerabilities(t *testing.T) {
 			assert.Equal(t, test.expectedResult, attestations)
 		})
 	}
+	defaultPollOptions()
 }
 
 func TestGetBuildDetail(t *testing.T) {

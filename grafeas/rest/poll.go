@@ -9,10 +9,20 @@ import (
 	"github.com/Shopify/voucher/grafeas/rest/objects"
 )
 
-const (
+var (
 	attempts = 5
 	sleep    = time.Second * 10
 )
+
+func setPollOptions(attemptsOption int, sleepOption time.Duration) {
+	attempts = attemptsOption
+	sleep = sleepOption
+}
+
+func defaultPollOptions() {
+	attempts = 5
+	sleep = time.Second * 10
+}
 
 // isDone returns true if the passed discovery has finished, false otherwise.
 func isDone(occurrence *objects.Occurrence) bool {

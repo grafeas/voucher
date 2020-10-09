@@ -28,7 +28,6 @@ type GrafeasAPIService interface {
 	BatchCreateNotes(context.Context, string, map[string]objects.Note) ([]objects.Note, error)
 	ListNotes(context.Context, string, *objects.ListOpts) (objects.ListNotesResponse, error)
 	ListOccurrences(context.Context, string, *objects.ListOpts) (objects.ListOccurrencesResponse, error)
-	//ListNoteOccurrences(context.Context, string, string, *objects.ListOpts) (objects.ListOccurrencesResponse, error)
 }
 
 //grafeasAPIServiceImpl for REST calls
@@ -49,7 +48,8 @@ func NewGrafeasAPIService(basePath, versionPath string) GrafeasAPIService {
 	}
 }
 
-//CreateOccurrence https://github.com/grafeas/client-go/blob/39fa98b49d38de3942716c0f58f3505012415470/0.1.0/api_grafeas_v1_beta1.go#L310
+//CreateOccurrence based on
+//https://github.com/grafeas/client-go/blob/39fa98b49d38de3942716c0f58f3505012415470/0.1.0/api_grafeas_v1_beta1.go#L310
 func (g grafeasAPIServiceImpl) CreateOccurrence(ctx context.Context, parent string, occurrence objects.Occurrence) (objects.Occurrence, error) {
 	urlPath, err := g.buildURL(parent, "/occurrences", nil)
 	if err != nil {
@@ -71,7 +71,8 @@ func (g grafeasAPIServiceImpl) CreateOccurrence(ctx context.Context, parent stri
 	return occ, nil
 }
 
-//BatchCreateOccurrences https://github.com/grafeas/client-go/blob/39fa98b49d38de3942716c0f58f3505012415470/0.1.0/api_grafeas_v1_beta1.go#L128
+//BatchCreateOccurrences based on
+//https://github.com/grafeas/client-go/blob/39fa98b49d38de3942716c0f58f3505012415470/0.1.0/api_grafeas_v1_beta1.go#L128
 func (g grafeasAPIServiceImpl) BatchCreateOccurrences(ctx context.Context, parent string, occs []objects.Occurrence) ([]objects.Occurrence, error) {
 	occsReq := objects.BatchCreateOccurrencesRequest{
 		Parent:      parent,
@@ -97,7 +98,8 @@ func (g grafeasAPIServiceImpl) BatchCreateOccurrences(ctx context.Context, paren
 	return occResp.Occurrences, nil
 }
 
-//BatchCreateNotes https://github.com/grafeas/client-go/blob/39fa98b49d38de3942716c0f58f3505012415470/0.1.0/api_grafeas_v1_beta1.go#L37
+//BatchCreateNotes based on
+//https://github.com/grafeas/client-go/blob/39fa98b49d38de3942716c0f58f3505012415470/0.1.0/api_grafeas_v1_beta1.go#L37
 func (g grafeasAPIServiceImpl) BatchCreateNotes(ctx context.Context, parent string, notes map[string]objects.Note) ([]objects.Note, error) {
 	notesReq := objects.BatchCreateNotesRequest{
 		Parent: parent,
@@ -123,7 +125,8 @@ func (g grafeasAPIServiceImpl) BatchCreateNotes(ctx context.Context, parent stri
 	return notesResp.Notes, nil
 }
 
-//ListNotes https://github.com/grafeas/client-go/blob/39fa98b49d38de3942716c0f58f3505012415470/0.1.0/api_grafeas_v1_beta1.go#L1057
+//ListNotes based on
+//https://github.com/grafeas/client-go/blob/39fa98b49d38de3942716c0f58f3505012415470/0.1.0/api_grafeas_v1_beta1.go#L1057
 func (g grafeasAPIServiceImpl) ListNotes(ctx context.Context, parent string, optsNotes *objects.ListOpts) (objects.ListNotesResponse, error) {
 	urlPath, err := g.buildURL(parent, "/notes", optsNotes)
 	if err != nil {
@@ -141,7 +144,8 @@ func (g grafeasAPIServiceImpl) ListNotes(ctx context.Context, parent string, opt
 	return notesResp, nil
 }
 
-//ListOccurrences https://github.com/grafeas/client-go/blob/39fa98b49d38de3942716c0f58f3505012415470/0.1.0/api_grafeas_v1_beta1.go#L1165
+//ListOccurrences based on
+//https://github.com/grafeas/client-go/blob/39fa98b49d38de3942716c0f58f3505012415470/0.1.0/api_grafeas_v1_beta1.go#L1165
 func (g grafeasAPIServiceImpl) ListOccurrences(ctx context.Context, parent string, optsOccurrences *objects.ListOpts) (objects.ListOccurrencesResponse, error) {
 	urlPath, err := g.buildURL(parent, "/occurrences", optsOccurrences)
 	if err != nil {
@@ -158,11 +162,6 @@ func (g grafeasAPIServiceImpl) ListOccurrences(ctx context.Context, parent strin
 	}
 	return occResp, nil
 }
-
-//ListNoteOccurrences https://github.com/grafeas/client-go/blob/39fa98b49d38de3942716c0f58f3505012415470/0.1.0/api_grafeas_v1_beta1.go#L949
-//func (g *GrafeasAPIServiceImpl) ListNoteOccurrences(ctx context.Context, parent, noteName string, optsOccurrences *objects.ListOpts) (objects.ListOccurrencesResponse, error) {
-//	return g.ListOccurrences(ctx, parent+"/notes/"+noteName, optsOccurrences)
-//}
 
 func (g grafeasAPIServiceImpl) buildURL(parent, address string, options *objects.ListOpts) (*url.URL, error) {
 	path := g.basePath + g.versionPath + parent + address

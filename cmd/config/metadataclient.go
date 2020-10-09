@@ -56,9 +56,9 @@ func NewMetadataClient(ctx context.Context, secrets *Secrets) (voucher.MetadataC
 			ctx,
 			viper.GetString("image_project"),
 			viper.GetString("binauth_project"),
-			viper.GetString("grafeasos_vul_project"),
+			viper.GetString("grafeasos.vul_project"),
 			keyring,
-			rest.NewGrafeasAPIService(viper.GetString("grafeasos_base_path"), viper.GetString("grafeasos_version")),
+			rest.NewGrafeasAPIService(viper.GetString("grafeasos.hostname"), viper.GetString("grafeasos.version")),
 		)
 	default:
 		log.Warning("`metadata_client` option is not set, defaulting to \"containeranalysis\"")

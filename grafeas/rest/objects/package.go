@@ -1,9 +1,11 @@
 package objects
 
-//VersionKind https://github.com/grafeas/client-go/blob/master/0.1.0/model_version_version_kind.go
+//VersionKind based on
+//https://github.com/grafeas/client-go/blob/master/0.1.0/model_version_version_kind.go
 type VersionKind string
 
-//PackageArchitecture https://github.com/grafeas/client-go/blob/master/0.1.0/model_package_architecture.go
+//PackageArchitecture based on
+//https://github.com/grafeas/client-go/blob/master/0.1.0/model_package_architecture.go
 type PackageArchitecture string
 
 //consts
@@ -18,13 +20,15 @@ const (
 	PackageArchitectureX64         PackageArchitecture = "X64"
 )
 
-//Package https://github.com/grafeas/client-go/blob/master/0.1.0/model_package_package.go
+//Package based on
+//https://github.com/grafeas/client-go/blob/master/0.1.0/model_package_package.go
 type Package struct {
 	Name         string                `json:"name,omitempty"` //required
 	Distribution []PackageDistribution `json:"distribution,omitempty"`
 }
 
-//PackageDistribution https://github.com/grafeas/client-go/blob/master/0.1.0/model_package_distribution.go
+//PackageDistribution based on
+//https://github.com/grafeas/client-go/blob/master/0.1.0/model_package_distribution.go
 type PackageDistribution struct {
 	CpeURI        string               `json:"cpeUri,omitempty"` //required
 	Architecture  *PackageArchitecture `json:"architecture,omitempty"`
@@ -34,7 +38,8 @@ type PackageDistribution struct {
 	Description   string               `json:"description,omitempty"`
 }
 
-//PackageVersion https://github.com/grafeas/client-go/blob/master/0.1.0/model_package_version.go
+//PackageVersion based on
+//https://github.com/grafeas/client-go/blob/master/0.1.0/model_package_version.go
 type PackageVersion struct {
 	Epoch    int32        `json:"epoch,omitempty"`
 	Name     string       `json:"name,omitempty"` //required only when version kind is NORMAL
@@ -47,13 +52,15 @@ type PackageDetails struct {
 	Installation *PackageInstallation `json:"installation,omitempty"`
 }
 
-//PackageInstallation https://github.com/grafeas/client-go/blob/master/0.1.0/model_package_installation.go
+//PackageInstallation based on
+//https://github.com/grafeas/client-go/blob/master/0.1.0/model_package_installation.go
 type PackageInstallation struct {
 	Name     string            `json:"name,omitempty"`     //output only
 	Location []PackageLocation `json:"location,omitempty"` //required
 }
 
-//PackageLocation https://github.com/grafeas/client-go/blob/master/0.1.0/model_v1beta1package_location.go
+//PackageLocation based on
+//https://github.com/grafeas/client-go/blob/master/0.1.0/model_v1beta1package_location.go
 type PackageLocation struct {
 	CpeURI  string          `json:"cpeUri,omitempty"` //required
 	Version *PackageVersion `json:"version,omitempty"`

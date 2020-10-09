@@ -9,7 +9,8 @@ import (
 	"github.com/docker/distribution/reference"
 )
 
-//Occurrence adopted from https://github.com/grafeas/client-go/blob/master/0.1.0/model_v1beta1_occurrence.go
+//Occurrence based on
+//https://github.com/grafeas/client-go/blob/master/0.1.0/model_v1beta1_occurrence.go
 type Occurrence struct {
 	//output only, form: `projects/[PROJECT_ID]/occurrences/[OCCURRENCE_ID]
 	Name          string                `json:"name,omitempty"`
@@ -28,27 +29,18 @@ type Occurrence struct {
 	Attestation   *AttestationDetails   `json:"attestation,omitempty"`
 }
 
-//Resource https://github.com/grafeas/client-go/blob/master/0.1.0/model_v1beta1_resource.go
+//Resource based on
+//https://github.com/grafeas/client-go/blob/master/0.1.0/model_v1beta1_resource.go
 type Resource struct {
 	URI string `json:"uri,omitempty"` //required
 }
 
-//RelatedURL https://github.com/grafeas/client-go/blob/master/0.1.0/model_v1beta1_related_url.go
+//RelatedURL based on
+//https://github.com/grafeas/client-go/blob/master/0.1.0/model_v1beta1_related_url.go
 type RelatedURL struct {
 	URL   string `json:"url,omitempty"`
 	Label string `json:"label,omitempty"`
 }
-
-//not used, so not implemented types
-
-//ImageDetails https://github.com/grafeas/client-go/blob/master/0.1.0/model_v1beta1image_details.go
-type ImageDetails struct{}
-
-//DeploymentDetails https://github.com/grafeas/client-go/blob/master/0.1.0/model_v1beta1deployment_details.go
-type DeploymentDetails struct{}
-
-//RPCStatus https://github.com/grafeas/client-go/blob/master/0.1.0/model_rpc_status.go
-type RPCStatus struct{}
 
 //NewOccurrence creates new occurrence
 func NewOccurrence(reference reference.Canonical, parentNoteID string, attestation *AttestationDetails, binauthProjectPath string) Occurrence {
@@ -74,7 +66,6 @@ func OccurrenceToAttestation(checkName string, occ *Occurrence) voucher.SignedAt
 	}
 
 	attestationDetails := occ.Attestation
-
 	signedAttestation.Body = string(*attestationDetails.Attestation.GenericSignedAttestation.ContentType)
 
 	return signedAttestation
@@ -91,7 +82,6 @@ func OccurrenceToBuildDetail(occ *Occurrence) (detail repository.BuildDetail) {
 	detail.Commit = buildProvenance.SourceProvenance.Context.Git.RevisionID
 
 	buildArtifacts := buildProvenance.BuiltArtifacts
-
 	detail.Artifacts = make([]repository.BuildArtifact, 0, len(buildArtifacts))
 
 	for _, artifact := range buildArtifacts {
@@ -134,4 +124,97 @@ func getSeverity(severity *VulnerabilitySeverity) voucher.Severity {
 		return voucher.CriticalSeverity
 	}
 	return voucher.UnknownSeverity
+}
+
+//ImageDetails based on
+//https://github.com/grafeas/client-go/blob/master/0.1.0/model_v1beta1image_details.go
+type ImageDetails struct {
+	DerivedImage *ImageDerived `json:"derivedImage,omitempty"` //required
+}
+
+//ImageDerived based on
+//https://github.com/grafeas/client-go/blob/master/0.1.0/model_image_derived.go
+type ImageDerived struct {
+	Fingerprint     *ImageFingerprint `json:"fingerprint,omitempty"` //required
+	Distance        int32             `json:"distance,omitempty"`    //output only
+	LayerInfo       []ImageLayer      `json:"layerInfo,omitempty"`
+	BaseResourceURL string            `json:"baseResourceUrl,omitempty"` //output only
+}
+
+//ImageLayer based on
+//https://github.com/grafeas/client-go/blob/master/0.1.0/model_image_layer.go
+type ImageLayer struct {
+	Directive *LayerDirective `json:"directive,omitempty"` //required
+	Arguments string          `json:"arguments,omitempty"`
+}
+
+//LayerDirective based on
+//https://github.com/grafeas/client-go/blob/master/0.1.0/model_layer_directive.go
+type LayerDirective string
+
+//consts
+const (
+	LayerDirectiveUnpecified  LayerDirective = "DIRECTIVE_UNSPECIFIED"
+	LayerDirectiveMaintainer  LayerDirective = "MAINTAINER"
+	LayerDirectiveRun         LayerDirective = "RUN"
+	LayerDirectiveCmd         LayerDirective = "CMD"
+	LayerDirectiveLabel       LayerDirective = "LABEL"
+	LayerDirectiveExpose      LayerDirective = "EXPOSE"
+	LayerDirectiveEnv         LayerDirective = "ENV"
+	LayerDirectiveAdd         LayerDirective = "ADD"
+	LayerDirectiveCopy        LayerDirective = "COPY"
+	LayerDirectiveEntrypoint  LayerDirective = "ENTRYPOINT"
+	LayerDirectiveVolume      LayerDirective = "VOLUME"
+	LayerDirectiveUser        LayerDirective = "USER"
+	LayerDirectiveWorkdir     LayerDirective = "WORKDIR"
+	LayerDirectiveArg         LayerDirective = "ARG"
+	LayerDirectiveOnbuild     LayerDirective = "ONBUILD"
+	LayerDirectiveStopsignal  LayerDirective = "STOPSIGNAL"
+	LayerDirectiveHealthcheck LayerDirective = "HEALTHCHECK"
+	LayerDirectiveShell       LayerDirective = "SHELL"
+)
+
+//DeploymentDetails based on
+//https://github.com/grafeas/client-go/blob/master/0.1.0/model_v1beta1deployment_details.go
+type DeploymentDetails struct {
+	Deployment *Deployment `json:"deployment,omitempty"`
+}
+
+//Deployment based on
+//https://github.com/grafeas/client-go/blob/master/0.1.0/model_deployment_deployment.go
+type Deployment struct {
+	UserEmail    string              `json:"userEmail,omitempty"`
+	DeployTime   time.Time           `json:"deployTime,omitempty"` //required
+	UndeployTime time.Time           `json:"undeployTime,omitempty"`
+	Config       string              `json:"config,omitempty"`
+	Address      string              `json:"address,omitempty"`
+	ResourceURI  []string            `json:"resourceUri,omitempty"` //output only
+	Platform     *DeploymentPlatform `json:"platform,omitempty"`
+}
+
+//DeploymentPlatform based on
+//https://github.com/grafeas/client-go/blob/master/0.1.0/model_deployment_platform.go
+type DeploymentPlatform string
+
+//consts
+const (
+	DeploymentPlatformUnspecified DeploymentPlatform = "PLATFORM_UNSPECIFIED"
+	DeploymentPlatformGke         DeploymentPlatform = "GKE"
+	DeploymentPlatformFlex        DeploymentPlatform = "FLEX"
+	DeploymentPlatformCustom      DeploymentPlatform = "CUSTOM"
+)
+
+//RPCStatus based on
+//https://github.com/grafeas/client-go/blob/master/0.1.0/model_rpc_status.go
+type RPCStatus struct {
+	Code    int32         `json:"code,omitempty"`
+	Message string        `json:"message,omitempty"`
+	Details []ProtobufAny `json:"details,omitempty"`
+}
+
+//ProtobufAny based on
+//https://github.com/grafeas/client-go/blob/master/0.1.0/model_protobuf_any.go
+type ProtobufAny struct {
+	TypeURL string `json:"typeUrl,omitempty"` //URL/resource name
+	Value   string `json:"value,omitempty"`
 }

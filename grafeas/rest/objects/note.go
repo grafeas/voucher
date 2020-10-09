@@ -2,7 +2,8 @@ package objects
 
 import "time"
 
-//NoteKind https://github.com/grafeas/client-go/blob/master/0.1.0/model_v1beta1_note_kind.go
+//NoteKind based on
+//https://github.com/grafeas/client-go/blob/master/0.1.0/model_v1beta1_note_kind.go
 type NoteKind string
 
 //consts
@@ -17,7 +18,8 @@ const (
 	NoteKindAttestation   NoteKind = "ATTESTATION"
 )
 
-//Note https://github.com/grafeas/client-go/blob/master/0.1.0/model_v1beta1_note.go
+//Note based on
+//https://github.com/grafeas/client-go/blob/master/0.1.0/model_v1beta1_note.go
 type Note struct {
 	Name                 string                `json:"name,omitempty"` //output only
 	ShortDescription     string                `json:"shortDescription,omitempty"`
@@ -37,19 +39,22 @@ type Note struct {
 	AttestationAuthority *AttestationAuthority `json:"attestationAuthority,omitempty"`
 }
 
-//Deployable https://github.com/grafeas/client-go/blob/master/0.1.0/model_deployment_deployable.go
+//Deployable based on
+//https://github.com/grafeas/client-go/blob/master/0.1.0/model_deployment_deployable.go
 type Deployable struct {
 	ResourceURI []string `json:"resourceUri,omitempty"` //required
 }
 
-//ImageFingerprint https://github.com/grafeas/client-go/blob/master/0.1.0/model_image_fingerprint.go
+//ImageFingerprint based on
+//https://github.com/grafeas/client-go/blob/master/0.1.0/model_image_fingerprint.go
 type ImageFingerprint struct {
 	V1Name string   `json:"v1Name,omitempty"` //required
 	V2Blob []string `json:"v2Blob,omitempty"` //required
 	V2Name string   `json:"v2Name,omitempty"` //output only
 }
 
-//ImageBasis https://github.com/grafeas/client-go/blob/master/0.1.0/model_image_basis.go
+//ImageBasis based on
+//https://github.com/grafeas/client-go/blob/master/0.1.0/model_image_basis.go
 type ImageBasis struct {
 	ResourceURL string            `json:"resourceUrl,omitempty"` //required
 	Fingerprint *ImageFingerprint `json:"fingerprint,omitempty"` //required
