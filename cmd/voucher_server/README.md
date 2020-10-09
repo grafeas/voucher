@@ -40,7 +40,7 @@ Below are the configuration options for Voucher Server:
 | Group                | Key                          | Description                                                                                           |
 | :-------------       | :--------------------------- | :---------------------------------------------------------------------------------------------------- |
 |                      | `dryrun`                     | When set, don't create attestations.                                                                  |
-|                      | `scanner`                    | The vulnerability scanner to use ("clair" or "gca").                                                  |
+|                      | `scanner`                    | The vulnerability scanner to use ("clair" or "metadata").                                                  |
 |                      | `failon`                     | The minimum vulnerability to fail on. Discussed below.                                                |
 |                      | `valid_repos`                | A list of repos that are owned by your team/organization.                                             |
 |                      | `trusted_builder_identities` | A list of email addresses. Owners of these emails are considered "trusted" (and will pass Provenance) |
@@ -70,7 +70,7 @@ The `scanner` option in the configuration is used to select the Vulnerability sc
 This option supports two values:
 
 - `c` or `clair` to use an instance of CoreOS's Clair.
-- `g` or `gca` to use Google Container Analysis.
+- `metadata` to use Google Container Analysis. (Note that `g` and `gca` are being deprecated in favor of `metadata`.)
 
 If you decide to use Clair, you will need to update the clair configuration block to specify the correct address for the server.
 
