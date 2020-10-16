@@ -37,16 +37,19 @@ func (cs *Suite) Get(name string) (Check, error) {
 // runner runs the passed check against the passed ImageData, and pushes results to the
 // CheckResults channel.
 func runner(ctx context.Context, name string, check Check, imageData ImageData, resultsChan chan CheckResult, metricsClient metrics.Client) {
+	metricsClient.CheckRunStart(name)
 	checkStart := time.Now()
 	ok, err := check.Check(ctx, imageData)
 	metricsClient.CheckRunLatency(name, time.Since(checkStart))
 	if err == nil {
-		if !ok {
+		if ok {
+			metricsClient.CheckRunSuccess(name)
+		} else {
 			metricsClient.CheckRunFailure(name)
 		}
 		resultsChan <- CheckResult{Name: name, Err: "", Success: ok, ImageData: imageData}
 	} else {
-		metricsClient.CheckRunError(name)
+		metricsClient.CheckRunError(name, err)
 		resultsChan <- CheckResult{Name: name, Err: err.Error(), Success: false, ImageData: imageData}
 	}
 }
@@ -83,13 +86,15 @@ func (cs *Suite) Run(ctx context.Context, metricsClient metrics.Client, imageDat
 func (cs *Suite) Attest(ctx context.Context, metricsClient metrics.Client, metadataClient MetadataClient, results []CheckResult) []CheckResult {
 	for i, result := range results {
 		checkStart := time.Now()
+		metricsClient.CheckAttestationStart(result.Name)
 		if result.Success {
 			details, err := createAttestation(ctx, metadataClient, result)
 			results[i].Details = details
 			if nil == err {
 				results[i].Attested = true
+				metricsClient.CheckAttestationSuccess(result.Name)
 			} else {
-				metricsClient.CheckAttestationError(result.Name)
+				metricsClient.CheckAttestationError(result.Name, err)
 				results[i].Err = err.Error()
 			}
 		}

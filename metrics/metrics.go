@@ -5,9 +5,13 @@ import (
 )
 
 type Client interface {
+	CheckRunStart(string)
 	CheckRunLatency(string, time.Duration)
 	CheckAttestationLatency(string, time.Duration)
 	CheckRunFailure(string)
-	CheckRunError(string)
-	CheckAttestationError(string)
+	CheckRunError(string, error)
+	CheckRunSuccess(string)
+	CheckAttestationStart(string)
+	CheckAttestationError(string, error)
+	CheckAttestationSuccess(string)
 }
