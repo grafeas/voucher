@@ -12,6 +12,7 @@ import (
 	grafeas "google.golang.org/genproto/googleapis/grafeas/v1"
 
 	"github.com/Shopify/voucher"
+	"github.com/Shopify/voucher/docker/uri"
 )
 
 const (
@@ -30,13 +31,18 @@ func vulnerabilityFilter(ref reference.Reference) string {
 	)
 }
 
-func getVulnerabilityDiscoveries(ctx context.Context, client *grafeasv1.Client, imageProject string, ref reference.Reference) ([]*grafeas.DiscoveryOccurrence, error) {
+func getVulnerabilityDiscoveries(ctx context.Context, client *grafeasv1.Client, ref reference.Reference) ([]*grafeas.DiscoveryOccurrence, error) {
 	occurrences := make([]*grafeas.DiscoveryOccurrence, 0, 50)
 
 	var err error
 
+	project, err := uri.ReferenceToProjectName(ref)
+	if nil != err {
+		return nil, err
+	}
+
 	reqOccurrences := &grafeas.ListOccurrencesRequest{
-		Parent:   imageProject,
+		Parent:   projectPath(project),
 		Filter:   vulnerabilityFilter(ref),
 		PageSize: discoPageSize,
 	}
@@ -90,7 +96,6 @@ func pollForDiscoveries(ctx context.Context, c *Client, ref reference.Reference)
 		discoveries, err := getVulnerabilityDiscoveries(
 			ctx,
 			c.containeranalysis,
-			projectPath(c.imageProject),
 			ref,
 		)
 		if err != nil && !voucher.IsNoMetadataError(err) {

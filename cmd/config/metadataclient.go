@@ -38,12 +38,15 @@ func NewMetadataClient(ctx context.Context, secrets *Secrets) (voucher.MetadataC
 		log.Printf("signer %q is unknown, supported values are 'kms' or 'pgp'\n", signerName)
 	}
 
+	if viper.GetString("image_project") != "" {
+		log.Warning("`image_project` is deprecated. Please rely on the `valid_repos` configuration option to limit where images come from.")
+	}
+
 	metadataClient := viper.GetString("metadata_client")
 	switch metadataClient {
 	case "containeranalysis":
 		return containeranalysis.NewClient(
 			ctx,
-			viper.GetString("image_project"),
 			viper.GetString("binauth_project"),
 			keyring,
 		)
@@ -51,7 +54,6 @@ func NewMetadataClient(ctx context.Context, secrets *Secrets) (voucher.MetadataC
 		log.Warning("`metadata_client` option is not set, defaulting to \"containeranalysis\"")
 		return containeranalysis.NewClient(
 			ctx,
-			viper.GetString("image_project"),
 			viper.GetString("binauth_project"),
 			keyring,
 		)

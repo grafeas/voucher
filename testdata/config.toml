@@ -1,7 +1,6 @@
 dryrun          = true
 scanner         = "clair"
 failon          = "high"
-image_project   = "voucher-test-project"
 binauth_project = "voucher-binauth"
 metadata_client = "containeranalysis"
 

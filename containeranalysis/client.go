@@ -13,6 +13,7 @@ import (
 
 	"github.com/Shopify/voucher"
 	"github.com/Shopify/voucher/attestation"
+	"github.com/Shopify/voucher/docker/uri"
 	"github.com/Shopify/voucher/repository"
 	"github.com/Shopify/voucher/signer"
 )
@@ -24,7 +25,6 @@ type Client struct {
 	containeranalysis *grafeasv1.Client        // The client reference.
 	keyring           signer.AttestationSigner // The keyring used for signing metadata.
 	binauthProject    string                   // The project that Binauth Notes and Occurrences are written to.
-	imageProject      string                   // The project that image information is stored.
 }
 
 // CanAttest returns true if the client can create and sign attestations.
@@ -33,8 +33,8 @@ func (g *Client) CanAttest() bool {
 }
 
 // NewPayloadBody returns a payload body appropriate for this MetadataClient.
-func (g *Client) NewPayloadBody(reference reference.Canonical) (string, error) {
-	payload, err := attestation.NewPayload(reference).ToString()
+func (g *Client) NewPayloadBody(ref reference.Canonical) (string, error) {
+	payload, err := attestation.NewPayload(ref).ToString()
 	if err != nil {
 		return "", err
 	}
@@ -44,7 +44,7 @@ func (g *Client) NewPayloadBody(reference reference.Canonical) (string, error) {
 
 // AddAttestationToImage adds a new attestation with the passed Attestation
 // to the image described by ImageData.
-func (g *Client) AddAttestationToImage(ctx context.Context, reference reference.Canonical, attestation voucher.Attestation) (voucher.SignedAttestation, error) {
+func (g *Client) AddAttestationToImage(ctx context.Context, ref reference.Canonical, attestation voucher.Attestation) (voucher.SignedAttestation, error) {
 	if !g.CanAttest() {
 		return voucher.SignedAttestation{}, errCannotAttest
 	}
@@ -57,7 +57,7 @@ func (g *Client) AddAttestationToImage(ctx context.Context, reference reference.
 	_, err = g.containeranalysis.CreateOccurrence(
 		ctx,
 		newOccurrenceAttestation(
-			reference,
+			ref,
 			signedAttestation,
 			g.binauthProject,
 		),
@@ -73,8 +73,8 @@ func (g *Client) AddAttestationToImage(ctx context.Context, reference reference.
 }
 
 // GetAttestations returns all of the attestations associated with an image.
-func (g *Client) GetAttestations(ctx context.Context, reference reference.Canonical) ([]voucher.SignedAttestation, error) {
-	filterStr := kindFilterStr(reference, grafeas.NoteKind_ATTESTATION)
+func (g *Client) GetAttestations(ctx context.Context, ref reference.Canonical) ([]voucher.SignedAttestation, error) {
+	filterStr := kindFilterStr(ref, grafeas.NoteKind_ATTESTATION)
 
 	var attestations []voucher.SignedAttestation
 
@@ -111,16 +111,20 @@ func (g *Client) GetAttestations(ctx context.Context, reference reference.Canoni
 }
 
 // GetVulnerabilities returns the detected vulnerabilities for the Image described by voucher.ImageData.
-func (g *Client) GetVulnerabilities(ctx context.Context, reference reference.Canonical) (vulnerabilities []voucher.Vulnerability, err error) {
-	filterStr := kindFilterStr(reference, grafeas.NoteKind_VULNERABILITY)
+func (g *Client) GetVulnerabilities(ctx context.Context, ref reference.Canonical) (vulnerabilities []voucher.Vulnerability, err error) {
+	filterStr := kindFilterStr(ref, grafeas.NoteKind_VULNERABILITY)
 
-	err = pollForDiscoveries(ctx, g, reference)
+	err = pollForDiscoveries(ctx, g, ref)
 	if nil != err {
 		return []voucher.Vulnerability{}, err
 	}
 
-	project := projectPath(g.imageProject)
-	req := &grafeas.ListOccurrencesRequest{Parent: project, Filter: filterStr}
+	project, err := uri.ReferenceToProjectName(ref)
+	if nil != err {
+		return []voucher.Vulnerability{}, err
+	}
+
+	req := &grafeas.ListOccurrencesRequest{Parent: projectPath(project), Filter: filterStr}
 	occIterator := g.containeranalysis.ListOccurrences(ctx, req)
 
 	for {
@@ -151,13 +155,17 @@ func (g *Client) Close() {
 }
 
 // GetBuildDetail gets the BuildDetail for the passed image.
-func (g *Client) GetBuildDetail(ctx context.Context, reference reference.Canonical) (repository.BuildDetail, error) {
+func (g *Client) GetBuildDetail(ctx context.Context, ref reference.Canonical) (repository.BuildDetail, error) {
 	var err error
 
-	filterStr := kindFilterStr(reference, grafeas.NoteKind_BUILD)
+	filterStr := kindFilterStr(ref, grafeas.NoteKind_BUILD)
 
-	project := projectPath(g.imageProject)
-	req := &grafeas.ListOccurrencesRequest{Parent: project, Filter: filterStr}
+	project, err := uri.ReferenceToProjectName(ref)
+	if nil != err {
+		return repository.BuildDetail{}, err
+	}
+
+	req := &grafeas.ListOccurrencesRequest{Parent: projectPath(project), Filter: filterStr}
 	occIterator := g.containeranalysis.ListOccurrences(ctx, req)
 
 	occ, err := occIterator.Next()
@@ -172,14 +180,14 @@ func (g *Client) GetBuildDetail(ctx context.Context, reference reference.Canonic
 	}
 
 	if _, err := occIterator.Next(); err != iterator.Done {
-		return repository.BuildDetail{}, errors.New("Found multiple Grafeas occurrences for " + reference.String())
+		return repository.BuildDetail{}, errors.New("Found multiple Grafeas occurrences for " + ref.String())
 	}
 
 	return OccurrenceToBuildDetail(occ), nil
 }
 
 // NewClient creates a new containeranalysis Grafeas Client.
-func NewClient(ctx context.Context, imageProject, binauthProject string, keyring signer.AttestationSigner) (*Client, error) {
+func NewClient(ctx context.Context, binauthProject string, keyring signer.AttestationSigner) (*Client, error) {
 	var err error
 
 	caClient, err := containeranalysisapi.NewClient(ctx)
@@ -191,7 +199,6 @@ func NewClient(ctx context.Context, imageProject, binauthProject string, keyring
 		containeranalysis: caClient.GetGrafeasClient(),
 		keyring:           keyring,
 		binauthProject:    binauthProject,
-		imageProject:      imageProject,
 	}
 
 	return client, nil

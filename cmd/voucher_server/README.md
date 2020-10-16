@@ -45,7 +45,6 @@ Below are the configuration options for Voucher Server:
 |                      | `valid_repos`                | A list of repos that are owned by your team/organization.                                             |
 |                      | `trusted_builder_identities` | A list of email addresses. Owners of these emails are considered "trusted" (and will pass Provenance) |
 |                      | `trusted_projects`           | A list of projects that are considered "trusted" (and will pass Provenance)                           |
-|                      | `image_project`              | The project in the metadata server that image information is stored.                                  |
 |                      | `binauth_project`            | The project in the metadata server that the binauth information is stored.                            |
 | `checks`             | (test name here)             | A test that is active when running "all" tests.                                                       |
 | `server`             | `port`                       | The port that the server can be reached on.                                                           |
