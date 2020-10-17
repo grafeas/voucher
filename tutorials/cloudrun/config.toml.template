@@ -1,0 +1,51 @@
+dryrun = false
+scanner = "metadata"
+failon = "high"
+metadata_client = "containeranalysis"
+image_project = "<PROJECT_ID>"
+binauth_project = "<PROJECT_ID>"
+signer = "kms"
+valid_repos = [
+    "gcr.io/path/to/my/project",
+]
+
+trusted_builder-identities = [
+    "email@example.com",
+    "idcloudbuild.gserviceaccount.com"
+]
+
+trusted_projects = [
+    "trusted-builds"
+]
+
+[checks]
+diy      = false
+nobody   = false
+provenance = false
+snakeoil = true
+
+[server]
+port = 8080
+require_auth = false
+username = "username here"
+password = "bcrypt hash of your password"
+
+[ejson]
+dir = "/key"
+secrets = "/etc/voucher/secrets.production.ejson"
+
+[clair]
+address = "localhost:6060"
+
+[statsd]
+addr = "localhost:8125"
+sample_rate = 0.1
+tags = []
+
+[repository.grafeas]
+org-url = "https://github.com/grafeas"
+
+[[kms_keys]]
+check = "snakeoil"
+path = "<KMS_KEY_NAME>"
+algo = "SHA512"
