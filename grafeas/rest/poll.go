@@ -5,8 +5,10 @@ import (
 	"time"
 
 	"github.com/Shopify/voucher"
+	"github.com/Shopify/voucher/docker/uri"
 	vgrafeas "github.com/Shopify/voucher/grafeas"
 	"github.com/Shopify/voucher/grafeas/rest/objects"
+	"github.com/docker/distribution/reference"
 )
 
 var (
@@ -41,9 +43,9 @@ func isDone(occurrence *objects.Occurrence) bool {
 
 // pollForDiscoveries pauses execution until grafeas has pushed
 // the Vulnerability information to the server.
-func pollForDiscoveries(ctx context.Context, c *Client) error {
+func pollForDiscoveries(ctx context.Context, c *Client, ref reference.Reference) error {
 	for i := 0; i < attempts; i++ {
-		discoveries, err := getVulnerabilityDiscoveries(ctx, c)
+		discoveries, err := getVulnerabilityDiscoveries(ctx, c, ref)
 		if err != nil && !voucher.IsNoMetadataError(err) {
 			return err
 		}
@@ -59,8 +61,13 @@ func pollForDiscoveries(ctx context.Context, c *Client) error {
 	return vgrafeas.ErrDiscoveriesUnfinished
 }
 
-func getVulnerabilityDiscoveries(ctx context.Context, g *Client) (items []objects.Occurrence, err error) {
-	occurrences, err := g.getAllOccurrences(ctx)
+func getVulnerabilityDiscoveries(ctx context.Context, g *Client, ref reference.Reference) (items []objects.Occurrence, err error) {
+	project, err := uri.ReferenceToProjectName(ref)
+	if nil != err {
+		return nil, err
+	}
+
+	occurrences, err := g.getAllOccurrences(ctx, project)
 
 	for _, occ := range occurrences {
 		if *occ.Kind == objects.NoteKindDiscovery {

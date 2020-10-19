@@ -50,36 +50,6 @@ func (mr *MockGrafeasAPIServiceMockRecorder) CreateOccurrence(arg0, arg1, arg2 i
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateOccurrence", reflect.TypeOf((*MockGrafeasAPIService)(nil).CreateOccurrence), arg0, arg1, arg2)
 }
 
-// BatchCreateOccurrences mocks base method.
-func (m *MockGrafeasAPIService) BatchCreateOccurrences(arg0 context.Context, arg1 string, arg2 []objects.Occurrence) ([]objects.Occurrence, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "BatchCreateOccurrences", arg0, arg1, arg2)
-	ret0, _ := ret[0].([]objects.Occurrence)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// BatchCreateOccurrences indicates an expected call of BatchCreateOccurrences.
-func (mr *MockGrafeasAPIServiceMockRecorder) BatchCreateOccurrences(arg0, arg1, arg2 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BatchCreateOccurrences", reflect.TypeOf((*MockGrafeasAPIService)(nil).BatchCreateOccurrences), arg0, arg1, arg2)
-}
-
-// BatchCreateNotes mocks base method.
-func (m *MockGrafeasAPIService) BatchCreateNotes(arg0 context.Context, arg1 string, arg2 map[string]objects.Note) ([]objects.Note, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "BatchCreateNotes", arg0, arg1, arg2)
-	ret0, _ := ret[0].([]objects.Note)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// BatchCreateNotes indicates an expected call of BatchCreateNotes.
-func (mr *MockGrafeasAPIServiceMockRecorder) BatchCreateNotes(arg0, arg1, arg2 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BatchCreateNotes", reflect.TypeOf((*MockGrafeasAPIService)(nil).BatchCreateNotes), arg0, arg1, arg2)
-}
-
 // ListNotes mocks base method.
 func (m *MockGrafeasAPIService) ListNotes(arg0 context.Context, arg1 string, arg2 *objects.ListOpts) (objects.ListNotesResponse, error) {
 	m.ctrl.T.Helper()

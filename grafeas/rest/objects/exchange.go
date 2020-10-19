@@ -4,32 +4,6 @@ import (
 	"github.com/antihax/optional"
 )
 
-//BatchCreateNotesRequest based on
-//https://github.com/grafeas/client-go/blob/master/0.1.0/model_v1beta1_batch_create_notes_request.go
-type BatchCreateNotesRequest struct {
-	Parent string          `json:"parent,omitempty"` //form: `projects/[PROJECT_ID]`
-	Notes  map[string]Note `json:"notes,omitempty"`
-}
-
-//BatchCreateNotesResponse based on
-//https://github.com/grafeas/client-go/blob/master/0.1.0/model_v1beta1_batch_create_notes_response.go
-type BatchCreateNotesResponse struct {
-	Notes []Note `json:"notes,omitempty"`
-}
-
-//BatchCreateOccurrencesRequest based on
-//https://github.com/grafeas/client-go/blob/master/0.1.0/model_v1beta1_batch_create_occurrences_request.go
-type BatchCreateOccurrencesRequest struct {
-	Parent      string       `json:"parent,omitempty"` //form: `projects/[PROJECT_ID]`
-	Occurrences []Occurrence `json:"occurrences,omitempty"`
-}
-
-//BatchCreateOccurrencesResponse based on
-//https://github.com/grafeas/client-go/blob/master/0.1.0/model_v1beta1_batch_create_occurrences_response.go
-type BatchCreateOccurrencesResponse struct {
-	Occurrences []Occurrence `json:"occurrences,omitempty"`
-}
-
 //ListOpts based on
 //ListNotesOpts https://github.com/grafeas/client-go/blob/39fa98b49d38de3942716c0f58f3505012415470/0.1.0/api_grafeas_v1_beta1.go#L1051
 //ListNoteOccurrencesOpts https://github.com/grafeas/client-go/blob/39fa98b49d38de3942716c0f58f3505012415470/0.1.0/api_grafeas_v1_beta1.go#L943

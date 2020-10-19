@@ -9,7 +9,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"strconv"
 	"time"
 
 	"github.com/Shopify/voucher/grafeas/rest/objects"
@@ -24,8 +23,6 @@ var (
 //GrafeasAPIService is the interface for communicating with Grafeas
 type GrafeasAPIService interface {
 	CreateOccurrence(context.Context, string, objects.Occurrence) (objects.Occurrence, error)
-	BatchCreateOccurrences(context.Context, string, []objects.Occurrence) ([]objects.Occurrence, error)
-	BatchCreateNotes(context.Context, string, map[string]objects.Note) ([]objects.Note, error)
 	ListNotes(context.Context, string, *objects.ListOpts) (objects.ListNotesResponse, error)
 	ListOccurrences(context.Context, string, *objects.ListOpts) (objects.ListOccurrencesResponse, error)
 }
@@ -69,60 +66,6 @@ func (g grafeasAPIServiceImpl) CreateOccurrence(ctx context.Context, parent stri
 		return objects.Occurrence{}, err
 	}
 	return occ, nil
-}
-
-//BatchCreateOccurrences based on
-//https://github.com/grafeas/client-go/blob/39fa98b49d38de3942716c0f58f3505012415470/0.1.0/api_grafeas_v1_beta1.go#L128
-func (g grafeasAPIServiceImpl) BatchCreateOccurrences(ctx context.Context, parent string, occs []objects.Occurrence) ([]objects.Occurrence, error) {
-	occsReq := objects.BatchCreateOccurrencesRequest{
-		Parent:      parent,
-		Occurrences: occs,
-	}
-	urlPath, err := g.buildURL(parent, "/occurrences:batchCreate", nil)
-	if err != nil {
-		return []objects.Occurrence{}, err
-	}
-	res, err := json.Marshal(occsReq)
-	if err != nil {
-		return []objects.Occurrence{}, err
-	}
-	resp, err := g.httpCall(urlPath, res, http.MethodPost)
-	if err != nil {
-		return []objects.Occurrence{}, err
-	}
-	occResp := objects.BatchCreateOccurrencesResponse{}
-	err = json.Unmarshal(resp, &occResp)
-	if err != nil {
-		return []objects.Occurrence{}, err
-	}
-	return occResp.Occurrences, nil
-}
-
-//BatchCreateNotes based on
-//https://github.com/grafeas/client-go/blob/39fa98b49d38de3942716c0f58f3505012415470/0.1.0/api_grafeas_v1_beta1.go#L37
-func (g grafeasAPIServiceImpl) BatchCreateNotes(ctx context.Context, parent string, notes map[string]objects.Note) ([]objects.Note, error) {
-	notesReq := objects.BatchCreateNotesRequest{
-		Parent: parent,
-		Notes:  notes,
-	}
-	urlPath, err := g.buildURL(parent, "/notes:batchCreate", nil)
-	if err != nil {
-		return []objects.Note{}, err
-	}
-	res, err := json.Marshal(notesReq)
-	if err != nil {
-		return []objects.Note{}, err
-	}
-	resp, err := g.httpCall(urlPath, res, http.MethodPost)
-	if err != nil {
-		return []objects.Note{}, err
-	}
-	notesResp := objects.BatchCreateNotesResponse{}
-	err = json.Unmarshal(resp, &notesResp)
-	if err != nil {
-		return []objects.Note{}, err
-	}
-	return notesResp.Notes, nil
 }
 
 //ListNotes based on
@@ -199,10 +142,11 @@ func (g grafeasAPIServiceImpl) httpCall(urlAddr *url.URL, payload []byte, method
 		}
 		return nil, err
 	}
-	if resp.StatusCode != http.StatusOK {
-		return nil, errors.New("error getting REST data: " + strconv.Itoa(resp.StatusCode))
-	}
+	statusCode := resp.StatusCode
 	data, err := ioutil.ReadAll(resp.Body)
+	if statusCode != http.StatusOK || err != nil {
+		return nil, NewGrafeasAPIError(statusCode, urlAddr.Path, method, data)
+	}
 	resp.Body.Close()
 
 	return data, err

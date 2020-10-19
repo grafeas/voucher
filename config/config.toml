@@ -9,7 +9,7 @@ valid_repos = [
     "gcr.io/path/to/my/project",
 ]
 
-trusted_builder-identities = [
+trusted_builder_identities = [
     "email@example.com",
     "idcloudbuild.gserviceaccount.com"
 ]

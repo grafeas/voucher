@@ -1,5 +1,7 @@
 package objects
 
+import "github.com/Shopify/voucher"
+
 //AttestationSignedContentType based on
 //https://github.com/grafeas/client-go/blob/master/0.1.0/model_attestation_pgp_signed_attestation_content_type.go
 //https://github.com/grafeas/client-go/blob/master/0.1.0/model_attestation_generic_signed_attestation_content_type.go
@@ -15,6 +17,19 @@ const (
 //https://github.com/grafeas/client-go/blob/master/0.1.0/model_v1beta1attestation_details.go
 type AttestationDetails struct {
 	Attestation *Attestation `json:"attestation,omitempty"` //required
+}
+
+//AsVoucherAttestation converts objects.AttestationDetails to voucher.SignedAttestation
+func (ad *AttestationDetails) AsVoucherAttestation(checkName string) voucher.SignedAttestation {
+	signedAttestation := voucher.SignedAttestation{
+		Attestation: voucher.Attestation{
+			CheckName: checkName,
+		},
+	}
+
+	signedAttestation.Body = string(*ad.Attestation.GenericSignedAttestation.ContentType)
+
+	return signedAttestation
 }
 
 //Attestation based on
@@ -45,18 +60,4 @@ type AttestationGenericSigned struct {
 type Signature struct {
 	Signature   string `json:"signature,omitempty"`
 	PublicKeyID string `json:"publicKeyId,omitempty"`
-}
-
-//attestation for note
-
-//AttestationAuthority based on
-//https://github.com/grafeas/client-go/blob/master/0.1.0/model_attestation_authority.go
-type AttestationAuthority struct {
-	Hint *AuthorityHint `json:"hint,omitempty"`
-}
-
-//AuthorityHint based on
-//https://github.com/grafeas/client-go/blob/master/0.1.0/model_authority_hint.go
-type AuthorityHint struct {
-	HumanReadableName string `json:"humanReadableName,omitempty"` //required
 }

@@ -4,16 +4,8 @@ package objects
 //https://github.com/grafeas/client-go/blob/master/0.1.0/model_discovered_analysis_status.go
 type DiscoveredAnalysisStatus string
 
-//DiscoveredContinuousAnalysis based on
-//https://github.com/grafeas/client-go/blob/master/0.1.0/model_discovered_continuous_analysis.go
-type DiscoveredContinuousAnalysis string
-
 //consts
 const (
-	DiscoveredContinuousAnalysisUnspecified DiscoveredContinuousAnalysis = "CONTINUOUS_ANALYSIS_UNSPECIFIED"
-	DiscoveredContinuousAnalysisActive      DiscoveredContinuousAnalysis = "ACTIVE"
-	DiscoveredContinuousAnalysisInactive    DiscoveredContinuousAnalysis = "INACTIVE"
-
 	DiscoveredAnalysisStatusUnspecified         DiscoveredAnalysisStatus = "ANALYSIS_STATUS_UNSPECIFIED"
 	DiscoveredAnalysisStatusPending             DiscoveredAnalysisStatus = "PENDING"
 	DiscoveredAnalysisStatusScanning            DiscoveredAnalysisStatus = "SCANNING"
@@ -33,9 +25,7 @@ type DiscoveryDetails struct {
 //DiscoveryDiscovered based on
 //https://github.com/grafeas/client-go/blob/master/0.1.0/model_discovery_discovered.go
 type DiscoveryDiscovered struct {
-	ContinuousAnalysis  *DiscoveredContinuousAnalysis `json:"continuousAnalysis,omitempty"`
-	AnalysisStatus      *DiscoveredAnalysisStatus     `json:"analysisStatus,omitempty"`
-	AnalysisStatusError *RPCStatus                    `json:"analysisStatusError,omitempty"`
+	AnalysisStatus *DiscoveredAnalysisStatus `json:"analysisStatus,omitempty"`
 }
 
 //discovery for note

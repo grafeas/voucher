@@ -54,7 +54,6 @@ func NewMetadataClient(ctx context.Context, secrets *Secrets) (voucher.MetadataC
 	case "grafeasos":
 		return rest.NewClient(
 			ctx,
-			viper.GetString("image_project"),
 			viper.GetString("binauth_project"),
 			viper.GetString("grafeasos.vul_project"),
 			keyring,
