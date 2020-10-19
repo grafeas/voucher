@@ -27,7 +27,7 @@ func getCanonicalReference(client *http.Client, ref reference.Reference) (refere
 		if nil != err {
 			return nil, fmt.Errorf("getting digest from tag failed: %s", err)
 		}
-		canonicalRef, err := reference.WithDigest(taggedRef, imageDigest)
+		canonicalRef, err := reference.WithDigest(reference.TrimNamed(taggedRef), imageDigest)
 		if nil != err {
 			return nil, fmt.Errorf("making canonical reference failed: %s", err)
 		}
