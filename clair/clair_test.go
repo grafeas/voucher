@@ -11,8 +11,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"golang.org/x/oauth2"
 
-	"github.com/Shopify/voucher"
-	vtesting "github.com/Shopify/voucher/testing"
+	"github.com/grafeas/voucher"
+	vtesting "github.com/grafeas/voucher/testing"
 )
 
 func TestGetClairVulnerabilitesSchema1(t *testing.T) {

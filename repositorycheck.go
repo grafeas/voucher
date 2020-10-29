@@ -1,6 +1,6 @@
 package voucher
 
-import "github.com/Shopify/voucher/repository"
+import "github.com/grafeas/voucher/repository"
 
 // RepositoryCheck represents a Voucher check that needs to lookup
 // information about an image from the repository that it's source code

@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Shopify/voucher/repository"
-	"github.com/Shopify/voucher/repository/github"
+	"github.com/grafeas/voucher/repository"
+	"github.com/grafeas/voucher/repository/github"
 )
 
 // NewRepositoryClient creates a new repository.Client for the given repository URL. The URL may be in any known

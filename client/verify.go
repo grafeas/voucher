@@ -11,7 +11,7 @@ import (
 
 	"github.com/docker/distribution/reference"
 
-	"github.com/Shopify/voucher"
+	"github.com/grafeas/voucher"
 )
 
 func (c *Client) Verify(ctx context.Context, check string, image reference.Canonical) (voucher.Response, error) {

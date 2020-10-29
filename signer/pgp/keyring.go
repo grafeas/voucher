@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/Shopify/voucher/signer"
+	"github.com/grafeas/voucher/signer"
 	"golang.org/x/crypto/openpgp"
 	"golang.org/x/crypto/openpgp/packet"
 )

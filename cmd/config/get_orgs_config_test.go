@@ -3,7 +3,7 @@ package config
 import (
 	"testing"
 
-	"github.com/Shopify/voucher/repository"
+	"github.com/grafeas/voucher/repository"
 	"github.com/stretchr/testify/assert"
 )
 

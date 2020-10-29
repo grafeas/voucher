@@ -1,7 +1,7 @@
 package containeranalysis
 
 import (
-	"github.com/Shopify/voucher/repository"
+	"github.com/grafeas/voucher/repository"
 	grafeas "google.golang.org/genproto/googleapis/grafeas/v1"
 )
 

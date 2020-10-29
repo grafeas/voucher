@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/Shopify/voucher"
-	"github.com/Shopify/voucher/client"
+	"github.com/grafeas/voucher"
+	"github.com/grafeas/voucher/client"
 )
 
 type config struct {

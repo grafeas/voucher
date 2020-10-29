@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/Shopify/voucher/repository"
+	"github.com/grafeas/voucher/repository"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -20,7 +20,7 @@ func TestNewDefaultBranchResult(t *testing.T) {
 	}{
 		{
 			testName: "Testing no commits in default branch",
-			repoURL:  "github.com/Shopify/voucher",
+			repoURL:  "github.com/grafeas/voucher",
 			input: func() *defaultBranchQuery {
 				res := new(defaultBranchQuery)
 				res.Resource.Typename = "Repository"
@@ -38,7 +38,7 @@ func TestNewDefaultBranchResult(t *testing.T) {
 		},
 		{
 			testName: "Testing has some commits in default branch",
-			repoURL:  "github.com/Shopify/voucher",
+			repoURL:  "github.com/grafeas/voucher",
 			input: func() *defaultBranchQuery {
 				res := new(defaultBranchQuery)
 				res.Resource.Typename = "Repository"
@@ -46,10 +46,10 @@ func TestNewDefaultBranchResult(t *testing.T) {
 				res.Resource.Repository.DefaultBranchRef.Target.Commit.Typename = "Commit"
 				res.Resource.Repository.DefaultBranchRef.Target.Commit.History.Nodes = []commit{
 					{
-						URL: "github.com/Shopify/voucher/commit/FakeCommit1",
+						URL: "github.com/grafeas/voucher/commit/FakeCommit1",
 					},
 					{
-						URL: "github.com/Shopify/voucher/commit/FakeCommit2",
+						URL: "github.com/grafeas/voucher/commit/FakeCommit2",
 					},
 				}
 				return res
@@ -61,10 +61,10 @@ func TestNewDefaultBranchResult(t *testing.T) {
 				Name: "master",
 				CommitRefs: []repository.CommitRef{
 					{
-						URL: "github.com/Shopify/voucher/commit/FakeCommit1",
+						URL: "github.com/grafeas/voucher/commit/FakeCommit1",
 					},
 					{
-						URL: "github.com/Shopify/voucher/commit/FakeCommit2",
+						URL: "github.com/grafeas/voucher/commit/FakeCommit2",
 					},
 				},
 			},
@@ -72,7 +72,7 @@ func TestNewDefaultBranchResult(t *testing.T) {
 		},
 		{
 			testName:    "Testing error propagation",
-			repoURL:     "random.com/Shopify/voucher",
+			repoURL:     "random.com/grafeas/voucher",
 			input:       new(defaultBranchQuery),
 			mask:        []string{},
 			expected:    repository.Branch{},

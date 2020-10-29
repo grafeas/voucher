@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/Shopify/voucher"
-	"github.com/Shopify/voucher/cmd/config"
-	"github.com/Shopify/voucher/repository"
+	"github.com/grafeas/voucher"
+	"github.com/grafeas/voucher/cmd/config"
+	"github.com/grafeas/voucher/repository"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"

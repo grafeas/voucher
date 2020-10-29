@@ -8,7 +8,7 @@ import (
 
 	"github.com/docker/distribution/reference"
 
-	"github.com/Shopify/voucher"
+	"github.com/grafeas/voucher"
 )
 
 var errImageCheckFailed = errors.New("image failed to pass required check(s)")

@@ -1,8 +1,8 @@
 package config
 
 import (
-	"github.com/Shopify/voucher"
-	"github.com/Shopify/voucher/auth/google"
+	"github.com/grafeas/voucher"
+	"github.com/grafeas/voucher/auth/google"
 )
 
 func newAuth() voucher.Auth {

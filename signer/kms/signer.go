@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	apiv1 "cloud.google.com/go/kms/apiv1"
-	"github.com/Shopify/voucher/signer"
+	"github.com/grafeas/voucher/signer"
 	kms_pb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
 

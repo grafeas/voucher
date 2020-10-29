@@ -5,8 +5,8 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/Shopify/voucher"
-	"github.com/Shopify/voucher/docker"
+	"github.com/grafeas/voucher"
+	"github.com/grafeas/voucher/docker"
 )
 
 // ErrNotFromRepo is returned when an image does not match one of the valid

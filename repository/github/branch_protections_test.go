@@ -19,7 +19,7 @@ func TestGetBranchProtections(t *testing.T) {
 	}{
 		{
 			testName: "Testing zero associated branch protections",
-			repoURL:  "https://github.com/Shopify/voucher",
+			repoURL:  "https://github.com/grafeas/voucher",
 			input: func() *branchProtectionsQuery {
 				res := new(branchProtectionsQuery)
 				res.Resource.Typename = "Repository"
@@ -35,7 +35,7 @@ func TestGetBranchProtections(t *testing.T) {
 		},
 		{
 			testName: "Testing zero associated matchingRefs for branch protections",
-			repoURL:  "https://github.com/Shopify/voucher",
+			repoURL:  "https://github.com/grafeas/voucher",
 			input: func() *branchProtectionsQuery {
 				res := new(branchProtectionsQuery)
 				res.Resource.Typename = "Repository"
@@ -54,7 +54,7 @@ func TestGetBranchProtections(t *testing.T) {
 		},
 		{
 			testName: "Testing has associated branch protections",
-			repoURL:  "https://github.com/Shopify/voucher",
+			repoURL:  "https://github.com/grafeas/voucher",
 			input: func() *branchProtectionsQuery {
 				res := new(branchProtectionsQuery)
 				res.Resource.Typename = "Repository"

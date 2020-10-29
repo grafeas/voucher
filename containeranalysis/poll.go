@@ -11,8 +11,8 @@ import (
 	grafeasv1 "cloud.google.com/go/grafeas/apiv1"
 	grafeas "google.golang.org/genproto/googleapis/grafeas/v1"
 
-	"github.com/Shopify/voucher"
-	"github.com/Shopify/voucher/docker/uri"
+	"github.com/grafeas/voucher"
+	"github.com/grafeas/voucher/docker/uri"
 )
 
 const (

@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Shopify/voucher"
-	"github.com/Shopify/voucher/repository"
+	"github.com/grafeas/voucher"
+	"github.com/grafeas/voucher/repository"
 )
 
 // ErrNoBuildData is an error returned if we can't pull any BuildData from

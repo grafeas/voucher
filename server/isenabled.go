@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Shopify/voucher"
+	"github.com/grafeas/voucher"
 )
 
 func verifiedRequiredChecksAreRegistered(checks ...string) error {

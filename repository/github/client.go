@@ -11,7 +11,7 @@ import (
 	"github.com/shurcooL/githubv4"
 	"golang.org/x/oauth2"
 
-	"github.com/Shopify/voucher/repository"
+	"github.com/grafeas/voucher/repository"
 )
 
 // errCreatingRepositoryMetadata is the error returned when we fail to create

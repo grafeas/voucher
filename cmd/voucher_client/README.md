@@ -7,7 +7,7 @@ Voucher Client is a tool for connecting to a running Voucher server.
 Install the client, `voucher_client`, by running:
 
 ```shell
-$ go get -u github.com/Shopify/voucher/cmd/voucher_client
+$ go get -u github.com/grafeas/voucher/cmd/voucher_client
 ```
 
 This will download and install the voucher client into `$GOPATH/bin` directory.
