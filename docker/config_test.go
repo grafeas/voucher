@@ -16,5 +16,5 @@ func TestRequestConfig(t *testing.T) {
 
 	config, err := RequestImageConfig(client, ref)
 	require.NoError(t, err)
-	require.True(t, config.RunsAsRoot())
+	require.False(t, config.RunsAsRoot())
 }

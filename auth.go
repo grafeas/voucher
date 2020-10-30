@@ -19,6 +19,7 @@ var ErrNoAuth = errors.New("no configured Auth")
 type Auth interface {
 	GetTokenSource(context.Context, reference.Named) (oauth2.TokenSource, error)
 	ToClient(ctx context.Context, image reference.Named) (*http.Client, error)
+	IsForDomain(url reference.Named) bool
 }
 
 // AuthToClient takes a struct implementing Auth and returns a new http.Client

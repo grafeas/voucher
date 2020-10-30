@@ -44,10 +44,18 @@ func (mock *dockerAPIMock) ServeHTTP(writer http.ResponseWriter, req *http.Reque
 		rawRespond(writer, "text/html", RateLimitOutput)
 		return
 	case "/v2/path/to/image/blobs/sha256:b5b2b2c507a0944348e0303114d8d93aaaa081732b86451d9bce1f432a537bc7":
-		jsonRespond(writer, schema2.MediaTypeImageConfig, NewTestImageConfig())
+		jsonRespond(writer, schema2.MediaTypeImageConfig, NewTestNobodyImageConfig())
 		return
 	case "/v2/path/to/bad/image/manifests/latest", "/v2/path/to/bad/image/manifests/sha256:bad8c8af52ba402ed7dd98d73f5a41836ece508d1f4704b274562ac0c9b3b7da":
 		http.Error(writer, "image doesn't exist", 404)
+		return
+	case "/v2/path/to/image/manifests/sha256:b248c8af52ba402ed7dd98d73f5a41836ece508d1f4704b274562ac0c9b3b7da":
+		writer.Header().Set("Docker-Content-Digest", "sha256:b248c8af52ba402ed7dd98d73f5a41836ece508d1f4704b274562ac0c9b3b7da")
+		mimeType, raw, _ := NewTestRootManifest().Payload()
+		rawRespond(writer, mimeType, string(raw))
+		return
+	case "/v2/path/to/image/blobs/sha256:b5b2b2c507a0944348e0303114d8d93bbbb081732b86451d9bce1f432a537bc7":
+		jsonRespond(writer, schema2.MediaTypeImageConfig, NewTestRootImageConfig())
 		return
 	}
 
@@ -86,8 +94,21 @@ func rawRespond(writer http.ResponseWriter, content, body string) {
 	}
 }
 
-// NewTestImageConfig creates a test image Config for our mock Docker API.
-func NewTestImageConfig() interface{} {
+// NewTestNobodyImageConfig creates a test Image Config with user as nobodoy for our mock Docker API.
+func NewTestNobodyImageConfig() interface{} {
+	config := struct {
+		ContainerConfig dockerTypes.ExecConfig `json:"container_config"`
+	}{
+		ContainerConfig: dockerTypes.ExecConfig{
+			User: "nobody",
+		},
+	}
+
+	return config
+}
+
+// NewTestRootImageConfig creates a test Image Config with user as root for our mock Docker API.
+func NewTestRootImageConfig() interface{} {
 	config := struct {
 		ContainerConfig dockerTypes.ExecConfig `json:"container_config"`
 	}{

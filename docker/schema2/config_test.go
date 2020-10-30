@@ -22,7 +22,7 @@ func TestRequestConfig(t *testing.T) {
 	require.NoError(t, err, "failed to get config: %s", err)
 
 	expectedConfig := &dockerTypes.ExecConfig{
-		User: "root",
+		User: "nobody",
 	}
 
 	assert.Equal(t, expectedConfig, config)

@@ -34,6 +34,10 @@ func (a *gAuth) GetTokenSource(ctx context.Context, ref reference.Named) (oauth2
 // ToClient returns a new http.Client with the authentication details setup by
 // Auth.GetTokenSource.
 func (a *gAuth) ToClient(ctx context.Context, image reference.Named) (*http.Client, error) {
+	if !a.IsForDomain(image) {
+		return nil, auth.NewAuthError("does not match domain", image)
+	}
+
 	tokenSource, err := a.GetTokenSource(ctx, image)
 	if nil != err {
 		return nil, err
@@ -43,6 +47,11 @@ func (a *gAuth) ToClient(ctx context.Context, image reference.Named) (*http.Clie
 	err = auth.UpdateIdleConnectionsTimeout(client)
 
 	return client, err
+}
+
+// IsForDomain validates the domain part of the Named image reference
+func (a *gAuth) IsForDomain(image reference.Named) bool {
+	return "gcr.io" == reference.Domain(image)
 }
 
 // NewAuth returns a new voucher.Auth to access Google specific resources.

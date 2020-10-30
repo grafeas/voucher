@@ -25,6 +25,15 @@ func NewBadTestReference(t *testing.T) reference.Canonical {
 	return parseReference(t, "localhost/path/to/bad/image@sha256:bad8c8af52ba402ed7dd98d73f5a41836ece508d1f4704b274562ac0c9b3b7da")
 }
 
+// NewNobodyBadTestReference creates a new reference to be used for the nobody check.
+// The returned reference is assumed to not, and does not have valid configuration
+// or layers.
+func NewNobodyBadTestReference(t *testing.T) reference.Canonical {
+	t.Helper()
+
+	return parseReference(t, "localhost/path/to/image@sha256:b248c8af52ba402ed7dd98d73f5a41836ece508d1f4704b274562ac0c9b3b7da")
+}
+
 // NewRateLimitedTestReference creates a new reference to be used to test
 // the handling of Rate Limited docker calls.
 // The returned response from calling this reference cannot be parsed by a

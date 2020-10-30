@@ -45,6 +45,44 @@ func NewTestManifest() *schema2.DeserializedManifest {
 	return newManifest
 }
 
+// NewTestRootManifest creates a test schema2 manifest for our mock Docker API, which points to an image whose user is configured to be root
+func NewTestRootManifest() *schema2.DeserializedManifest {
+	manifest := schema2.Manifest{
+		Config: distribution.Descriptor{
+			MediaType: schema2.MediaTypeImageConfig,
+			Size:      7023,
+			Digest:    "sha256:b5b2b2c507a0944348e0303114d8d93bbbb081732b86451d9bce1f432a537bc7",
+		},
+		Layers: []distribution.Descriptor{
+			{
+				MediaType: schema2.MediaTypeLayer,
+				Size:      32654,
+				Digest:    "sha256:e692418e4cbaf90ca69d05a66403747baa33ee08806650b51fab815ad7fc331f",
+			},
+			{
+				MediaType: schema2.MediaTypeLayer,
+				Size:      16724,
+				Digest:    "sha256:3c3a4604a545cdc127456d94e421cd355bca5b528f4a9c1905b15da2eb4a4c6b",
+			},
+			{
+				MediaType: schema2.MediaTypeLayer,
+				Size:      73109,
+				Digest:    "sha256:ec4b8955958665577945c89419d1af06b5f7636b4ac3da7f12184802ad867736",
+			},
+		},
+	}
+
+	manifest.SchemaVersion = 2
+	manifest.MediaType = schema2.MediaTypeManifest
+
+	newManifest, err := schema2.FromStruct(manifest)
+	if nil != err {
+		panic("failed to generate new schema2 manifest")
+	}
+
+	return newManifest
+}
+
 // NewTestSchema1Manifest creates a test schema1 manifest for our mock Docker API.
 func NewTestSchema1Manifest() schema1.Manifest {
 	manifest := schema1.Manifest{

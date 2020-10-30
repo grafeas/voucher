@@ -32,6 +32,7 @@ func (n *check) Check(ctx context.Context, i voucher.ImageData) (bool, error) {
 	}
 
 	imageConfig, err := docker.RequestImageConfig(client, i)
+
 	if nil != err {
 		return false, err
 	}

@@ -10,6 +10,7 @@ import (
 	"golang.org/x/oauth2"
 
 	"github.com/Shopify/voucher"
+	"github.com/Shopify/voucher/auth"
 )
 
 type testTokenSource struct {
@@ -38,6 +39,9 @@ func (a *testAuth) GetTokenSource(ctx context.Context, ref reference.Named) (oau
 // ToClient returns a new http.Client with the authentication details setup by
 // Auth.GetTokenSource.
 func (a *testAuth) ToClient(ctx context.Context, image reference.Named) (*http.Client, error) {
+	if !a.IsForDomain(image) {
+		return nil, auth.NewAuthError("does not match domain", image)
+	}
 	tokenSource, err := a.GetTokenSource(ctx, image)
 	if nil != err {
 		return nil, err
@@ -47,6 +51,10 @@ func (a *testAuth) ToClient(ctx context.Context, image reference.Named) (*http.C
 	err = UpdateClient(client, a.server)
 
 	return client, err
+}
+
+func (a *testAuth) IsForDomain(image reference.Named) bool {
+	return "localhost" == reference.Domain(image)
 }
 
 // NewAuth creates a new Auth suitable for testing with.
