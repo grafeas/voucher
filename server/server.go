@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/Shopify/voucher/cmd/config"
-	"github.com/Shopify/voucher/metrics"
+	"github.com/grafeas/voucher/cmd/config"
+	"github.com/grafeas/voucher/metrics"
 	log "github.com/sirupsen/logrus"
 )
 

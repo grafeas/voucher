@@ -8,9 +8,9 @@ import (
 	"github.com/Shopify/ejson"
 	"github.com/spf13/viper"
 
-	"github.com/Shopify/voucher/clair"
-	"github.com/Shopify/voucher/repository"
-	"github.com/Shopify/voucher/signer/pgp"
+	"github.com/grafeas/voucher/clair"
+	"github.com/grafeas/voucher/repository"
+	"github.com/grafeas/voucher/signer/pgp"
 )
 
 // Secrets represents the format that the ejson configuration is structured

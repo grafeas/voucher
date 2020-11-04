@@ -7,8 +7,8 @@ import (
 	"github.com/docker/distribution/reference"
 	"golang.org/x/oauth2"
 
-	"github.com/Shopify/voucher"
-	"github.com/Shopify/voucher/docker"
+	"github.com/grafeas/voucher"
+	"github.com/grafeas/voucher/docker"
 )
 
 // Scanner implements the interface SnakeoilScanner.

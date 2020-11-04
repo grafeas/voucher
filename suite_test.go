@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/Shopify/voucher/metrics"
+	"github.com/grafeas/voucher/metrics"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"

@@ -3,7 +3,7 @@ package clair
 import (
 	v1 "github.com/coreos/clair/api/v1"
 
-	"github.com/Shopify/voucher"
+	"github.com/grafeas/voucher"
 )
 
 // ClairVulnerabilitiesV1 return a list of clair vulnerabilities

@@ -1,6 +1,6 @@
 package containeranalysis
 
-import "github.com/Shopify/voucher"
+import "github.com/grafeas/voucher"
 
 // DiscoveryType is a Grafeas specific type which refers to MetadataItems containing metadata discovery status.
 const DiscoveryType voucher.MetadataType = "discovery"

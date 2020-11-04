@@ -4,7 +4,7 @@ import (
 	"net/url"
 	"path"
 
-	"github.com/Shopify/voucher/repository"
+	"github.com/grafeas/voucher/repository"
 )
 
 // GetCommitURL generates a commit url from the build metadata

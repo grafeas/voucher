@@ -3,7 +3,7 @@ package github
 import (
 	"testing"
 
-	"github.com/Shopify/voucher/repository"
+	"github.com/grafeas/voucher/repository"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -13,9 +13,9 @@ func TestGetCommitURL(t *testing.T) {
 		mockBuildDetail *repository.BuildDetail
 	}{
 		{
-			expectedURL: "https://github.com/Shopify/voucher/commit/sl2o3vo2wojweoie",
+			expectedURL: "https://github.com/grafeas/voucher/commit/sl2o3vo2wojweoie",
 			mockBuildDetail: &repository.BuildDetail{
-				RepositoryURL: "git@github.com/Shopify/voucher.git",
+				RepositoryURL: "git@github.com/grafeas/voucher.git",
 				Commit:        "sl2o3vo2wojweoie",
 				BuildCreator:  "someone",
 				BuildURL:      "somebuild.url.io",

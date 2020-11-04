@@ -1,4 +1,4 @@
-module github.com/Shopify/voucher
+module github.com/grafeas/voucher
 
 go 1.13
 

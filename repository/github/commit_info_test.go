@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/Shopify/voucher/repository"
+	"github.com/grafeas/voucher/repository"
 	"github.com/shurcooL/githubv4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -21,11 +21,11 @@ func TestGetAllCheckSuites(t *testing.T) {
 	}{
 		{
 			testName:  "Testing zero check suites",
-			commitURL: "https://github.com/Shopify/voucher/commit/881e9fd71e816415e1f199daeb6dc6d3c5fd4f2c",
+			commitURL: "https://github.com/grafeas/voucher/commit/881e9fd71e816415e1f199daeb6dc6d3c5fd4f2c",
 			input: func() *commitInfoQuery {
 				res := new(commitInfoQuery)
 				res.Resource.Typename = "Commit"
-				res.Resource.Commit.URL = "https://github.com/Shopify/voucher/commit/881e9fd71e816415e1f199daeb6dc6d3c5fd4f2c"
+				res.Resource.Commit.URL = "https://github.com/grafeas/voucher/commit/881e9fd71e816415e1f199daeb6dc6d3c5fd4f2c"
 				res.Resource.Commit.CheckSuites.Nodes = []checkSuite{}
 				res.Resource.Commit.CheckSuites.PageInfo.HasNextPage = false
 				return res
@@ -38,11 +38,11 @@ func TestGetAllCheckSuites(t *testing.T) {
 		},
 		{
 			testName:  "Testing happy check suites",
-			commitURL: "https://github.com/Shopify/voucher/commit/8c235f3bd57393c53037b032e6da3e2b48aa0428",
+			commitURL: "https://github.com/grafeas/voucher/commit/8c235f3bd57393c53037b032e6da3e2b48aa0428",
 			input: func() *commitInfoQuery {
 				res := new(commitInfoQuery)
 				res.Resource.Typename = "Commit"
-				res.Resource.Commit.URL = "https://github.com/Shopify/voucher/commit/8c235f3bd57393c53037b032e6da3e2b48aa0428"
+				res.Resource.Commit.URL = "https://github.com/grafeas/voucher/commit/8c235f3bd57393c53037b032e6da3e2b48aa0428"
 				res.Resource.Commit.CheckSuites.Nodes = []checkSuite{
 					{
 						Status:     "COMPLETED",
@@ -91,11 +91,11 @@ func TestGetAllAssociatedPullRequests(t *testing.T) {
 	}{
 		{
 			testName:  "Testing zero associated pull requests",
-			commitURL: "https://github.com/Shopify/voucher/commit/881e9fd71e816415e1f199daeb6dc6d3c5fd4f2c",
+			commitURL: "https://github.com/grafeas/voucher/commit/881e9fd71e816415e1f199daeb6dc6d3c5fd4f2c",
 			input: func() *commitInfoQuery {
 				res := new(commitInfoQuery)
 				res.Resource.Typename = "Commit"
-				res.Resource.Commit.URL = "https://github.com/Shopify/voucher/commit/881e9fd71e816415e1f199daeb6dc6d3c5fd4f2c"
+				res.Resource.Commit.URL = "https://github.com/grafeas/voucher/commit/881e9fd71e816415e1f199daeb6dc6d3c5fd4f2c"
 				res.Resource.Commit.AssociatedPullRequests.Nodes = []pullRequest{}
 				res.Resource.Commit.AssociatedPullRequests.PageInfo.HasNextPage = false
 				return res
@@ -108,20 +108,20 @@ func TestGetAllAssociatedPullRequests(t *testing.T) {
 		},
 		{
 			testName:  "Testing has associated pull requests",
-			commitURL: "https://github.com/Shopify/voucher/commit/8c235f3bd57393c53037b032e6da3e2b48aa0428",
+			commitURL: "https://github.com/grafeas/voucher/commit/8c235f3bd57393c53037b032e6da3e2b48aa0428",
 			input: func() *commitInfoQuery {
 				res := new(commitInfoQuery)
 				res.Resource.Typename = "Commit"
-				res.Resource.Commit.URL = "https://github.com/Shopify/voucher/commit/8c235f3bd57393c53037b032e6da3e2b48aa0428"
+				res.Resource.Commit.URL = "https://github.com/grafeas/voucher/commit/8c235f3bd57393c53037b032e6da3e2b48aa0428"
 				res.Resource.Commit.AssociatedPullRequests.Nodes = []pullRequest{
 					{
 						BaseRefName: "master",
 						HeadRefName: "fix-broken-response",
 						Merged:      true,
 						MergeCommit: commit{
-							URL: "https://github.com/Shopify/voucher/commit/8c235f3bd57393c53037b032e6da3e2b48aa0428",
+							URL: "https://github.com/grafeas/voucher/commit/8c235f3bd57393c53037b032e6da3e2b48aa0428",
 						},
-						URL: "https://github.com/Shopify/voucher/pull/23",
+						URL: "https://github.com/grafeas/voucher/pull/23",
 					},
 				}
 				res.Resource.Commit.AssociatedPullRequests.PageInfo.HasNextPage = false
@@ -137,9 +137,9 @@ func TestGetAllAssociatedPullRequests(t *testing.T) {
 					HeadRefName: "fix-broken-response",
 					Merged:      true,
 					MergeCommit: commit{
-						URL: "https://github.com/Shopify/voucher/commit/8c235f3bd57393c53037b032e6da3e2b48aa0428",
+						URL: "https://github.com/grafeas/voucher/commit/8c235f3bd57393c53037b032e6da3e2b48aa0428",
 					},
-					URL: "https://github.com/Shopify/voucher/pull/23",
+					URL: "https://github.com/grafeas/voucher/pull/23",
 				},
 			},
 		},
@@ -228,16 +228,16 @@ func TestConvertPullRequests(t *testing.T) {
 		},
 		{
 			testName:       "Testing has required approvals",
-			pullRequestURL: "https://github.com/Shopify/voucher/pull/23",
+			pullRequestURL: "https://github.com/grafeas/voucher/pull/23",
 			pullRequests: []pullRequest{
 				{
 					BaseRefName: "master",
 					HeadRefName: "fix-broken-response",
 					Merged:      true,
 					MergeCommit: commit{
-						URL: "https://github.com/Shopify/voucher/commit/8c235f3bd57393c53037b032e6da3e2b48aa0428",
+						URL: "https://github.com/grafeas/voucher/commit/8c235f3bd57393c53037b032e6da3e2b48aa0428",
 					},
-					URL: "https://github.com/Shopify/voucher/pull/23",
+					URL: "https://github.com/grafeas/voucher/pull/23",
 				},
 			},
 			branchProtections: map[string]branchProtection{
@@ -266,7 +266,7 @@ func TestConvertPullRequests(t *testing.T) {
 					HeadBranchName: "fix-broken-response",
 					IsMerged:       true,
 					MergeCommit: repository.CommitRef{
-						URL: "https://github.com/Shopify/voucher/commit/8c235f3bd57393c53037b032e6da3e2b48aa0428",
+						URL: "https://github.com/grafeas/voucher/commit/8c235f3bd57393c53037b032e6da3e2b48aa0428",
 					},
 					HasRequiredApprovals: true,
 				},
@@ -274,16 +274,16 @@ func TestConvertPullRequests(t *testing.T) {
 		},
 		{
 			testName:       "Testing not enough approvals",
-			pullRequestURL: "https://github.com/Shopify/voucher/pull/23",
+			pullRequestURL: "https://github.com/grafeas/voucher/pull/23",
 			pullRequests: []pullRequest{
 				{
 					BaseRefName: "master",
 					HeadRefName: "fix-broken-response",
 					Merged:      true,
 					MergeCommit: commit{
-						URL: "https://github.com/Shopify/voucher/commit/8c235f3bd57393c53037b032e6da3e2b48aa0428",
+						URL: "https://github.com/grafeas/voucher/commit/8c235f3bd57393c53037b032e6da3e2b48aa0428",
 					},
-					URL: "https://github.com/Shopify/voucher/pull/23",
+					URL: "https://github.com/grafeas/voucher/pull/23",
 				},
 			},
 			branchProtections: map[string]branchProtection{
@@ -312,7 +312,7 @@ func TestConvertPullRequests(t *testing.T) {
 					HeadBranchName: "fix-broken-response",
 					IsMerged:       true,
 					MergeCommit: repository.CommitRef{
-						URL: "https://github.com/Shopify/voucher/commit/8c235f3bd57393c53037b032e6da3e2b48aa0428",
+						URL: "https://github.com/grafeas/voucher/commit/8c235f3bd57393c53037b032e6da3e2b48aa0428",
 					},
 					HasRequiredApprovals: false,
 				},
@@ -320,16 +320,16 @@ func TestConvertPullRequests(t *testing.T) {
 		},
 		{
 			testName:       "Testing approvals not required",
-			pullRequestURL: "https://github.com/Shopify/voucher/pull/23",
+			pullRequestURL: "https://github.com/grafeas/voucher/pull/23",
 			pullRequests: []pullRequest{
 				{
 					BaseRefName: "master",
 					HeadRefName: "fix-broken-response",
 					Merged:      true,
 					MergeCommit: commit{
-						URL: "https://github.com/Shopify/voucher/commit/8c235f3bd57393c53037b032e6da3e2b48aa0428",
+						URL: "https://github.com/grafeas/voucher/commit/8c235f3bd57393c53037b032e6da3e2b48aa0428",
 					},
-					URL: "https://github.com/Shopify/voucher/pull/23",
+					URL: "https://github.com/grafeas/voucher/pull/23",
 				},
 			},
 			branchProtections: map[string]branchProtection{
@@ -355,7 +355,7 @@ func TestConvertPullRequests(t *testing.T) {
 					HeadBranchName: "fix-broken-response",
 					IsMerged:       true,
 					MergeCommit: repository.CommitRef{
-						URL: "https://github.com/Shopify/voucher/commit/8c235f3bd57393c53037b032e6da3e2b48aa0428",
+						URL: "https://github.com/grafeas/voucher/commit/8c235f3bd57393c53037b032e6da3e2b48aa0428",
 					},
 					HasRequiredApprovals: true,
 				},

@@ -6,9 +6,9 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
-	"github.com/Shopify/voucher"
-	"github.com/Shopify/voucher/containeranalysis"
-	"github.com/Shopify/voucher/signer"
+	"github.com/grafeas/voucher"
+	"github.com/grafeas/voucher/containeranalysis"
+	"github.com/grafeas/voucher/signer"
 )
 
 // NewMetadataClient creates a new MetadataClient.

@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/Shopify/voucher/repository"
+	"github.com/grafeas/voucher/repository"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -20,7 +20,7 @@ func TestNewRepositoryOrgInfoResult(t *testing.T) {
 	}{
 		{
 			testName: "Testing happy path",
-			uri:      "https://github.com/Shopify/voucher",
+			uri:      "https://github.com/grafeas/voucher",
 			input: func() *repositoryOrgInfoQuery {
 				res := new(repositoryOrgInfoQuery)
 				res.Resource.Repository.Owner.Typename = "Organization"

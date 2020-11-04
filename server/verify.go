@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/Shopify/voucher"
-	"github.com/Shopify/voucher/cmd/config"
+	"github.com/grafeas/voucher"
+	"github.com/grafeas/voucher/cmd/config"
 )
 
 func (s *Server) handleVerify(w http.ResponseWriter, r *http.Request, names ...string) {

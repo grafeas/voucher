@@ -9,7 +9,7 @@ import (
 	"github.com/docker/distribution/reference"
 	dockerTypes "github.com/docker/docker/api/types"
 
-	"github.com/Shopify/voucher/docker/uri"
+	"github.com/grafeas/voucher/docker/uri"
 )
 
 type v2Blob struct {

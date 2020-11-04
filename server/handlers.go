@@ -75,7 +75,8 @@ func (s *Server) HandleVerifyImage(w http.ResponseWriter, r *http.Request) {
 	s.handleVerify(w, r, requiredChecks...)
 }
 
-// HandleHealthCheck is a request handler that returns HTTP Status Code 200 when it is called from shopify cloud
+// HandleHealthCheck is a request handler that returns HTTP Status Code 200
+// when it is called. Can be used to determine uptime.
 func (s *Server) HandleHealthCheck(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }

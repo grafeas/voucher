@@ -1,7 +1,7 @@
 package voucher
 
 import (
-	"github.com/Shopify/voucher/signer"
+	"github.com/grafeas/voucher/signer"
 )
 
 // Attestation is a structure that contains the Attestation data that we want

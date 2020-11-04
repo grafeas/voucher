@@ -3,8 +3,8 @@ package provenance
 import (
 	"testing"
 
-	"github.com/Shopify/voucher"
-	"github.com/Shopify/voucher/repository"
+	"github.com/grafeas/voucher"
+	"github.com/grafeas/voucher/repository"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

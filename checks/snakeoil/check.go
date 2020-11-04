@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/Shopify/voucher"
+	"github.com/grafeas/voucher"
 )
 
 // ErrNoScanner is the error thrown when there is no SnakeoilScanner set for

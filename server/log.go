@@ -5,7 +5,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/Shopify/voucher"
+	"github.com/grafeas/voucher"
 )
 
 func init() {

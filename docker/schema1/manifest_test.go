@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	vtesting "github.com/Shopify/voucher/testing"
+	vtesting "github.com/grafeas/voucher/testing"
 )
 
 func TestToManifest(t *testing.T) {

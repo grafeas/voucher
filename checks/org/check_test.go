@@ -8,9 +8,9 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	"github.com/Shopify/voucher"
-	"github.com/Shopify/voucher/repository"
-	r "github.com/Shopify/voucher/repository"
+	"github.com/grafeas/voucher"
+	"github.com/grafeas/voucher/repository"
+	r "github.com/grafeas/voucher/repository"
 )
 
 func TestOrgCheck(t *testing.T) {

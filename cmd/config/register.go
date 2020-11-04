@@ -3,8 +3,8 @@ package config
 import (
 	"strings"
 
-	"github.com/Shopify/voucher"
-	"github.com/Shopify/voucher/checks/org"
+	"github.com/grafeas/voucher"
+	"github.com/grafeas/voucher/checks/org"
 )
 
 func RegisterDynamicChecks() {
