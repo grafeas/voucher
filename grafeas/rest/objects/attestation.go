@@ -58,6 +58,6 @@ type AttestationGenericSigned struct {
 //Signature based on
 //https://github.com/grafeas/client-go/blob/master/0.1.0/model_v1beta1_signature.go
 type Signature struct {
-	Signature   string `json:"signature,omitempty"`
+	Signature   []byte `json:"signature,omitempty"`
 	PublicKeyID string `json:"publicKeyId,omitempty"`
 }

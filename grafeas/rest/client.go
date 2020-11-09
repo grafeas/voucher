@@ -64,7 +64,7 @@ func (g *Client) AddAttestationToImage(ctx context.Context, ref reference.Canoni
 	} else {
 		attestation = objects.Attestation{
 			GenericSignedAttestation: &objects.AttestationGenericSigned{
-				Signatures: []objects.Signature{{Signature: signedAttestation.Signature,
+				Signatures: []objects.Signature{{Signature: []byte(signedAttestation.Signature),
 					PublicKeyID: signedAttestation.KeyID}}, ContentType: &contentType}}
 	}
 
