@@ -1,4 +1,4 @@
-package rest
+package grafeas
 
 import (
 	"bytes"
@@ -11,7 +11,7 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/Shopify/voucher/grafeas/rest/objects"
+	"github.com/Shopify/voucher/grafeas/objects"
 )
 
 //GrafeasAPIService vars

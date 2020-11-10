@@ -9,12 +9,12 @@ import (
 
 //Grafeas client errors
 var (
-	ErrNoOccurrences         = errors.New("no occurrences returned for image")
-	ErrDiscoveriesUnfinished = errors.New("discoveries have not finished processing")
+	errNoOccurrences         = errors.New("no occurrences returned for image")
+	errDiscoveriesUnfinished = errors.New("discoveries have not finished processing")
 )
 
-// IsAttestationExistsErr returns true if the passed Error is an "AlreadyExists" gRPC error.
-func IsAttestationExistsErr(err error) bool {
+// isAttestationExistsErr returns true if the passed Error is an "AlreadyExists" gRPC error.
+func isAttestationExistsErr(err error) bool {
 	if nil == err {
 		return false
 	}

@@ -82,4 +82,4 @@ snapshot:
 	$(GORELEASER) --snapshot
 
 mocks:
-	mockgen -source=grafeas/rest/grafeas_service.go -destination=grafeas/rest/mocks/grafeas_service_mock.go package=mocks
+	mockgen -source=grafeas/grafeas_service.go -destination=grafeas/mocks/grafeas_service_mock.go package=mocks

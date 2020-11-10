@@ -1,4 +1,4 @@
-package rest
+package grafeas
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/Shopify/voucher/grafeas/rest/objects"
+	"github.com/Shopify/voucher/grafeas/objects"
 	"github.com/antihax/optional"
 	"github.com/stretchr/testify/assert"
 )

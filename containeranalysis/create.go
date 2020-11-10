@@ -5,7 +5,6 @@ import (
 	grafeas "google.golang.org/genproto/googleapis/grafeas/v1"
 
 	"github.com/Shopify/voucher"
-	vgrafeas "github.com/Shopify/voucher/grafeas"
 )
 
 func newOccurrenceAttestation(image reference.Canonical, attestation voucher.SignedAttestation, binauthProject string) *grafeas.CreateOccurrenceRequest {
@@ -19,7 +18,7 @@ func newOccurrenceAttestation(image reference.Canonical, attestation voucher.Sig
 		},
 	}
 
-	binauthProjectPath := vgrafeas.ProjectPath(binauthProject)
+	binauthProjectPath := projectPath(binauthProject)
 	noteName := binauthProjectPath + "/notes/" + attestation.CheckName
 
 	request := &grafeas.CreateOccurrenceRequest{

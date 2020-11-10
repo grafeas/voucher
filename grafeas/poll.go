@@ -1,4 +1,4 @@
-package rest
+package grafeas
 
 import (
 	"context"
@@ -6,8 +6,7 @@ import (
 
 	"github.com/Shopify/voucher"
 	"github.com/Shopify/voucher/docker/uri"
-	vgrafeas "github.com/Shopify/voucher/grafeas"
-	"github.com/Shopify/voucher/grafeas/rest/objects"
+	"github.com/Shopify/voucher/grafeas/objects"
 	"github.com/docker/distribution/reference"
 )
 
@@ -58,7 +57,7 @@ func pollForDiscoveries(ctx context.Context, c *Client, ref reference.Reference)
 		}
 		time.Sleep(sleep)
 	}
-	return vgrafeas.ErrDiscoveriesUnfinished
+	return errDiscoveriesUnfinished
 }
 
 func getVulnerabilityDiscoveries(ctx context.Context, g *Client, ref reference.Reference) (items []objects.Occurrence, err error) {
@@ -77,8 +76,8 @@ func getVulnerabilityDiscoveries(ctx context.Context, g *Client, ref reference.R
 
 	if 0 == len(items) && nil == err {
 		err = &voucher.NoMetadataError{
-			Type: vgrafeas.DiscoveryType,
-			Err:  vgrafeas.ErrNoOccurrences,
+			Type: DiscoveryType,
+			Err:  errNoOccurrences,
 		}
 	}
 	return

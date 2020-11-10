@@ -1,4 +1,4 @@
-package rest
+package grafeas
 
 import (
 	"context"
@@ -7,8 +7,7 @@ import (
 	"github.com/Shopify/voucher"
 	"github.com/Shopify/voucher/attestation"
 	"github.com/Shopify/voucher/docker/uri"
-	vgrafeas "github.com/Shopify/voucher/grafeas"
-	"github.com/Shopify/voucher/grafeas/rest/objects"
+	"github.com/Shopify/voucher/grafeas/objects"
 	"github.com/Shopify/voucher/repository"
 	"github.com/Shopify/voucher/signer"
 	"github.com/Shopify/voucher/signer/pgp"
@@ -53,7 +52,7 @@ func (g *Client) AddAttestationToImage(ctx context.Context, ref reference.Canoni
 		return voucher.SignedAttestation{}, err
 	}
 
-	binauthProjectPath := vgrafeas.ProjectPath(g.binauthProject)
+	binauthProjectPath := projectPath(g.binauthProject)
 	contentType := objects.AttestationSigningJSON
 
 	attestation := objects.Attestation{}
@@ -73,7 +72,7 @@ func (g *Client) AddAttestationToImage(ctx context.Context, ref reference.Canoni
 	occurrence := objects.NewOccurrence(ref, payload.CheckName, &att, binauthProjectPath)
 	_, err = g.grafeas.CreateOccurrence(ctx, binauthProjectPath, occurrence)
 
-	if vgrafeas.IsAttestationExistsErr(err) {
+	if isAttestationExistsErr(err) {
 		err = nil
 		signedAttestation.Signature = ""
 	}
@@ -103,7 +102,7 @@ func (g *Client) GetAttestations(ctx context.Context, ref reference.Canonical) (
 	if 0 == len(attestations) && nil == err {
 		err = &voucher.NoMetadataError{
 			Type: voucher.AttestationType,
-			Err:  vgrafeas.ErrNoOccurrences,
+			Err:  errNoOccurrences,
 		}
 	}
 
@@ -137,7 +136,7 @@ func (g *Client) GetVulnerabilities(ctx context.Context, ref reference.Canonical
 	if 0 == len(items) && nil == err {
 		err = &voucher.NoMetadataError{
 			Type: voucher.VulnerabilityType,
-			Err:  vgrafeas.ErrNoOccurrences,
+			Err:  errNoOccurrences,
 		}
 	}
 
@@ -168,7 +167,7 @@ func (g *Client) GetBuildDetail(ctx context.Context, ref reference.Canonical) (r
 	// we should only have 1 occurrence based on our kind specified
 	if nil == err && len(occurrences) != 1 {
 		if len(occurrences) == 0 {
-			return repository.BuildDetail{}, &voucher.NoMetadataError{Type: voucher.BuildDetailsType, Err: vgrafeas.ErrNoOccurrences}
+			return repository.BuildDetail{}, &voucher.NoMetadataError{Type: voucher.BuildDetailsType, Err: errNoOccurrences}
 		}
 
 		return repository.BuildDetail{}, errors.New("Found multiple Grafeas occurrences for " + ref.String())
@@ -177,8 +176,8 @@ func (g *Client) GetBuildDetail(ctx context.Context, ref reference.Canonical) (r
 	return occurrences[0].Build.AsVoucherBuildDetail(), nil
 }
 
-func (g *Client) getAllOccurrences(ctx context.Context, projectPath string) (items []objects.Occurrence, err error) {
-	project := vgrafeas.ProjectPath(projectPath)
+func (g *Client) getAllOccurrences(ctx context.Context, path string) (items []objects.Occurrence, err error) {
+	project := projectPath(path)
 
 	occResp, err := g.grafeas.ListOccurrences(ctx, project, nil)
 	if err != nil {
@@ -198,6 +197,10 @@ func (g *Client) getAllOccurrences(ctx context.Context, projectPath string) (ite
 	}
 
 	return
+}
+
+func projectPath(project string) string {
+	return "projects/" + project
 }
 
 // NewClient creates a new Grafeas Client.

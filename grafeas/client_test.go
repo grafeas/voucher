@@ -1,4 +1,4 @@
-package rest
+package grafeas
 
 import (
 	"context"
@@ -16,9 +16,8 @@ import (
 
 	"github.com/Shopify/voucher"
 	"github.com/Shopify/voucher/attestation"
-	vgrafeas "github.com/Shopify/voucher/grafeas"
-	mocks "github.com/Shopify/voucher/grafeas/rest/mocks"
-	"github.com/Shopify/voucher/grafeas/rest/objects"
+	mocks "github.com/Shopify/voucher/grafeas/mocks"
+	"github.com/Shopify/voucher/grafeas/objects"
 	"github.com/Shopify/voucher/repository"
 	"github.com/Shopify/voucher/signer"
 	"github.com/Shopify/voucher/signer/kms"
@@ -178,7 +177,7 @@ func TestGetAttestations(t *testing.T) {
 			},
 			expectedError: &voucher.NoMetadataError{
 				Type: voucher.AttestationType,
-				Err:  vgrafeas.ErrNoOccurrences,
+				Err:  errNoOccurrences,
 			},
 		},
 	}
@@ -230,7 +229,7 @@ func TestGetVulnerabilities(t *testing.T) {
 			},
 			expectedError: &voucher.NoMetadataError{
 				Type: voucher.VulnerabilityType,
-				Err:  vgrafeas.ErrNoOccurrences,
+				Err:  errNoOccurrences,
 			},
 			ref: validRef,
 		},
@@ -238,7 +237,7 @@ func TestGetVulnerabilities(t *testing.T) {
 			returnOccs: objects.ListOccurrencesResponse{
 				Occurrences: []objects.Occurrence{},
 			},
-			expectedError:  vgrafeas.ErrDiscoveriesUnfinished,
+			expectedError:  errDiscoveriesUnfinished,
 			expectedResult: []voucher.Vulnerability{},
 			ref:            validRef,
 		},
@@ -304,7 +303,7 @@ func TestGetBuildDetail(t *testing.T) {
 			},
 			expectedError: &voucher.NoMetadataError{
 				Type: voucher.BuildDetailsType,
-				Err:  vgrafeas.ErrNoOccurrences,
+				Err:  errNoOccurrences,
 			},
 			ref: validRef,
 		},
