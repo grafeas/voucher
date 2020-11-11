@@ -1,6 +1,8 @@
 package objects
 
-import "github.com/Shopify/voucher"
+import (
+	"github.com/Shopify/voucher"
+)
 
 //AttestationSignedContentType based on
 //https://github.com/grafeas/client-go/blob/master/0.1.0/model_attestation_pgp_signed_attestation_content_type.go
@@ -32,19 +34,19 @@ func (ad *AttestationDetails) AsVoucherAttestation(checkName string) voucher.Sig
 	return signedAttestation
 }
 
+//NewAttestation creates a new attestation
+func NewAttestation(signedAttestation voucher.SignedAttestation) *AttestationDetails {
+	contentType := AttestationSigningJSON
+	return &AttestationDetails{Attestation: &Attestation{
+		GenericSignedAttestation: &AttestationGenericSigned{
+			Signatures: []Signature{{Signature: []byte(signedAttestation.Signature),
+				PublicKeyID: signedAttestation.KeyID}}, ContentType: &contentType}}}
+}
+
 //Attestation based on
 //https://github.com/grafeas/client-go/blob/master/0.1.0/model_attestation_attestation.go
 type Attestation struct {
-	PgpSignedAttestation     *AttestationPgpSigned     `json:"pgpSignedAttestation,omitempty"`
 	GenericSignedAttestation *AttestationGenericSigned `json:"genericSignedAttestation,omitempty"`
-}
-
-//AttestationPgpSigned based on
-//https://github.com/grafeas/client-go/blob/master/0.1.0/model_attestation_pgp_signed_attestation.go
-type AttestationPgpSigned struct {
-	ContentType *AttestationSignedContentType `json:"contentType,omitempty"`
-	Signature   string                        `json:"signature,omitempty"` //required
-	PgpKeyID    string                        `json:"pgpKeyId,omitempty"`
 }
 
 //AttestationGenericSigned based on

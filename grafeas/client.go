@@ -10,7 +10,6 @@ import (
 	"github.com/Shopify/voucher/grafeas/objects"
 	"github.com/Shopify/voucher/repository"
 	"github.com/Shopify/voucher/signer"
-	"github.com/Shopify/voucher/signer/pgp"
 	"github.com/antihax/optional"
 	"github.com/docker/distribution/reference"
 )
@@ -19,7 +18,7 @@ var errCannotAttest = errors.New("cannot create attestations, keyring is empty")
 
 // Client implements voucher.MetadataClient, connecting to Grafeas.
 type Client struct {
-	grafeas        GrafeasAPIService        // The client reference.
+	service        APIService               // The client reference.
 	keyring        signer.AttestationSigner // The keyring used for signing metadata.
 	binauthProject string                   // The project that Binauth Notes and Occurrences are written to.
 	vulProject     string                   // The project to read vulnerability occurrences from.
@@ -53,24 +52,9 @@ func (g *Client) AddAttestationToImage(ctx context.Context, ref reference.Canoni
 	}
 
 	binauthProjectPath := projectPath(g.binauthProject)
-	contentType := objects.AttestationSigningJSON
 
-	attestation := objects.Attestation{}
-	if _, ok := g.keyring.(*pgp.KeyRing); ok {
-		attestation = objects.Attestation{
-			PgpSignedAttestation: &objects.AttestationPgpSigned{Signature: signedAttestation.Signature,
-				PgpKeyID: signedAttestation.KeyID, ContentType: &contentType}}
-	} else {
-		attestation = objects.Attestation{
-			GenericSignedAttestation: &objects.AttestationGenericSigned{
-				Signatures: []objects.Signature{{Signature: []byte(signedAttestation.Signature),
-					PublicKeyID: signedAttestation.KeyID}}, ContentType: &contentType}}
-	}
-
-	att := objects.AttestationDetails{Attestation: &attestation}
-
-	occurrence := objects.NewOccurrence(ref, payload.CheckName, &att, binauthProjectPath)
-	_, err = g.grafeas.CreateOccurrence(ctx, binauthProjectPath, occurrence)
+	occurrence := objects.NewOccurrence(ref, payload.CheckName, objects.NewAttestation(signedAttestation), binauthProjectPath)
+	_, err = g.service.CreateOccurrence(ctx, binauthProjectPath, occurrence)
 
 	if isAttestationExistsErr(err) {
 		err = nil
@@ -170,7 +154,7 @@ func (g *Client) GetBuildDetail(ctx context.Context, ref reference.Canonical) (r
 			return repository.BuildDetail{}, &voucher.NoMetadataError{Type: voucher.BuildDetailsType, Err: errNoOccurrences}
 		}
 
-		return repository.BuildDetail{}, errors.New("Found multiple Grafeas occurrences for " + ref.String())
+		return repository.BuildDetail{}, errors.New("Found multiple occurrences for " + ref.String())
 	}
 
 	return occurrences[0].Build.AsVoucherBuildDetail(), nil
@@ -179,7 +163,7 @@ func (g *Client) GetBuildDetail(ctx context.Context, ref reference.Canonical) (r
 func (g *Client) getAllOccurrences(ctx context.Context, path string) (items []objects.Occurrence, err error) {
 	project := projectPath(path)
 
-	occResp, err := g.grafeas.ListOccurrences(ctx, project, nil)
+	occResp, err := g.service.ListOccurrences(ctx, project, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -187,7 +171,7 @@ func (g *Client) getAllOccurrences(ctx context.Context, path string) (items []ob
 	items = append(items, occResp.Occurrences...)
 
 	for occResp.NextPageToken != "" {
-		occResp, err = g.grafeas.ListOccurrences(ctx, project, &objects.ListOpts{
+		occResp, err = g.service.ListOccurrences(ctx, project, &objects.ListOpts{
 			PageToken: optional.NewString(occResp.NextPageToken),
 		})
 		if err != nil {
@@ -204,9 +188,9 @@ func projectPath(project string) string {
 }
 
 // NewClient creates a new Grafeas Client.
-func NewClient(ctx context.Context, binauthProject, vulProject string, keyring signer.AttestationSigner, grafeas GrafeasAPIService) (*Client, error) {
+func NewClient(ctx context.Context, binauthProject, vulProject string, keyring signer.AttestationSigner, service APIService) (*Client, error) {
 	return &Client{
-		grafeas:        grafeas,
+		service:        service,
 		keyring:        keyring,
 		binauthProject: binauthProject,
 		vulProject:     vulProject,

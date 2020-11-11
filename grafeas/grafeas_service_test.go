@@ -67,7 +67,7 @@ func TestCreateOccurrence(t *testing.T) {
 			if test.customURL == "" {
 				test.customURL = server.URL + "/"
 			}
-			client := NewGrafeasAPIService(test.customURL, "")
+			client := NewAPIService(test.customURL, "")
 
 			resOcc, err := client.CreateOccurrence(ctx, test.parent, test.expectedOcc)
 
@@ -149,7 +149,7 @@ func TestListNotes(t *testing.T) {
 			if test.customURL == "" {
 				test.customURL = server.URL + "/"
 			}
-			client := NewGrafeasAPIService(test.customURL, "")
+			client := NewAPIService(test.customURL, "")
 
 			resNotes, err := client.ListNotes(ctx, test.parent, test.optsNotes)
 
@@ -231,7 +231,7 @@ func TestListOccurrences(t *testing.T) {
 			if test.customURL == "" {
 				test.customURL = server.URL + "/"
 			}
-			client := NewGrafeasAPIService(test.customURL, "")
+			client := NewAPIService(test.customURL, "")
 
 			resOccs, err := client.ListOccurrences(ctx, test.parent, test.optsNotes)
 

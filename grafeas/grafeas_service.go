@@ -20,23 +20,23 @@ var (
 	timeout    = time.Minute
 )
 
-//GrafeasAPIService is the interface for communicating with Grafeas
-type GrafeasAPIService interface {
+//APIService is the interface for communicating with Grafeas
+type APIService interface {
 	CreateOccurrence(context.Context, string, objects.Occurrence) (objects.Occurrence, error)
 	ListNotes(context.Context, string, *objects.ListOpts) (objects.ListNotesResponse, error)
 	ListOccurrences(context.Context, string, *objects.ListOpts) (objects.ListOccurrencesResponse, error)
 }
 
-//grafeasAPIServiceImpl for REST calls
-type grafeasAPIServiceImpl struct {
+//apiServiceImpl for REST calls
+type apiServiceImpl struct {
 	basePath    string
 	versionPath string
 	client      *http.Client
 }
 
-//NewGrafeasAPIService creates new GrafeasAPIService
-func NewGrafeasAPIService(basePath, versionPath string) GrafeasAPIService {
-	return grafeasAPIServiceImpl{
+//NewAPIService creates new GrafeasAPIService
+func NewAPIService(basePath, versionPath string) APIService {
+	return &apiServiceImpl{
 		basePath:    basePath,
 		versionPath: versionPath,
 		client: &http.Client{
@@ -47,7 +47,7 @@ func NewGrafeasAPIService(basePath, versionPath string) GrafeasAPIService {
 
 //CreateOccurrence based on
 //https://github.com/grafeas/client-go/blob/39fa98b49d38de3942716c0f58f3505012415470/0.1.0/api_grafeas_v1_beta1.go#L310
-func (g grafeasAPIServiceImpl) CreateOccurrence(ctx context.Context, parent string, occurrence objects.Occurrence) (objects.Occurrence, error) {
+func (g *apiServiceImpl) CreateOccurrence(ctx context.Context, parent string, occurrence objects.Occurrence) (objects.Occurrence, error) {
 	urlPath, err := g.buildURL(parent, "/occurrences", nil)
 	if err != nil {
 		return objects.Occurrence{}, err
@@ -70,7 +70,7 @@ func (g grafeasAPIServiceImpl) CreateOccurrence(ctx context.Context, parent stri
 
 //ListNotes based on
 //https://github.com/grafeas/client-go/blob/39fa98b49d38de3942716c0f58f3505012415470/0.1.0/api_grafeas_v1_beta1.go#L1057
-func (g grafeasAPIServiceImpl) ListNotes(ctx context.Context, parent string, optsNotes *objects.ListOpts) (objects.ListNotesResponse, error) {
+func (g *apiServiceImpl) ListNotes(ctx context.Context, parent string, optsNotes *objects.ListOpts) (objects.ListNotesResponse, error) {
 	urlPath, err := g.buildURL(parent, "/notes", optsNotes)
 	if err != nil {
 		return objects.ListNotesResponse{}, err
@@ -89,7 +89,7 @@ func (g grafeasAPIServiceImpl) ListNotes(ctx context.Context, parent string, opt
 
 //ListOccurrences based on
 //https://github.com/grafeas/client-go/blob/39fa98b49d38de3942716c0f58f3505012415470/0.1.0/api_grafeas_v1_beta1.go#L1165
-func (g grafeasAPIServiceImpl) ListOccurrences(ctx context.Context, parent string, optsOccurrences *objects.ListOpts) (objects.ListOccurrencesResponse, error) {
+func (g *apiServiceImpl) ListOccurrences(ctx context.Context, parent string, optsOccurrences *objects.ListOpts) (objects.ListOccurrencesResponse, error) {
 	urlPath, err := g.buildURL(parent, "/occurrences", optsOccurrences)
 	if err != nil {
 		return objects.ListOccurrencesResponse{}, err
@@ -106,7 +106,7 @@ func (g grafeasAPIServiceImpl) ListOccurrences(ctx context.Context, parent strin
 	return occResp, nil
 }
 
-func (g grafeasAPIServiceImpl) buildURL(parent, address string, options *objects.ListOpts) (*url.URL, error) {
+func (g *apiServiceImpl) buildURL(parent, address string, options *objects.ListOpts) (*url.URL, error) {
 	path := g.basePath + g.versionPath + parent + address
 	res, err := url.Parse(path)
 	if err != nil {
@@ -126,7 +126,7 @@ func (g grafeasAPIServiceImpl) buildURL(parent, address string, options *objects
 	return res, nil
 }
 
-func (g grafeasAPIServiceImpl) httpCall(urlAddr *url.URL, payload []byte, method string) ([]byte, error) {
+func (g *apiServiceImpl) httpCall(urlAddr *url.URL, payload []byte, method string) ([]byte, error) {
 	req := http.Request{
 		Method: method,
 		URL:    urlAddr,
@@ -145,7 +145,7 @@ func (g grafeasAPIServiceImpl) httpCall(urlAddr *url.URL, payload []byte, method
 	statusCode := resp.StatusCode
 	data, err := ioutil.ReadAll(resp.Body)
 	if statusCode != http.StatusOK || err != nil {
-		return nil, NewGrafeasAPIError(statusCode, urlAddr.Path, method, data)
+		return nil, NewAPIError(statusCode, urlAddr.Path, method, data)
 	}
 	resp.Body.Close()
 
