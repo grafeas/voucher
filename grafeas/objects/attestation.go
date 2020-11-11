@@ -1,7 +1,7 @@
 package objects
 
 import (
-	"github.com/Shopify/voucher"
+	"github.com/grafeas/voucher"
 )
 
 //AttestationSignedContentType based on

@@ -13,10 +13,10 @@ Checks work.
 - Setup a [Go development environment](https://golang.org/doc/install#install)
 if you haven't already.
 
-- Get the Shopify version the project by using Go get:
+- Get the source code by using Go get:
 
 ```
-$ go get -u github.com/Shopify/voucher
+$ go get -u github.com/grafeas/voucher
 ```
 
 - Fork this project on GitHub.
@@ -24,7 +24,7 @@ $ go get -u github.com/Shopify/voucher
 - Setup your fork as a remote for your project:
 
 ```
-$ cd $GOPATH/src/github.com/Shopify/voucher
+$ cd $GOPATH/src/github.com/grafeas/voucher
 $ git remote add <your username> <your fork's remote path>
 ```
 
@@ -58,13 +58,13 @@ $ git push -u <your username> <the name of your branch>
 
 ## Send in your changes
 
-- Sign the [Contributor License Agreement](https://cla.shopify.com).
+- Sign the [Contributor License Agreement](https://cla.developers.google.com/)
 
 - Run the test suite and make certain that the tests are not failing. If you
 are adding code which would be untested, please consider adding tests to cover
 that code.
 
-- Open a PR against Shopify/voucher
+- Open a PR against grafeas/voucher
 
 ## Making a release
 

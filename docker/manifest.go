@@ -8,7 +8,7 @@ import (
 	"github.com/docker/distribution/manifest/schema2"
 	"github.com/docker/distribution/reference"
 
-	"github.com/Shopify/voucher/docker/uri"
+	"github.com/grafeas/voucher/docker/uri"
 )
 
 // RequestManifest requests an Manifest for the passed canonical image reference (an image URL

@@ -4,10 +4,10 @@ import (
 	"context"
 	"time"
 
-	"github.com/Shopify/voucher"
-	"github.com/Shopify/voucher/docker/uri"
-	"github.com/Shopify/voucher/grafeas/objects"
 	"github.com/docker/distribution/reference"
+	"github.com/grafeas/voucher"
+	"github.com/grafeas/voucher/docker/uri"
+	"github.com/grafeas/voucher/grafeas/objects"
 )
 
 var (

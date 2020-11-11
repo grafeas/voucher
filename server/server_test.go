@@ -11,8 +11,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/Shopify/voucher/cmd/config"
-	"github.com/Shopify/voucher/metrics"
+	"github.com/grafeas/voucher/cmd/config"
+	"github.com/grafeas/voucher/metrics"
 )
 
 var testParams = []byte(`

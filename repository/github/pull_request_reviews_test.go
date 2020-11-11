@@ -19,7 +19,7 @@ func TestGetAllReviews(t *testing.T) {
 	}{
 		{
 			testName:       "Testing zero associated reviews",
-			pullRequestURL: "https://github.com/Shopify/voucher/pull/64",
+			pullRequestURL: "https://github.com/grafeas/voucher/pull/64",
 			input: func() *pullRequestReviewsQuery {
 				res := new(pullRequestReviewsQuery)
 				res.Resource.Typename = "PullRequest"
@@ -35,7 +35,7 @@ func TestGetAllReviews(t *testing.T) {
 		},
 		{
 			testName:       "Testing has associated reviews",
-			pullRequestURL: "https://github.com/Shopify/voucher/pull/23",
+			pullRequestURL: "https://github.com/grafeas/voucher/pull/23",
 			input: func() *pullRequestReviewsQuery {
 				res := new(pullRequestReviewsQuery)
 				res.Resource.Typename = "PullRequest"

@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/Shopify/voucher"
-	"github.com/Shopify/voucher/repository"
-	r "github.com/Shopify/voucher/repository"
+	"github.com/grafeas/voucher"
+	"github.com/grafeas/voucher/repository"
+	r "github.com/grafeas/voucher/repository"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -15,8 +15,8 @@ func TestApprovedCheck(t *testing.T) {
 	ctx := context.Background()
 	imageData, err := voucher.NewImageData("gcr.io/voucher-test-project/apps/staging/voucher-internal@sha256:73d506a23331fce5cb6f49bfb4c27450d2ef4878efce89f03a46b27372a88430")
 	require.NoErrorf(t, err, "failed to get ImageData: %s", err)
-	buildDetail := r.BuildDetail{RepositoryURL: "https://github.com/Shopify/voucher-internal", Commit: "efgh6543"}
-	commitURL := "https://github.com/Shopify/voucher-internal/commit/efgh6543"
+	buildDetail := r.BuildDetail{RepositoryURL: "https://github.com/grafeas/voucher-internal", Commit: "efgh6543"}
+	commitURL := "https://github.com/grafeas/voucher-internal/commit/efgh6543"
 
 	cases := []struct {
 		name                 string

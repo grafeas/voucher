@@ -6,7 +6,7 @@ import (
 	"github.com/opencontainers/go-digest"
 	"golang.org/x/oauth2"
 
-	dockerURI "github.com/Shopify/voucher/docker/uri"
+	dockerURI "github.com/grafeas/voucher/docker/uri"
 )
 
 // LayerReference is a structure containing a Layer digest, as well as the repository

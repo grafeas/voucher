@@ -7,8 +7,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/Shopify/voucher/clair"
-	"github.com/Shopify/voucher/repository"
+	"github.com/grafeas/voucher/clair"
+	"github.com/grafeas/voucher/repository"
 )
 
 func TestNonExistantEjson(t *testing.T) {

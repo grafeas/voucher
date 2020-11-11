@@ -3,8 +3,8 @@ package nobody
 import (
 	"context"
 
-	"github.com/Shopify/voucher"
-	"github.com/Shopify/voucher/docker"
+	"github.com/grafeas/voucher"
+	"github.com/grafeas/voucher/docker"
 )
 
 // check is for verifying that the passed image does not run as

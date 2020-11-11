@@ -7,8 +7,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/Shopify/voucher"
-	vtesting "github.com/Shopify/voucher/testing"
+	"github.com/grafeas/voucher"
+	vtesting "github.com/grafeas/voucher/testing"
 )
 
 func TestDIYCheck(t *testing.T) {

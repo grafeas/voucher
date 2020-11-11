@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Shopify/voucher/repository"
 	"github.com/docker/distribution/reference"
+	"github.com/grafeas/voucher/repository"
 )
 
 // MetadataClient is an interface that represents something that communicates

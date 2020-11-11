@@ -8,8 +8,8 @@ import (
 	context "context"
 	reflect "reflect"
 
-	objects "github.com/Shopify/voucher/grafeas/objects"
 	gomock "github.com/golang/mock/gomock"
+	objects "github.com/grafeas/voucher/grafeas/objects"
 )
 
 // MockGrafeasAPIService is a mock of GrafeasAPIService interface.

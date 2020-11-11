@@ -9,7 +9,7 @@ import (
 	"github.com/docker/distribution/reference"
 	"github.com/opencontainers/go-digest"
 
-	"github.com/Shopify/voucher/docker/uri"
+	"github.com/grafeas/voucher/docker/uri"
 )
 
 // GetDigestFromTagged gets an image's digest from the passed tag.

@@ -4,14 +4,14 @@ import (
 	"context"
 	"errors"
 
-	"github.com/Shopify/voucher"
-	"github.com/Shopify/voucher/attestation"
-	"github.com/Shopify/voucher/docker/uri"
-	"github.com/Shopify/voucher/grafeas/objects"
-	"github.com/Shopify/voucher/repository"
-	"github.com/Shopify/voucher/signer"
 	"github.com/antihax/optional"
 	"github.com/docker/distribution/reference"
+	"github.com/grafeas/voucher"
+	"github.com/grafeas/voucher/attestation"
+	"github.com/grafeas/voucher/docker/uri"
+	"github.com/grafeas/voucher/grafeas/objects"
+	"github.com/grafeas/voucher/repository"
+	"github.com/grafeas/voucher/signer"
 )
 
 var errCannotAttest = errors.New("cannot create attestations, keyring is empty")

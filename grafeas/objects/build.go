@@ -3,7 +3,7 @@ package objects
 import (
 	"time"
 
-	"github.com/Shopify/voucher/repository"
+	"github.com/grafeas/voucher/repository"
 )
 
 //note objects

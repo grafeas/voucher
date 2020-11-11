@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/Shopify/voucher/metrics"
+	"github.com/grafeas/voucher/metrics"
 )
 
 // Suite is a suite of Checks, which

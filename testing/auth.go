@@ -9,8 +9,8 @@ import (
 	"github.com/docker/distribution/reference"
 	"golang.org/x/oauth2"
 
-	"github.com/Shopify/voucher"
-	"github.com/Shopify/voucher/auth"
+	"github.com/grafeas/voucher"
+	"github.com/grafeas/voucher/auth"
 )
 
 type testTokenSource struct {

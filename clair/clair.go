@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"net/http"
 
-	s1 "github.com/Shopify/voucher/docker/schema1"
-	s2 "github.com/Shopify/voucher/docker/schema2"
+	s1 "github.com/grafeas/voucher/docker/schema1"
+	s2 "github.com/grafeas/voucher/docker/schema2"
 	v1 "github.com/coreos/clair/api/v1"
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/reference"

@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/Shopify/voucher/repository"
+	"github.com/grafeas/voucher/repository"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -20,7 +20,7 @@ func TestNewBranchResult(t *testing.T) {
 	}{
 		{
 			testName: "Testing no commits in master branch",
-			repoURL:  "github.com/Shopify/voucher",
+			repoURL:  "github.com/grafeas/voucher",
 			input: func() *branchQuery {
 				res := new(branchQuery)
 				res.Resource.Typename = "Repository"
@@ -38,7 +38,7 @@ func TestNewBranchResult(t *testing.T) {
 		},
 		{
 			testName: "Testing has some commits in master branch",
-			repoURL:  "github.com/Shopify/voucher",
+			repoURL:  "github.com/grafeas/voucher",
 			input: func() *branchQuery {
 				res := new(branchQuery)
 				res.Resource.Typename = "Repository"
@@ -46,10 +46,10 @@ func TestNewBranchResult(t *testing.T) {
 				res.Resource.Repository.Ref.Target.Commit.Typename = "Commit"
 				res.Resource.Repository.Ref.Target.Commit.History.Nodes = []commit{
 					{
-						URL: "github.com/Shopify/voucher/commit/FakeCommit1",
+						URL: "github.com/grafeas/voucher/commit/FakeCommit1",
 					},
 					{
-						URL: "github.com/Shopify/voucher/commit/FakeCommit2",
+						URL: "github.com/grafeas/voucher/commit/FakeCommit2",
 					},
 				}
 				return res
@@ -61,10 +61,10 @@ func TestNewBranchResult(t *testing.T) {
 				Name: "master",
 				CommitRefs: []repository.CommitRef{
 					{
-						URL: "github.com/Shopify/voucher/commit/FakeCommit1",
+						URL: "github.com/grafeas/voucher/commit/FakeCommit1",
 					},
 					{
-						URL: "github.com/Shopify/voucher/commit/FakeCommit2",
+						URL: "github.com/grafeas/voucher/commit/FakeCommit2",
 					},
 				},
 			},
@@ -72,7 +72,7 @@ func TestNewBranchResult(t *testing.T) {
 		},
 		{
 			testName:    "Testing error propagation",
-			repoURL:     "error.com/Shopify/voucher",
+			repoURL:     "error.com/grafeas/voucher",
 			input:       new(branchQuery),
 			mask:        []string{},
 			expected:    repository.Branch{},

@@ -6,8 +6,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/Shopify/voucher/docker/schema2"
-	vtesting "github.com/Shopify/voucher/testing"
+	"github.com/grafeas/voucher/docker/schema2"
+	vtesting "github.com/grafeas/voucher/testing"
 )
 
 func TestRequestManifest(t *testing.T) {

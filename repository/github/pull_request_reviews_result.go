@@ -3,7 +3,7 @@ package github
 import (
 	"context"
 
-	"github.com/Shopify/voucher/repository"
+	"github.com/grafeas/voucher/repository"
 	"github.com/shurcooL/githubv4"
 )
 

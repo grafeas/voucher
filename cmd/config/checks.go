@@ -3,20 +3,20 @@ package config
 import (
 	"fmt"
 
-	"github.com/Shopify/voucher"
-	"github.com/Shopify/voucher/repository"
+	"github.com/grafeas/voucher"
+	"github.com/grafeas/voucher/repository"
 	"github.com/spf13/viper"
 
 	// Register the DIY check
-	_ "github.com/Shopify/voucher/checks/diy"
+	_ "github.com/grafeas/voucher/checks/diy"
 	// Register the Nobody check
-	_ "github.com/Shopify/voucher/checks/nobody"
+	_ "github.com/grafeas/voucher/checks/nobody"
 	// Register the Provenance check
-	_ "github.com/Shopify/voucher/checks/provenance"
+	_ "github.com/grafeas/voucher/checks/provenance"
 	// Register the Snakeoil check
-	_ "github.com/Shopify/voucher/checks/snakeoil"
+	_ "github.com/grafeas/voucher/checks/snakeoil"
 	// Register the Repo check
-	_ "github.com/Shopify/voucher/checks/approved"
+	_ "github.com/grafeas/voucher/checks/approved"
 )
 
 // setAuth sets the Auth for the passed Check, if that Check implements

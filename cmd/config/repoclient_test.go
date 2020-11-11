@@ -7,8 +7,8 @@ import (
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/Shopify/voucher/repository"
-	"github.com/Shopify/voucher/repository/github"
+	"github.com/grafeas/voucher/repository"
+	"github.com/grafeas/voucher/repository/github"
 )
 
 func TestValidRepo(t *testing.T) {

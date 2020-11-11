@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/Shopify/voucher"
+	"github.com/grafeas/voucher"
 )
 
 type testVulnerabilityScanner struct {

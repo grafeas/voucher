@@ -4,8 +4,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
-	"github.com/Shopify/voucher"
-	"github.com/Shopify/voucher/clair"
+	"github.com/grafeas/voucher"
+	"github.com/grafeas/voucher/clair"
 )
 
 func newScanner(secrets *Secrets, metadataClient voucher.MetadataClient, auth voucher.Auth) (scanner voucher.VulnerabilityScanner) {

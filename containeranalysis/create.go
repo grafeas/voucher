@@ -4,7 +4,7 @@ import (
 	"github.com/docker/distribution/reference"
 	grafeas "google.golang.org/genproto/googleapis/grafeas/v1"
 
-	"github.com/Shopify/voucher"
+	"github.com/grafeas/voucher"
 )
 
 func newOccurrenceAttestation(image reference.Canonical, attestation voucher.SignedAttestation, binauthProject string) *grafeas.CreateOccurrenceRequest {

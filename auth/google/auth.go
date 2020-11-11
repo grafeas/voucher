@@ -9,8 +9,8 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 
-	"github.com/Shopify/voucher"
-	"github.com/Shopify/voucher/auth"
+	"github.com/grafeas/voucher"
+	"github.com/grafeas/voucher/auth"
 )
 
 const gcrScope = "https://www.googleapis.com/auth/cloud-platform"

@@ -7,8 +7,8 @@ import (
 	"github.com/docker/distribution/reference"
 	dockerTypes "github.com/docker/docker/api/types"
 
-	"github.com/Shopify/voucher/docker/schema1"
-	"github.com/Shopify/voucher/docker/schema2"
+	"github.com/grafeas/voucher/docker/schema1"
+	"github.com/grafeas/voucher/docker/schema2"
 )
 
 // RequestImageConfig requests an image configuration from the server, based on the passed

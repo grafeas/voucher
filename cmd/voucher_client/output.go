@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Shopify/voucher"
+	"github.com/grafeas/voucher"
 )
 
 // errorf prints a formatted string to standard error.

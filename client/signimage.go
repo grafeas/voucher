@@ -6,7 +6,7 @@ import (
 
 	"github.com/docker/distribution/reference"
 
-	"github.com/Shopify/voucher"
+	"github.com/grafeas/voucher"
 )
 
 const timeout = 120 * time.Second

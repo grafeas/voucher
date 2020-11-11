@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/Shopify/voucher"
+	"github.com/grafeas/voucher"
 )
 
 func handleInput(r *http.Request) (imageData voucher.ImageData, err error) {

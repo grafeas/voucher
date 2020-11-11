@@ -10,7 +10,7 @@ Below is an example of a Check, "examplecheck", which we will step through. This
 package examplecheck
 
 import (
-	"github.com/Shopify/voucher"
+	"github.com/grafeas/voucher"
 )
 
 // check is a voucher.Check that holds our examplecheck test.
@@ -164,7 +164,7 @@ Note that if the name given in `RegisterCheck` differs, you will access the chec
 The final step is to Register the new check in Voucher, by adding an import line in `cmd/config/checks.go`.
 
 ```golang
-import _ "github.com/Shopify/voucher/checks/examplecheck"
+import _ "github.com/grafeas/voucher/checks/examplecheck"
 ```
 
 This will cause the CheckFactory to be registered.

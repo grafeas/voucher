@@ -22,7 +22,7 @@
 Install `voucher_server` by running:
 
 ```shell
-$ go get -u github.com/Shopify/voucher/cmd/voucher_server
+$ go get -u github.com/grafeas/voucher/cmd/voucher_server
 ```
 
 This will download and install the voucher server binary into `$GOPATH/bin` directory.

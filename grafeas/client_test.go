@@ -14,14 +14,14 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/Shopify/voucher"
-	"github.com/Shopify/voucher/attestation"
-	mocks "github.com/Shopify/voucher/grafeas/mocks"
-	"github.com/Shopify/voucher/grafeas/objects"
-	"github.com/Shopify/voucher/repository"
-	"github.com/Shopify/voucher/signer"
-	"github.com/Shopify/voucher/signer/kms"
-	"github.com/Shopify/voucher/signer/pgp"
+	"github.com/grafeas/voucher"
+	"github.com/grafeas/voucher/attestation"
+	mocks "github.com/grafeas/voucher/grafeas/mocks"
+	"github.com/grafeas/voucher/grafeas/objects"
+	"github.com/grafeas/voucher/repository"
+	"github.com/grafeas/voucher/signer"
+	"github.com/grafeas/voucher/signer/kms"
+	"github.com/grafeas/voucher/signer/pgp"
 )
 
 var basePath string
@@ -286,7 +286,7 @@ func TestGetBuildDetail(t *testing.T) {
 			},
 			ref: validRef,
 			expectedResult: repository.BuildDetail{
-				RepositoryURL: "https://github.com/Shopify/voucher",
+				RepositoryURL: "https://github.com/grafeas/voucher",
 				Commit:        "2",
 				BuildCreator:  "Shopify",
 				BuildURL:      "some_url2",
@@ -358,7 +358,7 @@ func createAllOccurrences() []objects.Occurrence {
 				ProjectID: "ShopifyId2", LogsURI: "some_url2", BuiltArtifacts: []objects.ProvenanceArtifact{{
 					Checksum: "sha256:71e3e78693c011e59b3fc84940f7672aeeb0a55427b6f5157bd08ab9e9ac746c", ID: "some_id2"}},
 				SourceProvenance: &objects.ProvenanceSource{Context: &objects.SourceContext{
-					Git: &objects.GitSourceContext{URL: "https://github.com/Shopify/voucher",
+					Git: &objects.GitSourceContext{URL: "https://github.com/grafeas/voucher",
 						RevisionID: "2"}}}}}},
 
 		{Name: "name4", Resource: &objects.Resource{URI: "https://gcr.io/project/image@sha256:foo"},

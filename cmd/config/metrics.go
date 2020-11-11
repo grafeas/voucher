@@ -3,7 +3,7 @@ package config
 import (
 	"log"
 
-	"github.com/Shopify/voucher/metrics"
+	"github.com/grafeas/voucher/metrics"
 	"github.com/spf13/viper"
 )
 

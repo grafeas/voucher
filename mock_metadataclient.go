@@ -6,7 +6,7 @@ import (
 	"github.com/docker/distribution/reference"
 	"github.com/stretchr/testify/mock"
 
-	"github.com/Shopify/voucher/repository"
+	"github.com/grafeas/voucher/repository"
 )
 
 type MockMetadataClient struct {

@@ -11,7 +11,7 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/Shopify/voucher/grafeas/objects"
+	"github.com/grafeas/voucher/grafeas/objects"
 )
 
 //GrafeasAPIService vars
