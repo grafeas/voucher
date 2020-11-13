@@ -1,4 +1,4 @@
-# Setting Up for Marketplace Solution
+# Setting Up for Google Cloud Marketplace Solution
 
 This document provides step-by-step instructions to prepare a GCP project for deploying Voucher marketplace solution.
 

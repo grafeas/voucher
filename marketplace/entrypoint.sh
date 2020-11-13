@@ -32,14 +32,16 @@ if [ -z "$kms" ] ; then echo "kms is not set" && exit 1; fi
 
 echo $project
 echo $auth
+echo $kms
 echo $username
 echo $passhash
-echo $kms
+
+authl=`echo "$auth" | awk '{ print tolower($1) }'`
 
 cat /usr/local/config.toml.template \
 | sed -e "s?<PROJECT_ID>?${project}?g" \
 | sed -e "s?<KMS_KEY_NAME>?${kms}?g" \
-| sed -e "s?<AUTH>?${auth}?g" \
+| sed -e "s?<AUTH>?${authl}?g" \
 | sed -e "s?<USERNAME>?${username}?g" \
 | sed -e "s?<PASSHASH>?${passhash}?g" \
   > /usr/local/config.toml
