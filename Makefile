@@ -16,7 +16,7 @@ export GO111MODULE=on
 
 .PHONY: clean ensure-deps update-deps system-deps \
 	test show-coverage \
-	build release snapshot container \
+	build release snapshot container mocks \
 	$(PACKAGES)
 
 all: clean ensure-deps build
@@ -80,3 +80,6 @@ release:
 
 snapshot:
 	$(GORELEASER) --snapshot
+
+mocks:
+	mockgen -source=grafeas/grafeas_service.go -destination=grafeas/mocks/grafeas_service_mock.go package=mocks
