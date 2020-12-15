@@ -1,7 +1,7 @@
 dryrun = false
 scanner = "metadata"
 failon = "high"
-metadata_client = "containeranalysis"
+metadata_client = "grafeasos"
 
 binauth_project = "your-project-here"
 signer = "kms"
@@ -59,6 +59,6 @@ path = "projects/<GCP project>/locations/global/keyRings/<key ring>-keys/cryptoK
 algo = "SHA512"
 
 [grafeasos]
-hostname = ""
-version = ""
-vuln_project = ""
+hostname = "localhost:8080"
+version = "v1"
+vuln_project = "vulns"
