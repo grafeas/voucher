@@ -13,7 +13,7 @@
 
 Voucher is the missing piece in the binary authorization toolchain which enables you to secure your software supply pipeline. Binary authorization uses an admission controller such as [Kritis](https://github.com/grafeas/kritis), which pulls information about a container image from a metadata server such as [Grafeas](https://grafeas.io/) to ensure that the image is not deployed to production unless it has passed an appropriate suite of checks. As running checks on containers during deployment is time consuming and prevents rapid rollout of changes, the checks the admission controller utilizes to verify an image is ready for production should be run at build time. Voucher does exactly that.
 
-Voucher was designed to be called from your CI/DC pipeline, after an image is built, but before that image is deployed to production. Voucher pulls the newly built image from your image registry; runs it through all of the checks that were requested, and generates attestations for every check that the image passes. Those attestations (OpenPGP signatures of container digests) are then pushed to the metadata server, where Kritis can verify them.
+Voucher was designed to be called from your CI/CD pipeline, after an image is built, but before that image is deployed to production. Voucher pulls the newly built image from your image registry; runs it through all of the checks that were requested, and generates attestations for every check that the image passes. Those attestations (OpenPGP signatures of container digests) are then pushed to the metadata server, where Kritis can verify them.
 
 Voucher presently includes the following checks:
 
