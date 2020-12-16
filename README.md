@@ -1,3 +1,4 @@
+![Tests](https://github.com/grafeas/voucher/workflows/Test/badge.svg)
 [![Go Report Card](https://goreportcard.com/badge/github.com/grafeas/voucher)](https://goreportcard.com/report/github.com/grafeas/voucher)
 
 # voucher
