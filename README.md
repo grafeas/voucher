@@ -1,5 +1,3 @@
-[![Build Status](https://travis-ci.org/grafeas/voucher.svg?branch=master)](https://travis-ci.org/grafeas/voucher)
-[![codecov](https://codecov.io/gh/grafeas/voucher/branch/master/graph/badge.svg)](https://codecov.io/gh/grafeas/voucher)
 [![Go Report Card](https://goreportcard.com/badge/github.com/grafeas/voucher)](https://goreportcard.com/report/github.com/grafeas/voucher)
 
 # voucher

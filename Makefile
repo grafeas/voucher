@@ -83,3 +83,6 @@ snapshot:
 
 mocks:
 	mockgen -source=grafeas/grafeas_service.go -destination=grafeas/mocks/grafeas_service_mock.go package=mocks
+
+test-in-docker:
+	docker run -v $(PWD):/go/src/github.com/grafeas/voucher -w /go/src/github.com/grafeas/voucher -e CGO_ENABLED=0  -it golang:1.15.6-alpine go test ./...
