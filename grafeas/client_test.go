@@ -22,6 +22,7 @@ import (
 	"github.com/grafeas/voucher/signer"
 	"github.com/grafeas/voucher/signer/kms"
 	"github.com/grafeas/voucher/signer/pgp"
+	vtesting "github.com/grafeas/voucher/testing"
 )
 
 var basePath string
@@ -116,11 +117,8 @@ func TestAddAttestationToImage(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	grafeas := mocks.NewMockGrafeasAPIService(ctrl)
-	keyringKms, _ := kms.NewSigner(map[string]kms.Key{
-		"key": {
-			Algo: kms.AlgoSHA512,
-		},
-	})
+	testSigner := vtesting.NewPGPSigner(t)
+
 	tcs := map[string]struct {
 		reference     reference.Canonical
 		keyring       signer.AttestationSigner
@@ -132,7 +130,7 @@ func TestAddAttestationToImage(t *testing.T) {
 		},
 		"sign error": {
 			reference:     getCanonicalRef(t, imgPath),
-			keyring:       keyringKms,
+			keyring:       testSigner,
 			payload:       voucher.Attestation{},
 			expectedError: errors.New("no signing entity exists for check"),
 		},

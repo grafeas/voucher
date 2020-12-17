@@ -2,7 +2,8 @@ dryrun          = true
 scanner         = "clair"
 failon          = "high"
 binauth_project = "voucher-binauth"
-metadata_client = "containeranalysis"
+metadata_client = "grafeasos"
+signer          = "pgp"
 
 [checks]
 diy             = true
