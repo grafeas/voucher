@@ -42,3 +42,7 @@ This repository contains two tools: Voucher server, intended to run in your infr
 ## Contributing
 
 Please refer to the [Contributing document](CONTRIBUTING.md) if you are interested in contributing to voucher!
+
+## Community
+
+Please join [voucher-users](https://groups.google.com/g/voucher-users) for announcements and discussions.

@@ -10,6 +10,9 @@ Checks work.
 
 - Review this document and the [Code of Conduct](CODE_OF_CONDUCT.md).
 
+- We encourage all contributors to join our mailing list
+[voucher-users](https://groups.google.com/g/voucher-users).
+
 - Setup a [Go development environment](https://golang.org/doc/install#install)
 if you haven't already.
 
