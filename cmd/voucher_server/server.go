@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 
 	"github.com/spf13/cobra"
@@ -27,16 +28,25 @@ var serverCmd = &cobra.Command{
 		secrets, err := config.ReadSecrets()
 		if err != nil {
 			log.Printf("Error loading EJSON file, no secrets loaded: %v", err)
+			return
 		}
 
 		metricsClient, err := config.MetricsClient()
 		if err != nil {
 			log.Printf("Error configuring metrics client: %v", err)
+			return
 		}
+
+		metadataClient, err := config.NewMetadataClient(context.Background(), secrets)
+		if err != nil {
+			log.Printf("Error configuring metadata client: %v", err)
+			return
+		}
+		defer metadataClient.Close()
 
 		config.RegisterDynamicChecks()
 
-		voucherServer := server.NewServer(&serverConfig, secrets, metricsClient)
+		voucherServer := server.NewServer(&serverConfig, secrets, metadataClient, metricsClient)
 
 		for groupName, checks := range config.GetRequiredChecksFromConfig() {
 			voucherServer.SetCheckGroup(groupName, checks)

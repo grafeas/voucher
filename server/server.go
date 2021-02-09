@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/grafeas/voucher"
 	"github.com/grafeas/voucher/cmd/config"
 	"github.com/grafeas/voucher/metrics"
 	log "github.com/sirupsen/logrus"
@@ -14,13 +15,15 @@ type Server struct {
 	checkGroups  map[string][]string
 	secrets      *config.Secrets
 	metrics      metrics.Client
+	metadata     voucher.MetadataClient
 }
 
 // NewServer creates a server on the specified port
-func NewServer(config *Config, secrets *config.Secrets, metrics metrics.Client) *Server {
+func NewServer(config *Config, secrets *config.Secrets, metadata voucher.MetadataClient, metrics metrics.Client) *Server {
 	return &Server{
 		serverConfig: config,
 		secrets:      secrets,
+		metadata:     metadata,
 		metrics:      metrics,
 		checkGroups:  make(map[string][]string),
 	}

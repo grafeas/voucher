@@ -35,15 +35,16 @@ func (s *Server) handleChecks(w http.ResponseWriter, r *http.Request, name ...st
 	ctx, cancel := context.WithTimeout(context.Background(), s.serverConfig.TimeoutDuration())
 	defer cancel()
 
-	metadataClient, err := config.NewMetadataClient(ctx, s.secrets)
-	if nil != err {
-		http.Error(w, "server has been misconfigured", http.StatusInternalServerError)
-		LogError("failed to create MetadataClient", err)
-		return
-	}
-	defer metadataClient.Close()
+	// TODO: figure out how to toggle b/w pooling and adhoc mode
+	// metadataClient, err := config.NewMetadataClient(ctx, s.secrets)
+	// if nil != err {
+	// 	http.Error(w, "server has been misconfigured", http.StatusInternalServerError)
+	// 	LogError("failed to create MetadataClient", err)
+	// 	return
+	// }
+	// defer metadataClient.Close()
 
-	buildDetail, err := metadataClient.GetBuildDetail(ctx, imageData)
+	buildDetail, err := s.metadata.GetBuildDetail(ctx, imageData)
 	if nil != err {
 		LogWarning(fmt.Sprintf("could not get image metadata for %s", imageData), err)
 	} else {
@@ -57,7 +58,7 @@ func (s *Server) handleChecks(w http.ResponseWriter, r *http.Request, name ...st
 		}
 	}
 
-	checksuite, err := config.NewCheckSuite(s.secrets, metadataClient, repositoryClient, name...)
+	checksuite, err := config.NewCheckSuite(s.secrets, s.metadata, repositoryClient, name...)
 	if nil != err {
 		http.Error(w, "server has been misconfigured", http.StatusInternalServerError)
 		LogError("failed to create CheckSuite", err)
@@ -69,7 +70,7 @@ func (s *Server) handleChecks(w http.ResponseWriter, r *http.Request, name ...st
 	if viper.GetBool("dryrun") {
 		results = checksuite.Run(ctx, s.metrics, imageData)
 	} else {
-		results = checksuite.RunAndAttest(ctx, metadataClient, s.metrics, imageData)
+		results = checksuite.RunAndAttest(ctx, s.metadata, s.metrics, imageData)
 	}
 
 	checkResponse := voucher.NewResponse(imageData, results)

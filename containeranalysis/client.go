@@ -3,12 +3,14 @@ package containeranalysis
 import (
 	"context"
 	"errors"
+	"runtime"
 
 	containeranalysisapi "cloud.google.com/go/containeranalysis/apiv1"
 	grafeasv1 "cloud.google.com/go/grafeas/apiv1"
 
 	"github.com/docker/distribution/reference"
 	"google.golang.org/api/iterator"
+	"google.golang.org/api/option"
 	grafeas "google.golang.org/genproto/googleapis/grafeas/v1"
 
 	"github.com/grafeas/voucher"
@@ -190,7 +192,7 @@ func (g *Client) GetBuildDetail(ctx context.Context, ref reference.Canonical) (r
 func NewClient(ctx context.Context, binauthProject string, keyring signer.AttestationSigner) (*Client, error) {
 	var err error
 
-	caClient, err := containeranalysisapi.NewClient(ctx)
+	caClient, err := containeranalysisapi.NewClient(ctx, option.WithGRPCConnectionPool(runtime.GOMAXPROCS(0)))
 	if err != nil {
 		return nil, err
 	}

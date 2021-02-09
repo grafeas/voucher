@@ -2,6 +2,7 @@ package server
 
 import (
 	"bytes"
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -16,7 +17,7 @@ import (
 )
 
 var testParams = []byte(`
-{  
+{
 	"image_url":"gcr.io/somewhere/image@sha256:cb749360c5198a55859a7f335de3cf4e2f64b60886a2098684a2f9c7ffca81f2"
 }
 `)
@@ -40,7 +41,9 @@ func TestMain(m *testing.M) {
 		PassHash:    testPasswordHash,
 	}
 	secrets, _ := config.ReadSecrets()
-	server = NewServer(serverConfig, secrets, &metrics.NoopClient{})
+	metadataClient, _ := config.NewMetadataClient(context.Background(), secrets)
+	defer metadataClient.Close()
+	server = NewServer(serverConfig, secrets, metadataClient, &metrics.NoopClient{})
 
 	for groupName, checks := range config.GetRequiredChecksFromConfig() {
 		server.SetCheckGroup(groupName, checks)
@@ -80,7 +83,7 @@ func TestBadAuthentication(t *testing.T) {
 
 func TestInvalidJSON(t *testing.T) {
 	invalidJSON := []byte(`
-		{  
+		{
 			image_url:poorly-formatted-json,
 		}
 		`)
