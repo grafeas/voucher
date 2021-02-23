@@ -8,6 +8,11 @@ builds:
     binary: voucher_server
     env:
       - CGO_ENABLED=0
+  - id: voucher_subscriber
+    main: ./cmd/voucher_subscriber
+    binary: voucher_subscriber
+    env:
+      - CGO_ENABLED=0
   - id: voucher_client
     main: ./cmd/voucher_client
     binary: voucher_client
@@ -18,6 +23,18 @@ archives:
     builds:
       - voucher_server
     name_template: "voucher_server_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
+    files:
+      - LICENSE
+    wrap_in_directory: true
+    replacements:
+      darwin: Darwin
+      linux: Linux
+      windows: Windows
+      amd64: x86_64
+  - id: voucher_subscriber
+    builds:
+      - voucher_subscriber
+    name_template: "voucher_subscriber_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
     files:
       - LICENSE
     wrap_in_directory: true

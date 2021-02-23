@@ -6,9 +6,10 @@ DOCKER=docker
 GOPATH?=`echo $$GOPATH`
 GOBUILD=$(GOCMD) build
 GOCLEAN=$(GOCMD) clean
-PACKAGES := voucher_server voucher_client
+PACKAGES := voucher_server voucher_subscriber voucher_client
 CODE=./cmd/
 SERVER_NAME=voucher_server
+SUBSCRIBER_NAME=voucher_subscriber
 CLIENT_NAME=voucher_client
 IMAGE_NAME?=voucher
 
@@ -68,6 +69,9 @@ build: $(PACKAGES)
 
 voucher_client:
 	$(GOBUILD) -o build/$(CLIENT_NAME) -v $(CODE)$(CLIENT_NAME)
+
+voucher_subscriber:
+	$(GOBUILD) -o build/$(SUBSCRIBER_NAME) -v $(CODE)$(SUBSCRIBER_NAME)
 
 voucher_server:
 	$(GOBUILD) -o build/$(SERVER_NAME) -v $(CODE)$(SERVER_NAME)
