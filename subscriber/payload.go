@@ -35,7 +35,7 @@ func parsePayload(message []byte) (*Payload, error) {
 	}
 
 	// an image without a digest is only tagged; opt to skip this image
-	// as the digest version has already been pushed and will be procssed soon
+	// as the digest version has already been pushed and will be processed soon
 	if pl.Digest == "" {
 		return nil, errInvalidPayload
 	}

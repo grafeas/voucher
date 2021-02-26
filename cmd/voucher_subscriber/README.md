@@ -26,7 +26,7 @@ All of the configuration options for the Voucher Subscriber is the same as the [
 
 ## Usage
 
-You can run Voucher in server mode by launching `voucher_subscriber`, using the following syntax:
+You can run Voucher in pub/sub subscriber mode by launching `voucher_subscriber`, using the following syntax:
 
 ```shell
 $ voucher_subscriber [--project <project> --subscription <subscription>]
