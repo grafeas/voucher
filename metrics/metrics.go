@@ -14,4 +14,6 @@ type Client interface {
 	CheckAttestationStart(string)
 	CheckAttestationError(string, error)
 	CheckAttestationSuccess(string)
+	PubSubMessageReceived()
+	PubSubTotalLatency(time.Duration)
 }

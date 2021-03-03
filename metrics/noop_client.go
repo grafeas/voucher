@@ -15,3 +15,5 @@ func (*NoopClient) CheckRunSuccess(string)                        {}
 func (*NoopClient) CheckAttestationStart(string)                  {}
 func (*NoopClient) CheckAttestationError(string, error)           {}
 func (*NoopClient) CheckAttestationSuccess(string)                {}
+func (*NoopClient) PubSubMessageReceived()                        {}
+func (*NoopClient) PubSubTotalLatency(time.Duration)              {}

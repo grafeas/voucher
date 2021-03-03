@@ -61,6 +61,16 @@ func (d *DogStatsdClient) CheckAttestationError(check string, err error) {
 	_ = d.client.Event(createDataDogErrorEvent(check, "Voucher Check Attestation Error", err))
 }
 
+// PubSubMessageReceived tracks the number of messages received from pub/sub
+func (d *DogStatsdClient) PubSubMessageReceived() {
+	_ = d.client.Incr("auto_voucher.message.received", []string{}, d.samplingRate)
+}
+
+// PubSubTotalLatency tracks the time it takes to process a pub/sub message
+func (d *DogStatsdClient) PubSubTotalLatency(duration time.Duration) {
+	_ = d.client.Timing("auto_voucher.latency", duration, []string{}, d.samplingRate)
+}
+
 func createDataDogErrorEvent(check, title string, err error) *statsd.Event {
 	event := statsd.NewEvent(title, err.Error())
 	event.AlertType = statsd.Error
