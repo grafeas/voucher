@@ -54,7 +54,7 @@ func (s *Subscriber) Subscribe(ctx context.Context) error {
 
 		pl, err := parsePayload(msg.Data)
 		if err != nil {
-			if err != errInvalidPayload {
+			if err != errNotInsertAction {
 				s.log.WithField("reason", err).WithField("payload", string(msg.Data)).Error("couldn't parse pub/sub payload")
 			}
 

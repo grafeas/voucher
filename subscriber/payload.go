@@ -10,7 +10,8 @@ import (
 const insertAction string = "INSERT"
 
 var (
-	errInvalidPayload   error = errors.New("ignoring; payload is invalid")
+	errNotInsertAction  error = errors.New("ignoring; not an INSERT action")
+	errNoDigest         error = errors.New("no digest specified")
 	errConversionFailed error = errors.New("error converting reference into type reference.Canonical")
 )
 
@@ -31,13 +32,13 @@ func parsePayload(message []byte) (*Payload, error) {
 	}
 
 	if pl.Action != insertAction {
-		return nil, errInvalidPayload
+		return nil, errNotInsertAction
 	}
 
 	// an image without a digest is only tagged; opt to skip this image
 	// as the digest version has already been pushed and will be processed soon
 	if pl.Digest == "" {
-		return nil, errInvalidPayload
+		return nil, errNoDigest
 	}
 
 	return &pl, nil

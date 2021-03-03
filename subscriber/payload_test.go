@@ -17,13 +17,13 @@ var payloadTestCases = []struct {
 	{
 		"returns nil payload with error for non-INSERT action payload",
 		[]byte(`{ "action":"DELETE" }`),
-		errInvalidPayload,
+		errNotInsertAction,
 		nil,
 	},
 	{
 		"returns an error when INSERT payload has no digest",
 		[]byte(`{ "action":"INSERT" }`),
-		errInvalidPayload,
+		errNoDigest,
 		nil,
 	},
 }
