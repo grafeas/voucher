@@ -2,8 +2,10 @@ package kms
 
 import (
 	"context"
+	"crypto/sha256"
 	"crypto/sha512"
 	"fmt"
+	"hash"
 
 	apiv1 "cloud.google.com/go/kms/apiv1"
 	"github.com/grafeas/voucher/signer"
@@ -11,6 +13,8 @@ import (
 )
 
 const (
+	AlgoSHA256 = "SHA256"
+	AlgoSHA384 = "SHA384"
 	AlgoSHA512 = "SHA512"
 	APIPath    = "//cloudkms.googleapis.com/v1"
 )
@@ -45,15 +49,43 @@ func (s *Signer) Sign(checkName, body string) (string, string, error) {
 		return "", "", signer.ErrNoKeyForCheck
 	}
 
-	if key.Algo != AlgoSHA512 {
-		return "", "", fmt.Errorf("unable to hash algorithm %q, must be SHA512", key.Algo)
+	var digest hash.Hash
+	switch key.Algo {
+	case AlgoSHA256:
+		digest = sha256.New()
+	case AlgoSHA384:
+		digest = sha512.New384()
+	case AlgoSHA512:
+		digest = sha512.New()
+	default:
+		return "", "", fmt.Errorf("Unsupported digest algorithm %v", key.Algo)
+	}
+
+	if _, err := digest.Write([]byte(body)); err != nil {
+		return "", "", err
+	}
+
+	var d kms_pb.Digest
+	switch key.Algo {
+	case AlgoSHA256:
+		d.Digest = &kms_pb.Digest_Sha256{
+			Sha256: digest.Sum(nil),
+		}
+	case AlgoSHA384:
+		d.Digest = &kms_pb.Digest_Sha384{
+			Sha384: digest.Sum(nil),
+		}
+	case AlgoSHA512:
+		d.Digest = &kms_pb.Digest_Sha512{
+			Sha512: digest.Sum(nil),
+		}
+	default:
+		return "", "", fmt.Errorf("Unsupported digest algorithm %v", key.Algo)
 	}
 
 	resp, err := s.client.AsymmetricSign(context.Background(), &kms_pb.AsymmetricSignRequest{
 		Name: key.Path,
-		Digest: &kms_pb.Digest{
-			Digest: &kms_pb.Digest_Sha512{Sha512: sha512Digest([]byte(body))},
-		},
+		Digest: &d,
 	})
 
 	if err != nil {
@@ -66,11 +98,4 @@ func (s *Signer) Sign(checkName, body string) (string, string, error) {
 // Close closes the KMS signer's connections.
 func (s *Signer) Close() error {
 	return s.client.Close()
-}
-
-func sha512Digest(data []byte) []byte {
-	output := make([]byte, sha512.Size)
-	sha := sha512.Sum512(data)
-	copy(output, sha[:])
-	return output
 }
