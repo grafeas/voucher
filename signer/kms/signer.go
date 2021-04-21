@@ -37,6 +37,12 @@ func NewSigner(keys map[string]Key) (*Signer, error) {
 		return nil, err
 	}
 
+	for checkName, key := range keys {
+		if key.Algo != AlgoSHA256 && key.Algo != AlgoSHA384 && key.Algo != AlgoSHA512 {
+			return nil, fmt.Errorf("Unsupported digest algorithm %v for check %v", key.Algo, checkName)
+		}
+	}
+
 	return &Signer{
 		keys:   keys,
 		client: client,
@@ -50,17 +56,6 @@ func (s *Signer) Sign(checkName, body string) (string, string, error) {
 	}
 
 	var digest hash.Hash
-	switch key.Algo {
-	case AlgoSHA256:
-		digest = sha256.New()
-	case AlgoSHA384:
-		digest = sha512.New384()
-	case AlgoSHA512:
-		digest = sha512.New()
-	default:
-		return "", "", fmt.Errorf("Unsupported digest algorithm %v", key.Algo)
-	}
-
 	if _, err := digest.Write([]byte(body)); err != nil {
 		return "", "", err
 	}
@@ -68,14 +63,17 @@ func (s *Signer) Sign(checkName, body string) (string, string, error) {
 	var d kms_pb.Digest
 	switch key.Algo {
 	case AlgoSHA256:
+		digest = sha256.New()
 		d.Digest = &kms_pb.Digest_Sha256{
 			Sha256: digest.Sum(nil),
 		}
 	case AlgoSHA384:
+		digest = sha512.New384()
 		d.Digest = &kms_pb.Digest_Sha384{
 			Sha384: digest.Sum(nil),
 		}
 	case AlgoSHA512:
+		digest = sha512.New()
 		d.Digest = &kms_pb.Digest_Sha512{
 			Sha512: digest.Sum(nil),
 		}
