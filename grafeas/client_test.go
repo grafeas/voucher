@@ -334,16 +334,18 @@ func createAllOccurrences() []objects.Occurrence {
 	noteKindB := objects.NoteKindBuild
 	noteKindD := objects.NoteKindDiscovery
 	contentType := objects.AttestationUnspecified
-	vulnSeverity := objects.SeverityMinimal
+	vulnSeverity := objects.SeverityLow
+	vulnEffectiveSeverity := objects.SeverityMinimal
 	packageKind := objects.VersionKindNormal
 	successStatus := objects.DiscoveredAnalysisStatusFinishedSuccess
 	occs := []objects.Occurrence{
 		{Name: "name1", Resource: &objects.Resource{URI: "https://gcr.io/project/image@sha256:foo"},
 			NoteName: "notename", Kind: &noteKindVuln,
 			Vulnerability: &objects.VulnerabilityDetails{Type: "vulnmedium", Severity: &vulnSeverity,
-				PackageIssue: []objects.VulnerabilityPackageIssue{{
-					AffectedLocation: &objects.VulnerabilityLocation{CpeURI: "uri", Package: "package_test",
-						Version: &objects.PackageVersion{Name: "v0.0.0", Kind: &packageKind, Revision: "r"}}}}}},
+			    EffectiveSeverity: &vulnEffectiveSeverity,
+					PackageIssue: []objects.VulnerabilityPackageIssue{{
+						AffectedLocation: &objects.VulnerabilityLocation{CpeURI: "uri", Package: "package_test",
+							Version: &objects.PackageVersion{Name: "v0.0.0", Kind: &packageKind, Revision: "r"}}}}}},
 
 		{Name: "name2", Resource: &objects.Resource{URI: "https://gcr.io/project/image@sha256:foo"},
 			NoteName: "notename", Kind: &noteKindAtt,
