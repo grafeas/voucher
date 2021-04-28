@@ -35,9 +35,9 @@ Note that `provenance` and the dynamic checks require the prescence of build met
 ## Voucher Server, Subscriber, and Client
 
 This repository contains three tools:
-- [Voucher Server](cmd/voucher_server/README.md): intended to run in your infrastructure to respond to CI/CD pipeline requests.
-- [Voucher Subscriber](cmd/voucher_subscriber/README.md): a program that accepts image creation pub/sub messages from GCR, and automatically vouches the images referenced in those messages. This program doesn't respond to any client requests.
-- [Voucher Client](cmd/voucher_client/README.md): an example of a Voucher API client that you can use directly in your CI/CD pipeline or as a basis for your own code. The client connects to a Voucher Server.
+- [Voucher Server](v2/cmd/voucher_server/README.md): intended to run in your infrastructure to respond to CI/CD pipeline requests.
+- [Voucher Subscriber](v2/cmd/voucher_subscriber/README.md): a program that accepts image creation pub/sub messages from GCR, and automatically vouches the images referenced in those messages. This program doesn't respond to any client requests.
+- [Voucher Client](v2/cmd/voucher_client/README.md): an example of a Voucher API client that you can use directly in your CI/CD pipeline or as a basis for your own code. The client connects to a Voucher Server.
 
 ## Contributing
 
