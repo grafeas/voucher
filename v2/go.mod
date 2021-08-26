@@ -1,4 +1,4 @@
-module github.com/grafeas/voucher
+module github.com/grafeas/voucher/v2
 
 go 1.13
 
