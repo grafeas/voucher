@@ -7,21 +7,24 @@ import (
 )
 
 type DogStatsdClient struct {
-	client       *statsd.Client
+	client       StatsdClient
 	samplingRate float64
 }
 
-func NewDogStatsdClient(addr string, samplingRate float64, tags []string) (*DogStatsdClient, error) {
-	client, err := statsd.New(addr, statsd.WithTags(tags))
-	if err != nil {
-		return nil, err
-	}
-
+func NewDogStatsdClient(client StatsdClient, samplingRate float64) (*DogStatsdClient, error) {
 	return &DogStatsdClient{
 		client:       client,
 		samplingRate: samplingRate,
 	}, nil
 }
+
+type StatsdClient interface {
+	Incr(string, []string, float64) error
+	Timing(string, time.Duration, []string, float64) error
+	Event(*statsd.Event) error
+}
+
+var _ StatsdClient = (*statsd.Client)(nil)
 
 func (d *DogStatsdClient) CheckRunStart(check string) {
 	_ = d.client.Incr("voucher.check.run.start", []string{"check:" + check}, d.samplingRate)

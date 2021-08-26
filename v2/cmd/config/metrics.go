@@ -3,19 +3,24 @@ package config
 import (
 	"log"
 
+	"github.com/DataDog/datadog-go/statsd"
 	"github.com/grafeas/voucher/v2/metrics"
 	"github.com/spf13/viper"
 )
 
 func MetricsClient() (metrics.Client, error) {
 	statsdAddr := viper.GetString("statsd.addr")
-	if statsdAddr != "" {
-		sampleRate := viper.GetFloat64("statsd.sample_rate")
-		tags := viper.GetStringSlice("statsd.tags")
-		log.Printf("Sending metrics to StatsD client: %v", statsdAddr)
-		return metrics.NewDogStatsdClient(statsdAddr, sampleRate, tags)
+	if statsdAddr == "" {
+		log.Printf("No metrics client configured")
+		return &metrics.NoopClient{}, nil
 	}
 
-	log.Printf("No metrics client configured")
-	return &metrics.NoopClient{}, nil
+	tags := viper.GetStringSlice("statsd.tags")
+	client, err := statsd.New(statsdAddr, statsd.WithTags(tags))
+	if err != nil {
+		return nil, err
+	}
+
+	sampleRate := viper.GetFloat64("statsd.sample_rate")
+	return metrics.NewDogStatsdClient(client, sampleRate)
 }
