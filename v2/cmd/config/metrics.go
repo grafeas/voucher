@@ -22,5 +22,5 @@ func MetricsClient() (metrics.Client, error) {
 	}
 
 	sampleRate := viper.GetFloat64("statsd.sample_rate")
-	return metrics.NewDogStatsdClient(client, sampleRate)
+	return metrics.NewStatsdMetricsClient(client, sampleRate)
 }
