@@ -7,11 +7,11 @@ import (
 	"fmt"
 	"net/http"
 
-	s1 "github.com/grafeas/voucher/v2/docker/schema1"
-	s2 "github.com/grafeas/voucher/v2/docker/schema2"
 	v1 "github.com/coreos/clair/api/v1"
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/reference"
+	s1 "github.com/grafeas/voucher/v2/docker/schema1"
+	s2 "github.com/grafeas/voucher/v2/docker/schema2"
 	digest "github.com/opencontainers/go-digest"
 	"golang.org/x/oauth2"
 )

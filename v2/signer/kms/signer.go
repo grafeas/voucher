@@ -82,7 +82,7 @@ func (s *Signer) Sign(checkName, body string) (string, string, error) {
 	}
 
 	resp, err := s.client.AsymmetricSign(context.Background(), &kms_pb.AsymmetricSignRequest{
-		Name: key.Path,
+		Name:   key.Path,
 		Digest: &d,
 	})
 
