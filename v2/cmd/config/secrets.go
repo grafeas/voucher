@@ -26,12 +26,11 @@ func ReadSecrets() (*Secrets, error) {
 	if !viper.IsSet("ejson.dir") {
 		return nil, fmt.Errorf("EJSON dir not set in the config file")
 	}
-
 	dir := viper.GetString("ejson.dir")
+
 	if !viper.IsSet("ejson.secrets") {
 		return nil, fmt.Errorf("EJSON secrets not set in the config file")
 	}
-
 	secrets := viper.GetString("ejson.secrets")
 
 	decrypted, err := ejson.DecryptFile(secrets, dir, "")
@@ -40,8 +39,10 @@ func ReadSecrets() (*Secrets, error) {
 	}
 
 	var data Secrets
-	err = json.NewDecoder(bytes.NewReader(decrypted)).Decode(&data)
-	return &data, err
+	if err := json.Unmarshal(decrypted, &data); err != nil {
+		return nil, err
+	}
+	return &data, nil
 }
 
 // getPGPKeyRing uses the Command's configured ejson file to populate a
@@ -51,7 +52,7 @@ func (s *Secrets) getPGPKeyRing() (*pgp.KeyRing, error) {
 
 	for name, key := range s.Keys {
 		err := pgp.AddKeyToKeyRingFromReader(newKeyRing, name, bytes.NewReader([]byte(key)))
-		if nil != err {
+		if err != nil {
 			return nil, err
 		}
 	}
