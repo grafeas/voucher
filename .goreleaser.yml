@@ -4,16 +4,19 @@ before:
      - make ensure-deps
 builds:
   - id: voucher_server
+    dir: v2
     main: ./cmd/voucher_server
     binary: voucher_server
     env:
       - CGO_ENABLED=0
   - id: voucher_subscriber
+    dir: v2
     main: ./cmd/voucher_subscriber
     binary: voucher_subscriber
     env:
       - CGO_ENABLED=0
   - id: voucher_client
+    dir: v2
     main: ./cmd/voucher_client
     binary: voucher_client
     env:

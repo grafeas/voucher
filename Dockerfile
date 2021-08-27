@@ -3,11 +3,15 @@ FROM golang:1.14-alpine as builder
 
 LABEL maintainer "catherinejones"
 WORKDIR /go/src/github.com/grafeas/voucher
-COPY . .
 RUN apk --no-cache add \
     git \
-    make && \
-    make voucher_server
+    make
+COPY Makefile .
+COPY v2/go.mod v2/
+COPY v2/go.sum v2/
+RUN make ensure-deps
+COPY . .
+RUN make voucher_server
 
 # Final build
 FROM alpine:3.12

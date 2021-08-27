@@ -1,13 +1,13 @@
 # Go parameters
-GOCMD=go
+GOCMD=cd v2 && go
 GORELEASER=goreleaser
-GOLANGCI-LINT=golangci-lint
+GOLANGCI-LINT=cd v2 && golangci-lint
 DOCKER=docker
 GOPATH?=`echo $$GOPATH`
 GOBUILD=$(GOCMD) build
 GOCLEAN=$(GOCMD) clean
 PACKAGES := voucher_server voucher_subscriber voucher_client
-CODE=./v2/cmd/
+CODE=./cmd/
 SERVER_NAME=voucher_server
 SUBSCRIBER_NAME=voucher_subscriber
 CLIENT_NAME=voucher_client
@@ -39,16 +39,16 @@ endif
 	$(info "No missing dependencies")
 
 show-coverage: test
-	go tool cover -html=coverage.txt
+	$(GOCMD) tool cover -html=coverage.txt
 
 test:
-	go test ./... -race -coverprofile=coverage.txt -covermode=atomic
+	$(GOCMD) test ./... -race -coverprofile=coverage.txt -covermode=atomic
 
 lint:
-	golangci-lint run
+	$(GOLANGCI-LINT) run
 
 lint-new:
-	golangci-lint run --new-from-rev master
+	$(GOLANGCI-LINT) run --new-from-rev main
 
 clean:
 	$(GOCLEAN)
@@ -57,7 +57,6 @@ clean:
 	done
 
 ensure-deps:
-	$(GOCMD) mod tidy
 	$(GOCMD) mod download
 	$(GOCMD) mod verify
 
@@ -68,13 +67,13 @@ update-deps:
 build: $(PACKAGES)
 
 voucher_client:
-	$(GOBUILD) -o build/$(CLIENT_NAME) -v $(CODE)$(CLIENT_NAME)
+	$(GOBUILD) -o ../build/$(CLIENT_NAME) -v $(CODE)$(CLIENT_NAME)
 
 voucher_subscriber:
-	$(GOBUILD) -o build/$(SUBSCRIBER_NAME) -v $(CODE)$(SUBSCRIBER_NAME)
+	$(GOBUILD) -o ../build/$(SUBSCRIBER_NAME) -v $(CODE)$(SUBSCRIBER_NAME)
 
 voucher_server:
-	$(GOBUILD) -o build/$(SERVER_NAME) -v $(CODE)$(SERVER_NAME)
+	$(GOBUILD) -o ../build/$(SERVER_NAME) -v $(CODE)$(SERVER_NAME)
 
 container:
 	$(DOCKER) build -t $(IMAGE_NAME) .
