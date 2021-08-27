@@ -18,6 +18,7 @@ import (
 const (
 	mockAPIKey = "api-key"
 	mockAppKey = "app-key"
+	mockClock  = 1096329600
 )
 
 func TestDatadogClient_Counter(t *testing.T) {
@@ -31,6 +32,7 @@ func TestDatadogClient_Counter(t *testing.T) {
 	assert.Equal(t, "voucher.check.run.start", series.Metric)
 	assert.Equal(t, []string{"check:diy"}, series.GetTags())
 	assert.Equal(t, "count", series.GetType())
+	assert.Equal(t, [][]float64{{mockClock, 1}}, series.GetPoints())
 }
 
 func TestDatadogClient_Timing(t *testing.T) {
@@ -43,6 +45,7 @@ func TestDatadogClient_Timing(t *testing.T) {
 	series := p.Series[0]
 	assert.Equal(t, "voucher.check.run.latency", series.Metric)
 	assert.Equal(t, "gauge", series.GetType())
+	assert.Equal(t, [][]float64{{mockClock, 123}}, series.GetPoints())
 }
 
 func TestDatadogClient_Event(t *testing.T) {
@@ -56,6 +59,7 @@ func TestDatadogClient_Event(t *testing.T) {
 	assert.Equal(t, datadog.EVENTALERTTYPE_ERROR, p.GetAlertType())
 	assert.Equal(t, datadog.EVENTPRIORITY_LOW, p.GetPriority())
 	assert.Equal(t, []string{"check:diy"}, p.GetTags())
+	assert.Equal(t, int64(mockClock), p.GetDateHappened())
 }
 
 func newMockedDatadogClient(t testing.TB, data interface{}) *metrics.DatadogClient {
@@ -75,5 +79,5 @@ func newMockedDatadogClient(t testing.TB, data interface{}) *metrics.DatadogClie
 	t.Cleanup(mockDatadog.Close)
 
 	u, _ := url.Parse(mockDatadog.URL)
-	return metrics.NewDatadogClient(mockAPIKey, mockAppKey, metrics.WithDatadogURL(*u))
+	return metrics.NewDatadogClient(mockAPIKey, mockAppKey, metrics.WithDatadogURL(*u), metrics.WithDatadogFrozenClock(mockClock))
 }

@@ -45,17 +45,24 @@ func WithDatadogURL(datadog url.URL) DatadogClientOpt {
 	}
 }
 
+func WithDatadogFrozenClock(frozenTime float64) DatadogClientOpt {
+	return func(c *DatadogClient) {
+		c.client.(*datadogStatsd).now = func() float64 { return frozenTime }
+	}
+}
+
 // datadogStatsd is an alternative statsd.Client that transmits directly to Datadog
 type datadogStatsd struct {
 	authCtx context.Context
 	metrics *datadog.MetricsApiService
 	events  *datadog.EventsApiService
-	timeout time.Duration
 	tags    []string
 	now     func() float64
 }
 
 var _ statsdClient = (*datadogStatsd)(nil)
+
+const submitTimeout = 3 * time.Second
 
 func newDatadogStatsd(cfg *datadog.Configuration, apiKey, appKey string) *datadogStatsd {
 	client := datadog.NewAPIClient(cfg)
@@ -67,7 +74,6 @@ func newDatadogStatsd(cfg *datadog.Configuration, apiKey, appKey string) *datado
 		authCtx: context.WithValue(context.Background(), datadog.ContextAPIKeys, keys),
 		metrics: client.MetricsApi,
 		events:  client.EventsApi,
-		timeout: 3 * time.Second,
 		now:     func() float64 { return float64(time.Now().Unix()) },
 	}
 }
@@ -94,7 +100,7 @@ func (d *datadogStatsd) Timing(metric string, dur time.Duration, tags []string, 
 }
 
 func (d *datadogStatsd) Event(e *statsd.Event) error {
-	ctx, cancel := context.WithTimeout(d.authCtx, d.timeout)
+	ctx, cancel := context.WithTimeout(d.authCtx, submitTimeout)
 	defer cancel()
 
 	ddEvent := datadog.NewEventCreateRequest(e.Text, e.Title)
@@ -102,6 +108,12 @@ func (d *datadogStatsd) Event(e *statsd.Event) error {
 	ddEvent.SetAggregationKey(e.AggregationKey)
 	ddEvent.SetPriority(datadog.EventPriority(e.Priority))
 	ddEvent.SetTags(append(d.tags, e.Tags...))
+	if e.Timestamp.IsZero() {
+		ddEvent.SetDateHappened(int64(d.now()))
+	} else {
+		ddEvent.SetDateHappened(e.Timestamp.Unix())
+	}
+
 	if _, _, err := d.events.CreateEvent(ctx, *ddEvent); err != nil {
 		log.Println("error submitting event to datadog", err)
 	}
@@ -109,7 +121,7 @@ func (d *datadogStatsd) Event(e *statsd.Event) error {
 }
 
 func (d *datadogStatsd) submit(series ...datadog.Series) {
-	ctx, cancel := context.WithTimeout(d.authCtx, d.timeout)
+	ctx, cancel := context.WithTimeout(d.authCtx, submitTimeout)
 	defer cancel()
 
 	// TODO: this is not batched, that is not great
