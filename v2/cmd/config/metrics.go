@@ -12,8 +12,8 @@ func MetricsClient() (metrics.Client, error) {
 	if statsdAddr := viper.GetString("statsd.addr"); statsdAddr != "" {
 		sampleRate := viper.GetFloat64("statsd.sample_rate")
 		return metrics.NewStatsdClient(statsdAddr, sampleRate, tags)
-	} else if ddAPIKey := viper.GetString("statsd.datadog_apikey"); ddAPIKey != "" {
-		ddAppKey := viper.GetString("statsd.datadog_appkey")
+	} else if ddAPIKey := viper.GetString("statsd.datadog_api_key"); ddAPIKey != "" {
+		ddAppKey := viper.GetString("statsd.datadog_app_key")
 		return metrics.NewDatadogClient(ddAPIKey, ddAppKey, metrics.WithDatadogTags(tags)), nil
 	}
 	log.Printf("No metrics client configured")

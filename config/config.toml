@@ -38,7 +38,11 @@ secrets = "/etc/voucher/secrets.production.ejson"
 address = "localhost:6060"
 
 [statsd]
+# with a local aggregator:
 addr = "localhost:8125"
+# OR, directly to Datadog's API:
+# datadog_api_key = ""
+# datadog_app_key = ""
 sample_rate = 0.1
 tags = []
 
