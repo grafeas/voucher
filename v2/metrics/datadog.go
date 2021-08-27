@@ -3,13 +3,50 @@ package metrics
 import (
 	"context"
 	"log"
+	"net/url"
 	"time"
 
 	"github.com/DataDog/datadog-api-client-go/api/v1/datadog"
 	"github.com/DataDog/datadog-go/statsd"
 )
 
-type DatadogStatsd struct {
+// DatadogClient emits metrics directly to Datadog.
+type DatadogClient struct {
+	StatsdClient
+	cfg *datadog.Configuration
+}
+
+func NewDatadogClient(apiKey, appKey string, opts ...DatadogClientOpt) *DatadogClient {
+	cfg := datadog.NewConfiguration()
+	c := &DatadogClient{
+		cfg: cfg,
+		StatsdClient: StatsdClient{
+			client: newDatadogStatsd(cfg, apiKey, appKey),
+		},
+	}
+	for _, o := range opts {
+		o(c)
+	}
+	return c
+}
+
+type DatadogClientOpt func(*DatadogClient)
+
+func WithDatadogTags(tags []string) DatadogClientOpt {
+	return func(c *DatadogClient) {
+		c.client.(*datadogStatsd).tags = tags
+	}
+}
+
+func WithDatadogURL(datadog url.URL) DatadogClientOpt {
+	return func(c *DatadogClient) {
+		c.cfg.Host = datadog.Host
+		c.cfg.Scheme = datadog.Scheme
+	}
+}
+
+// datadogStatsd is an alternative statsd.Client that transmits directly to Datadog
+type datadogStatsd struct {
 	authCtx context.Context
 	metrics *datadog.MetricsApiService
 	events  *datadog.EventsApiService
@@ -18,16 +55,18 @@ type DatadogStatsd struct {
 	now     func() float64
 }
 
-func NewDatadogStatsd(client *datadog.APIClient, apiKey string, appKey string, tags []string) *DatadogStatsd {
+var _ statsdClient = (*datadogStatsd)(nil)
+
+func newDatadogStatsd(cfg *datadog.Configuration, apiKey, appKey string) *datadogStatsd {
+	client := datadog.NewAPIClient(cfg)
 	keys := map[string]datadog.APIKey{
 		"apiKeyAuth": {Key: apiKey},
 		"appKeyAuth": {Key: appKey},
 	}
-	return &DatadogStatsd{
+	return &datadogStatsd{
 		authCtx: context.WithValue(context.Background(), datadog.ContextAPIKeys, keys),
 		metrics: client.MetricsApi,
 		events:  client.EventsApi,
-		tags:    tags,
 		timeout: 3 * time.Second,
 		now:     func() float64 { return float64(time.Now().Unix()) },
 	}
@@ -38,7 +77,7 @@ const (
 	countType    = "count"
 )
 
-func (d *DatadogStatsd) Incr(metric string, tags []string, _ float64) error {
+func (d *datadogStatsd) Incr(metric string, tags []string, _ float64) error {
 	s := datadog.NewSeries(metric, [][]float64{{d.now(), 1}})
 	s.SetType(countType)
 	s.SetTags(append(d.tags, tags...))
@@ -46,7 +85,7 @@ func (d *DatadogStatsd) Incr(metric string, tags []string, _ float64) error {
 	return nil
 }
 
-func (d *DatadogStatsd) Timing(metric string, dur time.Duration, tags []string, _ float64) error {
+func (d *datadogStatsd) Timing(metric string, dur time.Duration, tags []string, _ float64) error {
 	s := datadog.NewSeries(metric, [][]float64{{d.now(), float64(dur.Milliseconds())}})
 	s.SetType(durationType)
 	s.SetTags(append(d.tags, tags...))
@@ -54,7 +93,7 @@ func (d *DatadogStatsd) Timing(metric string, dur time.Duration, tags []string, 
 	return nil
 }
 
-func (d *DatadogStatsd) Event(e *statsd.Event) error {
+func (d *datadogStatsd) Event(e *statsd.Event) error {
 	ctx, cancel := context.WithTimeout(d.authCtx, d.timeout)
 	defer cancel()
 
@@ -69,7 +108,7 @@ func (d *DatadogStatsd) Event(e *statsd.Event) error {
 	return nil
 }
 
-func (d *DatadogStatsd) submit(series ...datadog.Series) {
+func (d *datadogStatsd) submit(series ...datadog.Series) {
 	ctx, cancel := context.WithTimeout(d.authCtx, d.timeout)
 	defer cancel()
 

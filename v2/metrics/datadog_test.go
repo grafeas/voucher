@@ -2,6 +2,7 @@ package metrics_test
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -9,66 +10,61 @@ import (
 	"time"
 
 	"github.com/DataDog/datadog-api-client-go/api/v1/datadog"
-	"github.com/DataDog/datadog-go/statsd"
 	"github.com/grafeas/voucher/v2/metrics"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 const (
-	mockApiKey = "api-key"
+	mockAPIKey = "api-key"
 	mockAppKey = "app-key"
 )
 
-func TestDatadogStatsd_Incr(t *testing.T) {
+func TestDatadogClient_Counter(t *testing.T) {
 	var p datadog.MetricsPayload
-	stats := newMockedDatadogStatsd(t, "/api/v1/series", &p)
+	metrics := newMockedDatadogClient(t, &p)
 
-	stats.Incr("test.counter", []string{"awesome:true"}, 1)
+	metrics.CheckRunStart("diy")
 
 	require.Len(t, p.Series, 1)
 	series := p.Series[0]
-	assert.Equal(t, "test.counter", series.Metric)
+	assert.Equal(t, "voucher.check.run.start", series.Metric)
+	assert.Equal(t, []string{"check:diy"}, series.GetTags())
 	assert.Equal(t, "count", series.GetType())
 }
 
-func TestDatadogStatsd_Timing(t *testing.T) {
+func TestDatadogClient_Timing(t *testing.T) {
 	var p datadog.MetricsPayload
-	stats := newMockedDatadogStatsd(t, "/api/v1/series", &p)
+	metrics := newMockedDatadogClient(t, &p)
 
-	stats.Timing("test.duration", 123*time.Millisecond, []string{"awesome:true"}, 1)
+	metrics.CheckRunLatency("diy", 123*time.Millisecond)
 
 	require.Len(t, p.Series, 1)
 	series := p.Series[0]
-	assert.Equal(t, "test.duration", series.Metric)
+	assert.Equal(t, "voucher.check.run.latency", series.Metric)
 	assert.Equal(t, "gauge", series.GetType())
 }
 
-func TestDatadogStatsd_Event(t *testing.T) {
+func TestDatadogClient_Event(t *testing.T) {
 	var p datadog.EventCreateRequest
-	stats := newMockedDatadogStatsd(t, "/api/v1/events", &p)
+	metrics := newMockedDatadogClient(t, &p)
 
-	e := statsd.NewEvent("error in check", "kaboom")
-	e.AlertType = statsd.Error
-	e.Priority = statsd.Low
-	e.Tags = []string{"check:test"}
-	stats.Event(e)
+	metrics.CheckAttestationError("diy", errors.New("kaboom"))
 
 	assert.Equal(t, "kaboom", p.Text)
-	assert.Equal(t, "error in check", p.Title)
+	assert.Equal(t, "Voucher Check Attestation Error", p.Title)
+	assert.Equal(t, datadog.EVENTALERTTYPE_ERROR, p.GetAlertType())
+	assert.Equal(t, datadog.EVENTPRIORITY_LOW, p.GetPriority())
+	assert.Equal(t, []string{"check:diy"}, p.GetTags())
 }
 
-func newMockedDatadogStatsd(t testing.TB, path string, data interface{}) *metrics.DatadogStatsd {
+func newMockedDatadogClient(t testing.TB, data interface{}) *metrics.DatadogClient {
 	mockDatadog := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if h := r.Header["Dd-Api-Key"]; len(h) != 1 || h[0] != mockApiKey {
+		if h := r.Header["Dd-Api-Key"]; len(h) != 1 || h[0] != mockAPIKey {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
 
-		if r.URL.Path != path {
-			w.WriteHeader(http.StatusNotFound)
-			return
-		}
 		if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			return
@@ -78,10 +74,6 @@ func newMockedDatadogStatsd(t testing.TB, path string, data interface{}) *metric
 
 	t.Cleanup(mockDatadog.Close)
 
-	cfg := datadog.NewConfiguration()
 	u, _ := url.Parse(mockDatadog.URL)
-	cfg.Host = u.Host
-	cfg.Scheme = u.Scheme
-	dd := datadog.NewAPIClient(cfg)
-	return metrics.NewDatadogStatsd(dd, mockApiKey, mockAppKey, nil)
+	return metrics.NewDatadogClient(mockAPIKey, mockAppKey, metrics.WithDatadogURL(*u))
 }
