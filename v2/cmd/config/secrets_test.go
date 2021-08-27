@@ -1,6 +1,8 @@
 package config
 
 import (
+	"os"
+	"os/exec"
 	"testing"
 
 	"github.com/spf13/viper"
@@ -72,4 +74,28 @@ func TestGetPGPKeyRing(t *testing.T) {
 	keyRing, err := data.getPGPKeyRing()
 	require.NoError(t, err)
 	assert.NotNil(t, keyRing)
+}
+
+func TestReadSops(t *testing.T) {
+	viper.Set("ejson.secrets", "")
+	viper.Set("ejson.dir", "")
+	viper.Set("sops.file", "../../../testdata/test.sops.json")
+
+	// Capture and restore GNUPGHOME variable
+	existingHome := os.Getenv("GNUPGHOME")
+	t.Cleanup(func() { os.Setenv("GNUPGHOME", existingHome) })
+
+	// Overwrite GNUPGHOME, shell to GPG to load the test private key
+	testHome := t.TempDir()
+	os.Setenv("GNUPGHOME", testHome)
+	cmd := exec.Command("gpg", "--import", "../../../testdata/testkey.asc")
+	err := cmd.Run()
+	require.NoError(t, err)
+
+	data, err := ReadSecrets()
+	require.NoError(t, err)
+	assert.Equal(t, clair.Config{
+		Username: "eclair",
+		Password: "chocolate",
+	}, data.ClairConfig)
 }

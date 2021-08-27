@@ -7,6 +7,7 @@ import (
 
 	"github.com/Shopify/ejson"
 	"github.com/spf13/viper"
+	"go.mozilla.org/sops/v3/decrypt"
 
 	"github.com/grafeas/voucher/v2/clair"
 	"github.com/grafeas/voucher/v2/repository"
@@ -23,17 +24,7 @@ type Secrets struct {
 
 // ReadSecrets reads from the ejson file and populates the passed interface.
 func ReadSecrets() (*Secrets, error) {
-	if !viper.IsSet("ejson.dir") {
-		return nil, fmt.Errorf("EJSON dir not set in the config file")
-	}
-	dir := viper.GetString("ejson.dir")
-
-	if !viper.IsSet("ejson.secrets") {
-		return nil, fmt.Errorf("EJSON secrets not set in the config file")
-	}
-	secrets := viper.GetString("ejson.secrets")
-
-	decrypted, err := ejson.DecryptFile(secrets, dir, "")
+	decrypted, err := decryptSecrets()
 	if err != nil {
 		return nil, err
 	}
@@ -43,6 +34,21 @@ func ReadSecrets() (*Secrets, error) {
 		return nil, err
 	}
 	return &data, nil
+}
+
+func decryptSecrets() ([]byte, error) {
+	ejDir := viper.GetString("ejson.dir")
+	ejSecrets := viper.GetString("ejson.secrets")
+	if ejDir != "" && ejSecrets != "" {
+		return ejson.DecryptFile(ejSecrets, ejDir, "")
+	}
+
+	sops := viper.GetString("sops.file")
+	if sops != "" {
+		return decrypt.File(sops, "json")
+	}
+
+	return nil, fmt.Errorf("secrets not provided via ejson or sops")
 }
 
 // getPGPKeyRing uses the Command's configured ejson file to populate a
