@@ -1,8 +1,8 @@
 {
-  "_public_key" : "cb0849626842a90427a026dc78ab39f8ded6f3180477c848ed3fe7c9c85da93d",
-  "repositories": {
-    "shopify": {
-      "token": "EJ[1:vt978NEKynsJhZlCvg5XdSE2S2PM1JBPK0tlC05cQAc=:4mDZCykfieedtHGoM0UT+Wr6zPO9J6XO:/AuGJ3I2QVnk52qOLo0sQ+EzEAk=]"
-    }
-  }
+	"_public_key": "cb0849626842a90427a026dc78ab39f8ded6f3180477c848ed3fe7c9c85da93d",
+	"repositories": {
+		"shopify": {
+			"token": "EJ[1:vt978NEKynsJhZlCvg5XdSE2S2PM1JBPK0tlC05cQAc=:4mDZCykfieedtHGoM0UT+Wr6zPO9J6XO:/AuGJ3I2QVnk52qOLo0sQ+EzEAk=]"
+		}
+	}
 }
