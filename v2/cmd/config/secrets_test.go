@@ -16,6 +16,7 @@ import (
 func TestNonExistantEjson(t *testing.T) {
 	viper.Set("ejson.secrets", "../../../testdata/bad.ejson")
 	viper.Set("ejson.dir", "../../../testdata/key")
+	t.Cleanup(viper.Reset)
 
 	_, err := ReadSecrets()
 	require.Equal(
@@ -30,6 +31,7 @@ func TestNonExistantEjson(t *testing.T) {
 func TestGetRepositoryKeyRing(t *testing.T) {
 	viper.Set("ejson.secrets", "../../../testdata/test.ejson")
 	viper.Set("ejson.dir", "../../../testdata/key")
+	t.Cleanup(viper.Reset)
 
 	data, err := ReadSecrets()
 	require.NoError(t, err)
@@ -47,6 +49,7 @@ func TestGetRepositoryKeyRing(t *testing.T) {
 func TestGetRepositoryKeyRingNoEjson(t *testing.T) {
 	viper.Set("ejson.secrets", "../../../testdata/test.ejson")
 	viper.Set("ejson.dir", "../../../testdata/nokey")
+	t.Cleanup(viper.Reset)
 
 	data, err := ReadSecrets()
 	require.Nil(t, data)
@@ -56,6 +59,7 @@ func TestGetRepositoryKeyRingNoEjson(t *testing.T) {
 func TestGetClairConfig(t *testing.T) {
 	viper.Set("ejson.secrets", "../../../testdata/test.ejson")
 	viper.Set("ejson.dir", "../../../testdata/key")
+	t.Cleanup(viper.Reset)
 
 	data, err := ReadSecrets()
 	require.NoError(t, err)
@@ -68,6 +72,7 @@ func TestGetClairConfig(t *testing.T) {
 func TestGetPGPKeyRing(t *testing.T) {
 	viper.Set("ejson.secrets", "../../../testdata/test.ejson")
 	viper.Set("ejson.dir", "../../../testdata/key")
+	t.Cleanup(viper.Reset)
 
 	data, err := ReadSecrets()
 	require.NoError(t, err)
@@ -77,9 +82,8 @@ func TestGetPGPKeyRing(t *testing.T) {
 }
 
 func TestReadSops(t *testing.T) {
-	viper.Set("ejson.secrets", "")
-	viper.Set("ejson.dir", "")
 	viper.Set("sops.file", "../../../testdata/test.sops.json")
+	t.Cleanup(viper.Reset)
 
 	// Capture and restore GNUPGHOME variable
 	existingHome := os.Getenv("GNUPGHOME")
