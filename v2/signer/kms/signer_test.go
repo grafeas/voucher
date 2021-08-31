@@ -30,11 +30,11 @@ func TestSigner_Sign(t *testing.T) {
 		},
 		{
 			algo:     kms.AlgoSHA384,
-			expected: "8517aca50b29dbeb9f5d8964a8adf64e2f6592b0aff41eade47f68ba9a3849254fac883bf15836da007086e73a145d7b",
+			expected: "ad111970708aaff07524d81f71582952b75ade74951ebb3c25e801fc4a3f17de8d3e8fbc7c271114462fe63f67d33536",
 		},
 		{
 			algo:     kms.AlgoSHA512,
-			expected: "5510ebbda5ed4da007c55a62fd7075c722ec031f07398ef3e90b9b50e0fe950985476c474414d2b386e8f08cd505fb506b528006a30abfe9ca0eb0b67b7e760b",
+			expected: "5b722b307fce6c944905d132691d5e4a2214b7fe92b738920eb3fce3a90420a19511c3010a0e7712b054daef5b57bad59ecbd93b3280f210578f547f4aed4d25",
 		},
 	}
 
@@ -47,18 +47,28 @@ func TestSigner_Sign(t *testing.T) {
 				},
 			}
 
-			// Build signer with mocked KMS:
+			// Build signer with mocked KMS, sign something:
 			k := &mockKMS{}
 			signer, err := kms.NewSigner(keys, kms.WithKMSClient(k))
 			require.NoError(t, err)
-
 			sig, path, err := signer.Sign("my-check", checkBody)
 			require.NoError(t, err)
 
 			// Verify request to kMS, and interpretation of response
 			if assert.Len(t, k.reqs, 1) {
-				kmsReq := k.reqs[0]
-				assert.Equal(t, "", fmt.Sprintf("%x", kmsReq.GetDigest().GetSha256()))
+				kmsDigest := k.reqs[0].GetDigest()
+				var digest string
+				switch tc.algo {
+				case kms.AlgoSHA256:
+					digest = string(kmsDigest.GetSha256())
+				case kms.AlgoSHA384:
+					digest = string(kmsDigest.GetSha384())
+				case kms.AlgoSHA512:
+					digest = string(kmsDigest.GetSha512())
+				default:
+					require.FailNow(t, "unexpected algo")
+				}
+				assert.Equal(t, tc.expected, fmt.Sprintf("%x", digest))
 			}
 			assert.Equal(t, mockSignature, sig)
 			assert.Equal(t, "//cloudkms.googleapis.com/v1/project/my-project/locations/global/keyRings/my-keyring/cryptoKeys/my-key", path)

@@ -79,30 +79,37 @@ func (s *Signer) Sign(checkName, body string) (string, string, error) {
 		return "", "", signer.ErrNoKeyForCheck
 	}
 
-	var digest hash.Hash
-	if _, err := digest.Write([]byte(body)); err != nil {
-		return "", "", err
+	digest := func(h hash.Hash) ([]byte, error) {
+		if _, err := h.Write([]byte(body)); err != nil {
+			return nil, err
+		}
+		return h.Sum(nil), nil
 	}
 
 	var d kms_pb.Digest
+	var digested []byte
+	var digestErr error
 	switch key.Algo {
 	case AlgoSHA256:
-		digest = sha256.New()
+		digested, digestErr = digest(sha256.New())
 		d.Digest = &kms_pb.Digest_Sha256{
-			Sha256: digest.Sum(nil),
+			Sha256: digested,
 		}
 	case AlgoSHA384:
-		digest = sha512.New384()
+		digested, digestErr = digest(sha512.New384())
 		d.Digest = &kms_pb.Digest_Sha384{
-			Sha384: digest.Sum(nil),
+			Sha384: digested,
 		}
 	case AlgoSHA512:
-		digest = sha512.New()
+		digested, digestErr = digest(sha512.New())
 		d.Digest = &kms_pb.Digest_Sha512{
-			Sha512: digest.Sum(nil),
+			Sha512: digested,
 		}
 	default:
 		return "", "", fmt.Errorf("unsupported digest algorithm %v", key.Algo)
+	}
+	if digestErr != nil {
+		return "", "", digestErr
 	}
 
 	resp, err := s.client.AsymmetricSign(context.Background(), &kms_pb.AsymmetricSignRequest{
