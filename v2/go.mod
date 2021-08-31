@@ -20,6 +20,7 @@ require (
 	github.com/golang/mock v1.4.4
 	github.com/golang/protobuf v1.3.5
 	github.com/google/uuid v1.1.1 // indirect
+	github.com/googleapis/gax-go/v2 v2.0.5
 	github.com/gorilla/context v1.1.1 // indirect
 	github.com/gorilla/mux v1.6.2
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
