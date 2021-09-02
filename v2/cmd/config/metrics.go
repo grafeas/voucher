@@ -7,14 +7,14 @@ import (
 	"github.com/spf13/viper"
 )
 
-func MetricsClient() (metrics.Client, error) {
+func MetricsClient(secrets *Secrets) (metrics.Client, error) {
 	tags := viper.GetStringSlice("statsd.tags")
 	if statsdAddr := viper.GetString("statsd.addr"); statsdAddr != "" {
 		sampleRate := viper.GetFloat64("statsd.sample_rate")
 		return metrics.NewStatsdClient(statsdAddr, sampleRate, tags)
-	} else if ddAPIKey := viper.GetString("statsd.datadog_api_key"); ddAPIKey != "" {
-		ddAppKey := viper.GetString("statsd.datadog_app_key")
-		return metrics.NewDatadogClient(ddAPIKey, ddAppKey, metrics.WithDatadogTags(tags)), nil
+	}
+	if secrets.Datadog.APIKey != "" && secrets.Datadog.AppKey != "" {
+		return metrics.NewDatadogClient(secrets.Datadog.APIKey, secrets.Datadog.AppKey, metrics.WithDatadogTags(tags)), nil
 	}
 	log.Printf("No metrics client configured")
 	return &metrics.NoopClient{}, nil
