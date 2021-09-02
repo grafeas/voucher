@@ -10,11 +10,13 @@ import (
 	"github.com/DataDog/datadog-go/statsd"
 )
 
-// DatadogClient emits metrics directly to Datadog.
+// DatadogClient is a metrics.Client that emits directly to Datadog.
 type DatadogClient struct {
 	StatsdClient
 	cfg *datadog.Configuration
 }
+
+var _ Client = (*DatadogClient)(nil)
 
 func NewDatadogClient(apiKey, appKey string, opts ...DatadogClientOpt) *DatadogClient {
 	cfg := datadog.NewConfiguration()

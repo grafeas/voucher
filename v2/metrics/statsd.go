@@ -15,11 +15,13 @@ type statsdClient interface {
 
 var _ statsdClient = (*statsd.Client)(nil)
 
-// StatsdClient emits metrics via statsd protocol.
+// StatsdClient is a metrics.Client that emits via statsd UDP protocol.
 type StatsdClient struct {
 	client       statsdClient
 	samplingRate float64
 }
+
+var _ Client = (*StatsdClient)(nil)
 
 // NewStatsdClient creates a client to emit metrics to a statsd server, probably dogstatsd.
 func NewStatsdClient(addr string, samplingRate float64, tags []string) (*StatsdClient, error) {
