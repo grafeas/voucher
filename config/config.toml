@@ -39,7 +39,7 @@ address = "localhost:6060"
 
 [statsd]
 # with a local aggregator:
-backend = statsd
+backend = "statsd"
 # OR: backend = datadog
 addr = "localhost:8125"
 sample_rate = 0.1
