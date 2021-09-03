@@ -58,7 +58,7 @@ func (s *Secrets) getPGPKeyRing() (*pgp.KeyRing, error) {
 
 	for name, key := range s.Keys {
 		err := pgp.AddKeyToKeyRingFromReader(newKeyRing, name, bytes.NewReader([]byte(key)))
-		if err != nil {
+		if nil != err {
 			return nil, err
 		}
 	}
