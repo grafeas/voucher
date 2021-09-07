@@ -44,7 +44,7 @@ func (s *Subscriber) Subscribe(ctx context.Context) error {
 	cctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	err = sub.Receive(cctx, func(ctx context.Context, msg *pubsub.Message) {
+	msgErr := sub.Receive(cctx, func(ctx context.Context, msg *pubsub.Message) {
 		processStart := time.Now()
 		defer func(startTime time.Time) {
 			s.metrics.PubSubTotalLatency(time.Since(startTime))
@@ -89,8 +89,8 @@ func (s *Subscriber) Subscribe(ctx context.Context) error {
 		msg.Ack()
 	})
 
-	if err != nil {
-		return fmt.Errorf("sub.Receive: %s", err)
+	if msgErr != nil {
+		return fmt.Errorf("sub.Receive: %s", msgErr)
 	}
 
 	return nil

@@ -57,10 +57,10 @@ func init() {
 	cobra.OnInitialize(config.InitConfig)
 
 	subscriberCmd.Flags().StringP("project", "p", "", "pub/sub project that has the subsciprion (required)")
-	subscriberCmd.MarkFlagRequired("project")
+	_ = subscriberCmd.MarkFlagRequired("project")
 	viper.BindPFlag("pubsub.project", subscriberCmd.Flags().Lookup("project"))
 	subscriberCmd.Flags().StringP("subscription", "s", "", "pub/sub topic subscription (required)")
-	subscriberCmd.MarkFlagRequired("subscription")
+	_ = subscriberCmd.MarkFlagRequired("subscription")
 	viper.BindPFlag("pubsub.subscription", subscriberCmd.Flags().Lookup("subscription"))
 	subscriberCmd.Flags().StringVarP(&config.FileName, "config", "c", "", "path to config")
 	subscriberCmd.Flags().IntP("timeout", "", 240, "number of seconds that should be dedicated to a Voucher call")
