@@ -1,0 +1,32 @@
+{
+	"openpgpkeys": {
+		"snakeoil": "ENC[AES256_GCM,data:dSwVlA==,iv:SqgLfrwjvBwUl0+IZgSo2xkihshUby0NjhZ25ovJ9/k=,tag:xFTjoH82+rEk6RPDWo99ig==,type:str]"
+	},
+	"clair": {
+		"username": "ENC[AES256_GCM,data:Dseq/2ld,iv:+AeBN2t6uLCJf3Is+54ysYURZH48p0qzfgDxm6NuOFs=,tag:eXKPug8Z8GjEIRCkW1dp9Q==,type:str]",
+		"password": "ENC[AES256_GCM,data:WJQJt9HO2yjh,iv:WeYOhymeKJq8dmO/D+LfSYLc4SWCh8MXrm4Ct8zaGYQ=,tag:bNo2L+zgLKYZ09hdQcQDqw==,type:str]"
+	},
+	"repositories": {
+		"organization-name": {
+			"token": "ENC[AES256_GCM,data:cOfWrtqcFfUxMTVBN/XwkQxw1Tfv,iv:ZWR2+haVvIrgvcer2cE1SWmo7BWrwzdPmxAGHovi7+I=,tag:qIZqahCuSLz0JjIJp6fCsw==,type:str]"
+		}
+	},
+	"sops": {
+		"kms": null,
+		"gcp_kms": null,
+		"azure_kv": null,
+		"hc_vault": null,
+		"age": null,
+		"lastmodified": "2021-08-27T17:46:11Z",
+		"mac": "ENC[AES256_GCM,data:5R4aSJx6OVjIPwdAqRAF/WpE+HtUR0WX7NsEaHsdNDTH8EsvNJwb4tVLNtobmBiRkVJw9DDff74mBvAcPkQkPnDh0q7BuQNJCtwK09U/hHe2P0FRaXKCSQvAlZJBUIaa5pev42WeQbig2tWtcO7h3NUd3XTvHZmP0a6IZ5F28Jw=,iv:citPjY1kVStd2sS8LRW/KgaQa1tlszve2rJrByfe8lY=,tag:gLT6cNdciPmFIJb62SPM4g==,type:str]",
+		"pgp": [
+			{
+				"created_at": "2021-08-27T17:14:55Z",
+				"enc": "-----BEGIN PGP MESSAGE-----\n\nhQEMAx6S4rS7c+iFAQf/bHMnBjjdMNllrfwmjXALZqhB9gs7ZFk6/3JsRufcmBy4\nCs0bdEB+FTExLeYH6PTgnlYj8Uaw8MOHJYUQf+c2rJJWiGTh8ZVCyAz0gFRLWIHS\nC9e2DqpnjYJmZgcqfTY6RYiM8dIfEPlyQPYgaCLdcxv6yTxvTeKFeGOnkB4k060o\n3EvsxfqjcjcI9z5sTpQOuvCQQHSEFdvliifVSaY053UdMCHjGfKk5zdFOsQTssAW\n1rg3sajFqgTf9KSzCSqsrNylPoTN6HHa+kaqXvLAXe0DzGXf6IGyPsYN+YDfI9FY\nc2ZwZJlHHIHGC7eA5cMcSFJRTVU/g0nI7BYMFgOu39JcARo1rxzWkSiX3ISKUKu4\n9iDQ2iZChWtL/mVLQzAmtpBS4wKHJnhivyzmRva6VITpxIc/vR1TXqUP5gZOIKF4\nO5QEyvTGdhKcERX6Jnkx5pPmubrkyvo7uaXbRz0=\n=5Qdi\n-----END PGP MESSAGE-----\n",
+				"fp": "90E942641C07A4C466BA97161E92E2B4BB73E885"
+			}
+		],
+		"unencrypted_suffix": "_unencrypted",
+		"version": "3.7.1"
+	}
+}
