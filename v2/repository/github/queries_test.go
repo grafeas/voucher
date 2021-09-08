@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/iancoleman/strcase"
 	utils "github.com/mennanov/fieldmask-utils"
 	"github.com/stretchr/testify/assert"
 )
@@ -14,7 +13,7 @@ type queryHandlerFunc func(query interface{}, variables map[string]interface{}) 
 
 func createHandler(input interface{}, mask []string) queryHandlerFunc {
 	return func(query interface{}, variables map[string]interface{}) error {
-		mask, err := utils.MaskFromPaths(mask, strcase.ToCamel)
+		mask, err := utils.MaskFromPaths(mask, func(s string) string { return s })
 		if err != nil {
 			return err
 		}

@@ -19,7 +19,6 @@ require (
 	github.com/google/uuid v1.1.1 // indirect
 	github.com/googleapis/gax-go/v2 v2.0.5
 	github.com/gorilla/mux v1.6.2
-	github.com/iancoleman/strcase v0.2.0
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/mennanov/fieldmask-utils v0.0.0-20190703161732-eca3212cf9f3
 	github.com/mitchellh/go-homedir v1.1.0
