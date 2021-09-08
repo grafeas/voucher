@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/golang/protobuf/protoc-gen-go/generator"
+	"github.com/iancoleman/strcase"
 	utils "github.com/mennanov/fieldmask-utils"
 	"github.com/stretchr/testify/assert"
 )
@@ -14,7 +14,7 @@ type queryHandlerFunc func(query interface{}, variables map[string]interface{}) 
 
 func createHandler(input interface{}, mask []string) queryHandlerFunc {
 	return func(query interface{}, variables map[string]interface{}) error {
-		mask, err := utils.MaskFromPaths(mask, generator.CamelCase)
+		mask, err := utils.MaskFromPaths(mask, strcase.ToCamel)
 		if err != nil {
 			return err
 		}

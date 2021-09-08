@@ -16,10 +16,10 @@ require (
 	github.com/dustin/gojson v0.0.0-20160307161227-2e71ec9dd5ad // indirect
 	github.com/fernet/fernet-go v0.0.0-20180830025343-9eac43b88a5e // indirect
 	github.com/golang/mock v1.4.4
-	github.com/golang/protobuf v1.4.1
 	github.com/google/uuid v1.1.1 // indirect
 	github.com/googleapis/gax-go/v2 v2.0.5
 	github.com/gorilla/mux v1.6.2
+	github.com/iancoleman/strcase v0.2.0
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/mennanov/fieldmask-utils v0.0.0-20190703161732-eca3212cf9f3
 	github.com/mitchellh/go-homedir v1.1.0
