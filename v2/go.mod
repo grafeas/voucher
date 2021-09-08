@@ -1,6 +1,6 @@
 module github.com/grafeas/voucher/v2
 
-go 1.13
+go 1.16
 
 require (
 	cloud.google.com/go v0.52.0
@@ -16,7 +16,6 @@ require (
 	github.com/dustin/gojson v0.0.0-20160307161227-2e71ec9dd5ad // indirect
 	github.com/fernet/fernet-go v0.0.0-20180830025343-9eac43b88a5e // indirect
 	github.com/golang/mock v1.4.4
-	github.com/golang/protobuf v1.4.1
 	github.com/google/uuid v1.1.1 // indirect
 	github.com/googleapis/gax-go/v2 v2.0.5
 	github.com/gorilla/mux v1.6.2
