@@ -26,6 +26,7 @@ func TestDatadogClient_Counter(t *testing.T) {
 	metrics := newMockedDatadogClient(t, &p)
 
 	metrics.CheckRunStart("diy")
+	metrics.Close()
 
 	require.Len(t, p.Series, 1)
 	series := p.Series[0]
@@ -35,11 +36,28 @@ func TestDatadogClient_Counter(t *testing.T) {
 	assert.Equal(t, [][]float64{{mockClock, 1}}, series.GetPoints())
 }
 
+func TestDatadogClient_Counter_Aggregate(t *testing.T) {
+	var p datadog.MetricsPayload
+	metrics := newMockedDatadogClient(t, &p)
+
+	metrics.CheckRunStart("diy")
+	metrics.CheckRunStart("diy")
+	metrics.Close()
+
+	require.Len(t, p.Series, 1)
+	series := p.Series[0]
+	assert.Equal(t, "voucher.check.run.start", series.Metric)
+	assert.Equal(t, []string{"check:diy"}, series.GetTags())
+	assert.Equal(t, "count", series.GetType())
+	assert.Equal(t, [][]float64{{mockClock, 2}}, series.GetPoints())
+}
+
 func TestDatadogClient_Timing(t *testing.T) {
 	var p datadog.MetricsPayload
 	metrics := newMockedDatadogClient(t, &p)
 
 	metrics.CheckRunLatency("diy", 123*time.Millisecond)
+	metrics.Close()
 
 	require.Len(t, p.Series, 1)
 	series := p.Series[0]

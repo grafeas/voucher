@@ -4,6 +4,8 @@ import (
 	"context"
 	"log"
 	"net/url"
+	"sort"
+	"sync"
 	"time"
 
 	"github.com/DataDog/datadog-api-client-go/api/v1/datadog"
@@ -53,6 +55,10 @@ func WithDatadogFrozenClock(frozenTime float64) DatadogClientOpt {
 	}
 }
 
+func (d *DatadogClient) Close() {
+	d.client.(*datadogStatsd).submit()
+}
+
 // datadogStatsd is an alternative statsd.Client that transmits directly to Datadog
 type datadogStatsd struct {
 	authCtx context.Context
@@ -60,6 +66,9 @@ type datadogStatsd struct {
 	events  *datadog.EventsApiService
 	tags    []string
 	now     func() float64
+
+	mu     sync.Mutex
+	series []*datadog.Series
 }
 
 var _ statsdClient = (*datadogStatsd)(nil)
@@ -86,18 +95,49 @@ const (
 )
 
 func (d *datadogStatsd) Incr(metric string, tags []string, _ float64) error {
-	s := datadog.NewSeries(metric, [][]float64{{d.now(), 1}})
+	tags = append(d.tags, tags...)
+	now := d.now()
+
+	d.mu.Lock()
+	defer d.mu.Unlock()
+
+	if existing := d.findSeries(metric, tags); existing != nil {
+		for i, p := range existing.Points {
+			if p[0] == now {
+				existing.Points[i][1]++
+				return nil
+			}
+		}
+		existing.Points = append(existing.Points, []float64{now, 1})
+		return nil
+	}
+
+	// Not found, create
+	s := datadog.NewSeries(metric, [][]float64{{now, 1}})
 	s.SetType(countType)
-	s.SetTags(append(d.tags, tags...))
-	d.submit(*s)
+	s.SetTags(tags)
+	d.series = append(d.series, s)
 	return nil
 }
 
 func (d *datadogStatsd) Timing(metric string, dur time.Duration, tags []string, _ float64) error {
-	s := datadog.NewSeries(metric, [][]float64{{d.now(), float64(dur.Milliseconds())}})
+	tags = append(d.tags, tags...)
+	now := d.now()
+	val := float64(dur.Milliseconds())
+
+	d.mu.Lock()
+	defer d.mu.Unlock()
+
+	if existing := d.findSeries(metric, tags); existing != nil {
+		existing.Points = append(existing.Points, []float64{now, val})
+		return nil
+	}
+
+	// Not found, create
+	s := datadog.NewSeries(metric, [][]float64{{now, val}})
 	s.SetType(durationType)
-	s.SetTags(append(d.tags, tags...))
-	d.submit(*s)
+	s.SetTags(tags)
+	d.series = append(d.series, s)
 	return nil
 }
 
@@ -122,13 +162,47 @@ func (d *datadogStatsd) Event(e *statsd.Event) error {
 	return nil
 }
 
-func (d *datadogStatsd) submit(series ...datadog.Series) {
+func (d *datadogStatsd) submit() {
 	ctx, cancel := context.WithTimeout(d.authCtx, submitTimeout)
 	defer cancel()
 
-	// TODO: this is not batched, that is not great
+	d.mu.Lock()
+	defer d.mu.Unlock()
+
+	seriesCount := len(d.series)
+	if seriesCount == 0 {
+		return
+	}
+	series := make([]datadog.Series, 0, seriesCount)
+	for _, s := range d.series {
+		series = append(series, *s)
+	}
+	d.series = nil
+
 	// TODO: this is sync, that is not great
 	if _, _, err := d.metrics.SubmitMetrics(ctx, *datadog.NewMetricsPayload(series)); err != nil {
 		log.Println("error submitting metrics to datadog", err)
 	}
+}
+
+func (d *datadogStatsd) findSeries(metric string, tags []string) *datadog.Series {
+	sort.Strings(tags)
+seriesLoop:
+	for _, s := range d.series {
+		if s.GetMetric() != metric {
+			continue
+		}
+		sTags := s.GetTags()
+		if len(sTags) != len(tags) {
+			continue
+		}
+		sort.Strings(sTags)
+		for i, t := range sTags {
+			if tags[i] != t {
+				continue seriesLoop
+			}
+		}
+		return s
+	}
+	return nil
 }
