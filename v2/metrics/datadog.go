@@ -3,6 +3,7 @@ package metrics
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"math"
 	"net/url"
@@ -22,18 +23,25 @@ type DatadogClient struct {
 }
 
 var _ Client = (*DatadogClient)(nil)
+var _ io.Closer = (*DatadogClient)(nil)
 
 func NewDatadogClient(apiKey, appKey string, opts ...DatadogClientOpt) *DatadogClient {
 	cfg := datadog.NewConfiguration()
+	ds := newDatadogStatsd(cfg, apiKey, appKey)
 	c := &DatadogClient{
 		cfg: cfg,
 		StatsdClient: StatsdClient{
-			client: newDatadogStatsd(cfg, apiKey, appKey),
+			client: ds,
 		},
 	}
 	for _, o := range opts {
 		o(c)
 	}
+
+	// start the client's loop after processing options, so tests can shorten the interval
+	submitLoopCtx, cancel := context.WithCancel(context.Background())
+	ds.cancelSubmitLoop = cancel
+	go ds.submitLoop(submitLoopCtx)
 	return c
 }
 
@@ -58,13 +66,23 @@ func WithDatadogFrozenClock(frozenTime float64) DatadogClientOpt {
 	}
 }
 
-func (d *DatadogClient) Close() {
-	d.client.(*datadogStatsd).submit()
+func WithDatadogSubmitInterval(dur time.Duration) DatadogClientOpt {
+	return func(c *DatadogClient) {
+		c.client.(*datadogStatsd).submitInterval = dur
+	}
+}
+
+func (d *DatadogClient) Close() error {
+	d.client.(*datadogStatsd).Close()
+	return nil
 }
 
 // datadogStatsd is an alternative statsd.Client that transmits directly to Datadog
 type datadogStatsd struct {
-	authCtx context.Context
+	authCtx          context.Context
+	cancelSubmitLoop context.CancelFunc
+	submitInterval   time.Duration
+
 	metrics *datadog.MetricsApiService
 	events  *datadog.EventsApiService
 	tags    []string
@@ -87,11 +105,12 @@ func newDatadogStatsd(cfg *datadog.Configuration, apiKey, appKey string) *datado
 		"appKeyAuth": {Key: appKey},
 	}
 	return &datadogStatsd{
-		authCtx:      context.WithValue(context.Background(), datadog.ContextAPIKeys, keys),
-		metrics:      client.MetricsApi,
-		events:       client.EventsApi,
-		now:          func() float64 { return float64(time.Now().Unix()) },
-		durationData: make(map[string]map[float64][]float64),
+		authCtx:        context.WithValue(context.Background(), datadog.ContextAPIKeys, keys),
+		metrics:        client.MetricsApi,
+		events:         client.EventsApi,
+		now:            func() float64 { return float64(time.Now().Unix()) },
+		durationData:   make(map[string]map[float64][]float64),
+		submitInterval: 2 * time.Second,
 	}
 }
 
@@ -175,6 +194,25 @@ func (d *datadogStatsd) Event(e *statsd.Event) error {
 	return nil
 }
 
+func (d *datadogStatsd) Close() {
+	d.cancelSubmitLoop()
+	d.submit()
+}
+
+func (d *datadogStatsd) submitLoop(ctx context.Context) {
+	t := time.NewTicker(d.submitInterval)
+	defer t.Stop()
+
+	for {
+		select {
+		case <-t.C:
+			d.submit()
+		case <-ctx.Done():
+			return
+		}
+	}
+}
+
 func (d *datadogStatsd) submit() {
 	series := d.flushSeries()
 	if len(series) == 0 {
@@ -183,8 +221,6 @@ func (d *datadogStatsd) submit() {
 
 	ctx, cancel := context.WithTimeout(d.authCtx, submitTimeout)
 	defer cancel()
-
-	// TODO: this is sync, that is not great
 	if _, _, err := d.metrics.SubmitMetrics(ctx, *datadog.NewMetricsPayload(series)); err != nil {
 		log.Println("error submitting metrics to datadog", err)
 	}
@@ -244,7 +280,7 @@ func percentile(data []float64, p float64) float64 {
 	pos := float64(len(data)) * p
 	if math.Round(pos) == pos {
 		// Return exact value at percentile
-		return data[int(pos)]
+		return data[int(pos)-1]
 	}
 
 	return (data[int(pos-1)] + data[int(pos)]) / 2
