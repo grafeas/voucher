@@ -38,7 +38,7 @@ func NewDatadogClient(apiKey, appKey string, opts ...DatadogClientOpt) *DatadogC
 		o(c)
 	}
 
-	// start the client's loop after processing options, so tests can shorten the interval
+	// start the submission loop after processing options, so tests can shorten the interval
 	submitLoopCtx, cancel := context.WithCancel(context.Background())
 	ds.cancelSubmitLoop = cancel
 	go ds.submitLoop(submitLoopCtx)
@@ -77,7 +77,7 @@ func (d *DatadogClient) Close() error {
 	return nil
 }
 
-// datadogStatsd is an alternative statsd.Client that transmits directly to Datadog
+// datadogStatsd is an alternative statsd.Client that aggregates in memory, with periodic submission to Datadog API.
 type datadogStatsd struct {
 	authCtx          context.Context
 	cancelSubmitLoop context.CancelFunc
@@ -88,10 +88,10 @@ type datadogStatsd struct {
 	tags    []string
 	now     func() float64
 
-	mu     sync.Mutex
-	series []*datadog.Series
-	// map of timingKey() to timestamp, to values
-	durationData map[string]map[float64][]float64
+	// series tracks all metrics, but timingData is aggregated separately to prefilter calculations for summary metrics (e.g. p95)
+	mu         sync.Mutex
+	series     []*datadog.Series
+	timingData map[string]map[float64][]float64
 }
 
 var _ statsdClient = (*datadogStatsd)(nil)
@@ -109,14 +109,14 @@ func newDatadogStatsd(cfg *datadog.Configuration, apiKey, appKey string) *datado
 		metrics:        client.MetricsApi,
 		events:         client.EventsApi,
 		now:            func() float64 { return float64(time.Now().Unix()) },
-		durationData:   make(map[string]map[float64][]float64),
+		timingData:     make(map[string]map[float64][]float64),
 		submitInterval: 2 * time.Second,
 	}
 }
 
 const (
-	durationType = "gauge"
-	countType    = "count"
+	timingType = "gauge"
+	countType  = "count"
 )
 
 func (d *datadogStatsd) Incr(metric string, tags []string, _ float64) error {
@@ -127,6 +127,7 @@ func (d *datadogStatsd) Incr(metric string, tags []string, _ float64) error {
 	defer d.mu.Unlock()
 
 	if existing := d.findSeries(metric, tags); existing != nil {
+		// Series exists: increment or add the per-timestamp count
 		for i, p := range existing.Points {
 			if p[0] == now {
 				existing.Points[i][1]++
@@ -155,20 +156,22 @@ func (d *datadogStatsd) Timing(metric string, dur time.Duration, tags []string, 
 	defer d.mu.Unlock()
 
 	if existing := d.findSeries(metric, tags); existing != nil {
-		d.durationData[tk][now] = append(d.durationData[tk][now], val)
+		// Series exists, we only need to aggregate timing data:
+		d.timingData[tk][now] = append(d.timingData[tk][now], val)
 		return nil
 	}
 
 	// Not found, create
 	s := datadog.NewSeries(metric, nil)
-	s.SetType(durationType)
+	s.SetType(timingType)
 	s.SetTags(tags)
 	s.SetInterval(1)
 	d.series = append(d.series, s)
-	d.durationData[tk] = map[float64][]float64{now: {val}}
+	d.timingData[tk] = map[float64][]float64{now: {val}}
 	return nil
 }
 
+// timingKey serializes metric+tags as a key for timingData
 func timingKey(metric string, tags []string) string {
 	return fmt.Sprintf("%s %s", metric, strings.Join(tags, ","))
 }
@@ -196,6 +199,7 @@ func (d *datadogStatsd) Event(e *statsd.Event) error {
 
 func (d *datadogStatsd) Close() {
 	d.cancelSubmitLoop()
+	// flush any buffered metrics. this may block on mutex until the submitLoop finishes
 	d.submit()
 }
 
@@ -230,38 +234,44 @@ func (d *datadogStatsd) flushSeries() []datadog.Series {
 	d.mu.Lock()
 	defer d.mu.Unlock()
 
-	series := make([]datadog.Series, 0, len(d.series))
+	// most series map 1:1, but timing expands to 5 series
+	series := make([]datadog.Series, 0, len(d.series)+len(d.timingData)*4)
 	for _, s := range d.series {
-		if s.GetType() != durationType {
-			series = append(series, *s)
+		if s.GetType() == timingType {
+			series = append(series, d.deriveTimingSeries(s)...)
 			continue
 		}
-
-		// Construct series from captured samples:
-		tk := timingKey(s.GetMetric(), s.GetTags())
-		var counts, averages, p95s, p99s, maxes [][]float64
-		for ts, data := range d.durationData[tk] {
-			sort.Float64s(data)
-			var sum float64
-			for _, f := range data {
-				sum += f
-			}
-			count := float64(len(data))
-			counts = append(counts, []float64{ts, count})
-			averages = append(averages, []float64{ts, sum / count})
-			p95s = append(p95s, []float64{ts, percentile(data, 0.95)})
-			p99s = append(p99s, []float64{ts, percentile(data, 0.99)})
-			maxes = append(maxes, []float64{ts, data[len(data)-1]})
-		}
-		series = append(series, cloneSeries(s, "count", counts))
-		series = append(series, cloneSeries(s, "avg", averages))
-		series = append(series, cloneSeries(s, "95percentile", p95s))
-		series = append(series, cloneSeries(s, "99percentile", p99s))
-		series = append(series, cloneSeries(s, "max", maxes))
+		series = append(series, *s)
 	}
 	d.series = nil
-	d.durationData = make(map[string]map[float64][]float64)
+	d.timingData = make(map[string]map[float64][]float64)
 	return series
+}
+
+func (d *datadogStatsd) deriveTimingSeries(s *datadog.Series) []datadog.Series {
+	tk := timingKey(s.GetMetric(), s.GetTags())
+	var counts, averages, p95s, p99s, maxes [][]float64
+	for ts, data := range d.timingData[tk] {
+		sort.Float64s(data)
+		var sum float64
+		for _, f := range data {
+			sum += f
+		}
+		count := float64(len(data))
+		counts = append(counts, []float64{ts, count})
+		averages = append(averages, []float64{ts, sum / count})
+		p95s = append(p95s, []float64{ts, percentile(data, 0.95)})
+		p99s = append(p99s, []float64{ts, percentile(data, 0.99)})
+		maxes = append(maxes, []float64{ts, data[len(data)-1]})
+	}
+
+	return []datadog.Series{
+		cloneSeries(s, "count", counts),
+		cloneSeries(s, "avg", averages),
+		cloneSeries(s, "95percentile", p95s),
+		cloneSeries(s, "99percentile", p99s),
+		cloneSeries(s, "max", maxes),
+	}
 }
 
 func cloneSeries(s *datadog.Series, suffix string, points [][]float64) datadog.Series {
