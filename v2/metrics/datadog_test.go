@@ -24,7 +24,7 @@ const (
 
 func TestDatadogClient_Counter(t *testing.T) {
 	var p datadog.MetricsPayload
-	metrics := newMockedDatadogClient(t, &p)
+	metrics, _ := newMockedDatadogClient(t, &p)
 
 	metrics.CheckRunStart("diy")
 	metrics.Close()
@@ -39,7 +39,7 @@ func TestDatadogClient_Counter(t *testing.T) {
 
 func TestDatadogClient_Counter_Aggregate(t *testing.T) {
 	var p datadog.MetricsPayload
-	metrics := newMockedDatadogClient(t, &p)
+	metrics, _ := newMockedDatadogClient(t, &p)
 
 	metrics.CheckRunStart("diy")
 	metrics.CheckRunStart("diy")
@@ -55,7 +55,7 @@ func TestDatadogClient_Counter_Aggregate(t *testing.T) {
 
 func TestDatadogClient_Timing(t *testing.T) {
 	var p datadog.MetricsPayload
-	metrics := newMockedDatadogClient(t, &p)
+	metrics, _ := newMockedDatadogClient(t, &p)
 
 	metrics.CheckRunLatency("diy", 123*time.Millisecond)
 	metrics.Close()
@@ -89,7 +89,7 @@ func TestDatadogClient_Timing(t *testing.T) {
 
 func TestDatadogClient_Timing_Aggregate(t *testing.T) {
 	var p datadog.MetricsPayload
-	metrics := newMockedDatadogClient(t, &p)
+	metrics, _ := newMockedDatadogClient(t, &p)
 
 	for i := 0; i < 100; i++ {
 		metrics.CheckRunLatency("diy", time.Duration(i+1)*time.Millisecond)
@@ -125,13 +125,15 @@ func TestDatadogClient_Timing_Aggregate(t *testing.T) {
 
 func TestDatadogClient_AsyncFlush(t *testing.T) {
 	var p datadog.MetricsPayload
-	metrics := newMockedDatadogClient(t, &p)
+	metrics, signal := newMockedDatadogClient(t, &p)
 
 	metrics.CheckRunStart("diy")
-	require.Len(t, p.Series, 0)
 
-	time.Sleep(testSubmitInterval * 2)
-
+	select {
+	case <-signal:
+	case <-time.After(2 * testSubmitInterval):
+		require.Fail(t, "expected flush did not happen")
+	}
 	require.Len(t, p.Series, 1)
 	series := p.Series[0]
 	assert.Equal(t, "voucher.check.run.start", series.Metric)
@@ -142,7 +144,7 @@ func TestDatadogClient_AsyncFlush(t *testing.T) {
 
 func TestDatadogClient_Event(t *testing.T) {
 	var p datadog.EventCreateRequest
-	metrics := newMockedDatadogClient(t, &p)
+	metrics, _ := newMockedDatadogClient(t, &p)
 
 	metrics.CheckAttestationError("diy", errors.New("kaboom"))
 
@@ -154,7 +156,8 @@ func TestDatadogClient_Event(t *testing.T) {
 	assert.Equal(t, int64(mockClock), p.GetDateHappened())
 }
 
-func newMockedDatadogClient(t testing.TB, data interface{}) *metrics.DatadogClient {
+func newMockedDatadogClient(t testing.TB, data interface{}) (*metrics.DatadogClient, <-chan struct{}) {
+	signal := make(chan struct{})
 	mockDatadog := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if h := r.Header["Dd-Api-Key"]; len(h) != 1 || h[0] != mockAPIKey {
 			w.WriteHeader(http.StatusUnauthorized)
@@ -164,6 +167,11 @@ func newMockedDatadogClient(t testing.TB, data interface{}) *metrics.DatadogClie
 		if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			return
+		}
+
+		select {
+		case signal <- struct{}{}:
+		default:
 		}
 		w.WriteHeader(http.StatusOK)
 	}))
@@ -175,5 +183,5 @@ func newMockedDatadogClient(t testing.TB, data interface{}) *metrics.DatadogClie
 		metrics.WithDatadogURL(*u),
 		metrics.WithDatadogFrozenClock(mockClock),
 		metrics.WithDatadogSubmitInterval(testSubmitInterval),
-	)
+	), signal
 }
