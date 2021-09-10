@@ -56,13 +56,29 @@ Below are the configuration options for Voucher Server:
 | `server`             | `password`                   | A password hashed with the bcrypt algorithm, for use with the username.                               |
 | `ejson`              | `dir`                        | The path to the ejson keys directory.                                                                 |
 | `ejson`              | `secrets`                    | The path to the ejson secrets.                                                                        |
+| `sops`               | `file`                       | The path to the SOPS secrets.                                                                         |
 | `clair`              |  `address`                   | The hostname that Clair exists at. If "http://" or "https://" is omitted, this will default to HTTPS. |
 | `repository.[alias]` | `org-url`                    | The URL used to determine if a repository is owned by an organization.                                |
 | `required.[env]`     | (test name here)             | A test that is active when running "env" tests.                                                       |
+| `statsd`             | `backend`                    | The destination for reporting metrics, can be `statsd` for local aggregation, or `datadog`.           |
+| `statsd`             | `addr`                       | The UDP endpoint to use when `statsd.backend == "statsd"`.                                            |
+| `statsd`             | `tags`                       | List of tags in `key:value` format to apply to very metric. Example: `env:production`.                |
+| `statsd`             | `sample_rate`                | Configurable sample rate to limit metics overhead.                                                    |
 
 Configuration options can be overridden at runtime by setting the appropriate flag. For example, if you set the "port" flag when running `voucher_server`, that value will override whatever is in the configuration.
 
 Note that Repositories can be set multiple times. This is discussed futher below.
+
+Secret values are stored encrypted in an ejson or SOPS file, and can not be overwritten at the command line. Below are the configuration secrets for Voucher Server. Ejson and SOPS secrets follow the same schema:
+
+| Group                | Key                          | Description                                                                                           |
+| :-------------       | :--------------------------- | :---------------------------------------------------------------------------------------------------- |
+| `openpgpkeys`        | (test name here)             | The PGP key to use for signing attestations of a specific test.                                       |
+| `clair`              | `username`                   | Username for CoreOS Clair, if configured as a scanner.                                                |
+| `clair`              | `password`                   | Password for CoreOS Clair, if configured as a scanner.                                                |
+| `datadog`            | `api_key`                    | API key for direct submission when configuration `statsd.backend == "datadog"`.                       |
+| `datadog`            | `app_key`                    | App key for direct submission when configuration `statsd.backend == "datadog"`.                       |
+| `repositories`       | (repository owner name here) | Credentials for repository authentication.                                                            |
 
 ### Scanner
 
@@ -156,14 +172,13 @@ org-url = "https://github.com/grafeas"
 #### Repository Authentication
 
 For the repository groups to authenticate with a repository server, you will
-need to create secrets matching the alias name in your `ejson` file.
+need to create secrets matching the alias name in your secrets file (ejson or SOPS).
 
 For example, for the `repository.shopify` block, you would need a `repositories`
-block in your `ejson` with a `shopify` block inside of it:
+block in your secrets with a `shopify` block inside of it:
 
 ```json
 {
-  "_public_key" : "cb0849626842a90427a026dc78ab39f8ded6f3180477c848ed3fe7c9c85da93d",
   "repositories": {
     "shopify": {
       "token": "EJ[1:vt978NEKynsJhZlCvg5XdSE2S2PM1JBPK0tlC05cQAc=:4mDZCykfieedtHGoM0UT+Wr6zPO9J6XO:/AuGJ3I2QVnk52qOLo0sQ+EzEAk=]"
@@ -183,7 +198,6 @@ you can specify the App ID, Installation ID, and the private key as follows:
 
 ```json
 {
-  "_public_key" : "cb0849626842a90427a026dc78ab39f8ded6f3180477c848ed3fe7c9c85da93d",
   "repositories": {
     "shopify": {
       "_id": "1234",
@@ -264,7 +278,7 @@ ignored unless called directly.
 
 #### OpenPGP Keys
 
-You can use OpenPGP keys by encrypting them in your ejson secrets file.
+You can use OpenPGP keys by encrypting them in your secrets file (ejson or SOPS).
 
 First, ensure the signer is set to `pgp` in the configuration:
 
@@ -272,7 +286,7 @@ First, ensure the signer is set to `pgp` in the configuration:
 signer = "pgp"
 ```
 
-Then add keys to your ejson secrets file. [This is documented more completely
+Then add keys to your secrets file. [This is documented more completely
 in the Tutorial](TUTORIAL.md#generating-keys-for-attestation).
 
 #### Google KMS Keys

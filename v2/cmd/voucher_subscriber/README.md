@@ -36,11 +36,11 @@ $ voucher_subscriber [--project <project> --subscription <subscription>]
 
 `voucher_subscriber` supports the following flags:
 
-| Flag        | Short Flag       | Description                                                                |
-| :--------   | :--------------- | :------------------------------------------------------------------------- |
-| `--project`  | `-p`            | The GCP project to be used.                                                |
-| `--subscription` | `-s`        | The subscription that contains messages.                                   |
-| `--timeout` |                  | The number of seconds to spend checking an image, before failing.          |
+| Flag             | Short Flag   | Description                                                                |
+| :--------        | :----------- | :------------------------------------------------------------------------- |
+| `--project`      | `-p`         | The GCP project to be used.                                                |
+| `--subscription` | `-s`         | The subscription that contains messages.                                   |
+| `--timeout`      |              | The number of seconds to spend checking an image, before failing.          |
 
 For example:
 
