@@ -1,5 +1,5 @@
 # Builder
-FROM golang:1.14-alpine as builder
+FROM golang:1.16-alpine as builder
 
 LABEL maintainer "catherinejones"
 WORKDIR /go/src/github.com/grafeas/voucher
