@@ -96,7 +96,10 @@ type datadogStatsd struct {
 
 var _ statsdClient = (*datadogStatsd)(nil)
 
-const submitTimeout = 3 * time.Second
+const (
+	submitTimeout         = 5 * time.Second
+	defaultSubmitInterval = 10 * time.Second
+)
 
 func newDatadogStatsd(cfg *datadog.Configuration, apiKey, appKey string) *datadogStatsd {
 	client := datadog.NewAPIClient(cfg)
@@ -110,7 +113,7 @@ func newDatadogStatsd(cfg *datadog.Configuration, apiKey, appKey string) *datado
 		events:         client.EventsApi,
 		now:            func() float64 { return float64(time.Now().Unix()) },
 		timingData:     make(map[string]map[float64][]float64),
-		submitInterval: 2 * time.Second,
+		submitInterval: defaultSubmitInterval,
 	}
 }
 
@@ -142,12 +145,14 @@ func (d *datadogStatsd) Incr(metric string, tags []string, _ float64) error {
 	s := datadog.NewSeries(metric, [][]float64{{now, 1}})
 	s.SetType(countType)
 	s.SetTags(tags)
+	s.SetInterval(int64(d.submitInterval.Seconds()))
 	d.series = append(d.series, s)
 	return nil
 }
 
 func (d *datadogStatsd) Timing(metric string, dur time.Duration, tags []string, _ float64) error {
 	tags = append(d.tags, tags...)
+	sort.Strings(tags)
 	now := d.now()
 	val := float64(dur.Milliseconds())
 	tk := timingKey(metric, tags)
@@ -165,7 +170,6 @@ func (d *datadogStatsd) Timing(metric string, dur time.Duration, tags []string, 
 	s := datadog.NewSeries(metric, nil)
 	s.SetType(timingType)
 	s.SetTags(tags)
-	s.SetInterval(1)
 	d.series = append(d.series, s)
 	d.timingData[tk] = map[float64][]float64{now: {val}}
 	return nil
