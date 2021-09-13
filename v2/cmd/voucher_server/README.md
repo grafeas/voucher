@@ -62,8 +62,8 @@ Below are the configuration options for Voucher Server:
 | `required.[env]`     | (test name here)             | A test that is active when running "env" tests.                                                       |
 | `statsd`             | `backend`                    | The destination for reporting metrics, can be `statsd` for local aggregation, or `datadog`.           |
 | `statsd`             | `addr`                       | The UDP endpoint to use when `statsd.backend == "statsd"`.                                            |
-| `statsd`             | `tags`                       | List of tags in `key:value` format to apply to very metric. Example: `env:production`.                |
-| `statsd`             | `sample_rate`                | Configurable sample rate to limit metics overhead.                                                    |
+| `statsd`             | `tags`                       | List of tags in `key:value` format that apply to every metric. Example: `env:production`.                |
+| `statsd`             | `sample_rate`                | Configurable sample rate to limit metrics overhead.                                                    |
 
 Configuration options can be overridden at runtime by setting the appropriate flag. For example, if you set the "port" flag when running `voucher_server`, that value will override whatever is in the configuration.
 
