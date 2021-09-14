@@ -10,11 +10,13 @@ First, install Voucher using the instructions in the [README](/v2/cmd/voucher_se
 
 Create a new configuration file. You may want to refer to the [example configuration](/config/config.toml).
 
-Make sure that you update the `ejson` specific blocks to point to the `ejson` file and key you will be making in the next step.
+Make sure that you update the `ejson` or `sops` specific blocks to point to the files you will be making in the next step.
 
-## Create ejson configuration
+## Create secrets
 
-If you plan on creating attestations (rather than just running checks against your images), or if you plan on using Clair as your Vulnerability Scanner, you will need to create an `ejson` file to store the OpenPGP keys and/or Clair login information respectively.
+If you plan on creating attestations (rather than just running checks against your images), or if you plan on using Clair as your Vulnerability Scanner, you will need to create a secrets file to store secret values like the OpenPGP keys and/or Clair login information.
+
+### Create ejson configuration
 
 Note: this step is unnecessary if you are a Shopify employee and are running Voucher in Shopify's cloud platform.
 
@@ -57,6 +59,64 @@ You can now decrypt your `ejson` file using:
 $ ejson --keydir=<path to the directory containing the keyfile> decrypt <filename of your ejson file>
 ```
 
+### Create SOPS configuration
+
+First, establish what key you'd like SOPS to use. See [SOPS usage](https://github.com/mozilla/sops#usage) for the options supported.
+Voucher works best with external key storage, such as your cloud provider's KMS. This example will use the Google [Cloud Key Management](https://cloud.google.com/security-key-management) service.
+
+You can create a `json` file containing the secrets in plaintext. For example:
+
+```json
+{
+    "openpgpkeys": {
+        "diy": "-----BEGIN PGP PRIVATE KEY BLOCK-----\n..."
+    }
+}
+```
+
+Follow your provider's instructions to [create a new key](https://cloud.google.com/kms/docs/creating-keys). This example uses:
+* Project name: `my-awesome-project`
+* Keyring name: `voucher`
+* Key name: `voucher-sops`
+
+You can then encrypt the file using the KMS key, and verify the result is encrypted:
+```shell
+$ sops -e --gcp-kms projects/my-awesome-project/locations/global/keyRings/voucher/cryptoKeys/voucher-sops config/secrets-plaintext.production.json > config/secrets.production.json
+$ cat config/secrets.production.json
+{
+	"openpgpkeys": {
+		"diy": "ENC[AES256_GCM,data:zcNXbuPAkZMuer+sXqg4F1wAblKzm93K76c0WIU=,iv:ajzwCjEaT+sPW30LrHT+F7m7tSmJDfL5AEBfU6DU7a0=,tag:ILlBpERerNBRxC8VQ7xKSw==,type:str]"
+    },
+    "sops": {
+		"kms": null,
+		"gcp_kms": [
+			{
+				"resource_id": "projects/my-awesome-project/locations/global/keyRings/voucher/cryptoKeys/voucher-sops",
+				"created_at": "2021-09-10T20:47:03Z",
+				"enc": "CiQAxEdEknNVKrA0FQG0v1FKol9sQNKsaiQerEyXG7ueLz2vBRdeLESCTN0P9D082yxFLF4QGPHtToBrUSSQBF/xdprZIxAqSn2slzIYGBTx+sr+GNy2fEakJP8UYaQDhGjBfVVsRvMwWgFYuKpF4yg="
+			}
+		],
+		"azure_kv": null,
+		"hc_vault": null,
+		"age": null,
+		"lastmodified": "2021-09-10T20:47:03Z",
+		"mac": "ENC[AES256_GCM,data:DzYveNlcRvhrZigynfCtL4HbHS8VuoKlaozQUZD3UHQwnEraifwAQcZanHWYqW6EWj84YMG2GmT5lGYFJzMe9KTyoDXO6IDFMORDxyGaH1RddFzsn7QyLFttwvxQ+5u/J0xpQTEzzZUAJravHtx+xg4i6W0Uv22FS15HaoFMObZQh+9tJHMjzqVduNN48VkVs=,iv:ldhb/UUqYBoZWUe/SNwo=,tag:G/VgUd/c0JwFJKA3ZmfRBg==,type:str]",
+		"pgp": null,
+		"unencrypted_suffix": "_unencrypted",
+		"version": "3.7.1"
+	}
+}
+```
+
+Verify you can decrypt the file, then delete the plaintext copy:
+```shell
+$ export EDITOR="code -w" # optional, if you prefer vscode
+$ sops config/secrets.production.json
+$ rm config/secrets-plaintext.production.json
+```
+
+In the future if you need to edit the file, use the same `sops config/secrets.production.json` command. SOPS files embed a message authentication code, so you can only edit in this way.
+
 ## Generating Keys for Attestation
 
 Attestation uses GPG signing keys to sign the image. It's suggested that you use a primary GPG key instead of a subkey.
@@ -87,7 +147,7 @@ What keysize do you want? (2048) 4096
 Requested keysize is 4096 bits       
 ```
 
-When prompted for how long the key should be valid, you may want to specify that the key does not expire, especially if the team maintaining your Binary Authorization configuration is the same team managing your Voucher install.
+When prompted for how long the key should be valid, select an [appropriate cryptoperiod](https://www.keylength.com/) for your deployment. For this tutorial we'll specify that the key does not expire.
 
 ```
 Please specify how long the key should be valid.
@@ -101,7 +161,7 @@ Key does not expire at all
 Is this correct? (y/N) y
 ```
 
-You will next be asked to provide an ID for the GPG key. You will want to add a comment to claify which Check this key is for.
+You will next be asked to provide an ID for the GPG key. You will want to add a comment to clarify which Check this key is for.
 
 ```                        
 GnuPG needs to construct a user ID to identify your key.
@@ -147,11 +207,10 @@ Our example key from before would then look like this.
 -----BEGIN PGP PRIVATE KEY BLOCK-----\nlQcYBFt23t8BEADuZqi....
 ```
 
-Next, create a new value in the `openpgpkeys` block in your `ejson` file. Make sure the key name is the same as it's name in the source code (eg, for the "DIY" test, use "diy"):
+Next, create a new value in the `openpgpkeys` block in your secrets file. Make sure the key name is the same as it's name in the source code (eg, for the "DIY" test, use "diy"):
 
 ```json
 {
-    "_public_key": "<public key>",
     "openpgpkeys": {
         "diy": "-----BEGIN PGP PRIVATE KEY BLOCK-----\nlQcYBFt23t8BEADuZqi...."
     },
@@ -159,8 +218,15 @@ Next, create a new value in the `openpgpkeys` block in your `ejson` file. Make s
 }
 ```
 
-and call `ejson encrypt` to encrypt it:
+For ejson, edit the file and call `ejson encrypt` to encrypt it:
 
 ```shell
+$ code secrets.ejson
 $ ejson encrypt secrets.ejson
+```
+
+For SOPS, call `sops` to edit the file.
+
+```shell
+$ sops secrets.json
 ```
