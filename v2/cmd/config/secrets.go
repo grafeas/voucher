@@ -20,6 +20,12 @@ type Secrets struct {
 	Keys                     map[string]string  `json:"openpgpkeys"`
 	ClairConfig              clair.Config       `json:"clair"`
 	RepositoryAuthentication repository.KeyRing `json:"repositories"`
+	Datadog                  DatadogSecrets     `json:"datadog"`
+}
+
+type DatadogSecrets struct {
+	APIKey string `json:"api_key"`
+	AppKey string `json:"app_key"`
 }
 
 // ReadSecrets reads from the ejson file and populates the passed interface.

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io"
 	"log"
 
 	"github.com/spf13/cobra"
@@ -29,9 +30,11 @@ var serverCmd = &cobra.Command{
 			log.Printf("Error loading EJSON file, no secrets loaded: %v", err)
 		}
 
-		metricsClient, err := config.MetricsClient()
+		metricsClient, err := config.MetricsClient(secrets)
 		if err != nil {
 			log.Printf("Error configuring metrics client: %v", err)
+		} else if closer, ok := metricsClient.(io.Closer); ok {
+			defer closer.Close()
 		}
 
 		config.RegisterDynamicChecks()

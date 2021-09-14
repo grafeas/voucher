@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"io"
 	"os"
 
 	"github.com/sirupsen/logrus"
@@ -30,9 +31,11 @@ var subscriberCmd = &cobra.Command{
 			log.Errorf("error loading EJSON file, no secrets loaded: %s", err)
 		}
 
-		metricsClient, err := config.MetricsClient()
+		metricsClient, err := config.MetricsClient(secrets)
 		if err != nil {
 			log.Errorf("error configuring metrics client: %s", err)
+		} else if closer, ok := metricsClient.(io.Closer); ok {
+			defer closer.Close()
 		}
 
 		config.RegisterDynamicChecks()
