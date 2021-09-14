@@ -145,7 +145,6 @@ func (d *datadogStatsd) Incr(metric string, tags []string, _ float64) error {
 	s := datadog.NewSeries(metric, [][]float64{{now, 1}})
 	s.SetType(countType)
 	s.SetTags(tags)
-	s.SetInterval(int64(d.submitInterval.Seconds()))
 	d.series = append(d.series, s)
 	return nil
 }
