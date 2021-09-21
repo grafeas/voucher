@@ -1,50 +1,126 @@
 package client
 
 import (
+	"context"
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"net/url"
+	"strings"
 	"testing"
 
+	"github.com/docker/distribution/reference"
+	"github.com/grafeas/voucher/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestNewClient(t *testing.T) {
-	assert := assert.New(t)
-
-	_, err := NewClient("")
-	assert.Equalf(err, errNoHost, "should have been a no-host error, is actually: %s", err)
-
-	client, err := NewClient("localhost")
-	assert.NoErrorf(err, "failed to create client: %s", err)
-	assert.NotNilf(client.hostname, "client hostname URL is nil")
-	assert.Equal(client.hostname.String(), "https://localhost")
-
-	_, err = NewClient(":localhost")
-	require.Contains(t, err.Error(), "could not parse voucher hostname", "failed to create client: ", err)
+	cases := map[string]struct {
+		input    string
+		hostname string
+		errMsg   string
+	}{
+		"no host": {
+			input:  "",
+			errMsg: errNoHost.Error(),
+		},
+		"no scheme": {
+			input:    "localhost",
+			hostname: "https://localhost",
+		},
+		"bad url": {
+			input:  ":localhost",
+			errMsg: `could not parse voucher hostname: parse ":localhost": missing protocol scheme`,
+		},
+	}
+	for label, tc := range cases {
+		t.Run(label, func(t *testing.T) {
+			c, err := NewClient(tc.input)
+			if tc.errMsg != "" {
+				assert.Equal(t, tc.errMsg, err.Error())
+			} else {
+				require.NoError(t, err)
+				assert.Equal(t, tc.hostname, c.url.String())
+			}
+		})
+	}
 }
 
 func TestVoucherURL(t *testing.T) {
-	assert := assert.New(t)
-
-	client, err := NewClient("localhost")
-	require.NoError(t, err, "failed to create client: ", err)
-
-	allTestURL := toVoucherCheckURL(client.hostname, "all")
-	assert.Equalf(allTestURL, "https://localhost/all", "url is incorrect, should be \"%s\" instead of \"%s\"", "https://localhost/all", allTestURL)
-
-	allEmptyURL := toVoucherCheckURL(nil, "all")
-	assert.Equal(allEmptyURL, "/all")
+	u, _ := url.Parse("https://localhost")
+	allTestURL := toVoucherCheckURL(u, "all")
+	assert.Equal(t, allTestURL, "https://localhost/all")
 }
 
-func TestVoucherBasicAuth(t *testing.T) {
-	assert := assert.New(t)
+type mockVoucher struct {
+	checks        []*voucher.Response
+	verifications []*voucher.Response
+}
 
-	client, err := NewClient("localhost")
-	assert.NoErrorf(err, "failed to create client: %s", err)
-	assert.Equal(client.username, "", "username already set in client")
-	assert.Equal(client.password, "", "password already set in client")
+func (v *mockVoucher) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	var req voucher.Request
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "", http.StatusBadRequest)
+		return
+	}
 
-	client.SetBasicAuth("username", "password")
+	var search []*voucher.Response
+	if strings.Contains(r.URL.Path, "/verify") {
+		search = v.verifications
+	} else {
+		search = v.checks
+	}
 
-	assert.Equal(client.username, "username", "username incorrect in client: %s", client.username)
-	assert.Equal(client.password, "password", "password incorrect in client: %s", client.password)
+	var res *voucher.Response
+	for _, r := range search {
+		if r.Image == req.ImageURL {
+			res = r
+			break
+		}
+	}
+	if res == nil {
+		res = &voucher.Response{
+			Image:   req.ImageURL,
+			Success: false,
+		}
+	}
+	w.Header().Add("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(res)
+}
+
+const image = "gcr.io/project/image@sha256:0000000000000000000000000000000000000000000000000000000000000000"
+
+func TestVoucher_Check(t *testing.T) {
+	v := &mockVoucher{}
+	v.checks = append(v.checks, &voucher.Response{Image: image, Success: true})
+	srv := httptest.NewServer(v)
+	defer srv.Close()
+
+	c, err := NewClient(srv.URL)
+	require.NoError(t, err)
+	res, err := c.Check(context.Background(), "diy", canonical(t, image))
+	require.NoError(t, err)
+	assert.True(t, res.Success)
+}
+
+func TestVoucher_Verify(t *testing.T) {
+	v := &mockVoucher{}
+	v.verifications = append(v.verifications, &voucher.Response{Image: image, Success: true})
+	srv := httptest.NewServer(v)
+	defer srv.Close()
+
+	c, err := NewClient(srv.URL)
+	require.NoError(t, err)
+	res, err := c.Verify(context.Background(), "diy", canonical(t, image))
+	require.NoError(t, err)
+	assert.True(t, res.Success)
+}
+
+func canonical(t *testing.T, image string) reference.Canonical {
+	ref, err := reference.Parse(image)
+	require.NoError(t, err)
+	canonical, ok := ref.(reference.Canonical)
+	require.True(t, ok)
+	return canonical
 }
