@@ -12,11 +12,12 @@ import (
 	"strings"
 
 	"github.com/docker/distribution/reference"
-
 	voucher "github.com/grafeas/voucher/v2"
 )
 
-func (c *Client) Verify(ctx context.Context, check string, image reference.Canonical) (voucher.Response, error) {
+// Check executes a request to a Voucher server, to the appropriate check URI, and
+// with the passed reference.Canonical. Returns a voucher.Response and an error.
+func (c *Client) Check(ctx context.Context, check string, image reference.Canonical) (voucher.Response, error) {
 	var checkResp voucher.Response
 	var buffer bytes.Buffer
 
@@ -32,7 +33,7 @@ func (c *Client) Verify(ctx context.Context, check string, image reference.Canon
 	req, err = http.NewRequestWithContext(
 		ctx,
 		http.MethodPost,
-		toVoucherVerifyURL(c.hostname, check),
+		toVoucherCheckURL(c.hostname, check),
 		&buffer,
 	)
 	if nil != err {
@@ -61,16 +62,16 @@ func (c *Client) Verify(ctx context.Context, check string, image reference.Canon
 	return checkResp, err
 }
 
-// toVoucherVerifyURL adds the check and verify API path to the URL properly
-// and returns a string containing the full URL.
-func toVoucherVerifyURL(voucherURL *url.URL, checkname string) string {
+// toVoucherCheckURL adds the check to the URL properly and returns
+// a string containing the full URL.
+func toVoucherCheckURL(voucherURL *url.URL, checkname string) string {
 	if nil == voucherURL {
-		return "/" + checkname + "/verify"
+		return "/" + checkname
 	}
 
 	// Copy our URL, so we are not modifying the original.
 	newVoucherURL := (*voucherURL)
 
-	newVoucherURL.Path = path.Join(newVoucherURL.Path, checkname, "verify")
+	newVoucherURL.Path = path.Join(newVoucherURL.Path, checkname)
 	return newVoucherURL.String()
 }
