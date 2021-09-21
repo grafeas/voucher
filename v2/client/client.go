@@ -53,6 +53,12 @@ func (c *Client) SetBasicAuth(username, password string) {
 	c.password = password
 }
 
+func (c *Client) URL() *url.URL {
+	// Copy our URL, so we are not exposing the original.
+	urlCopy := (*c.url)
+	return &urlCopy
+}
+
 func (c *Client) newVoucherRequest(ctx context.Context, url string, image reference.Canonical) (*http.Request, error) {
 	voucherReq := voucher.Request{
 		ImageURL: image.String(),
