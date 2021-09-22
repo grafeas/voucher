@@ -43,8 +43,8 @@ func init() {
 
 	rootCmd.Flags().BoolVar(&verify, "verify", false, "Verify instead of check an image.")
 	rootCmd.Flags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.voucher.yaml)")
-	rootCmd.Flags().StringVarP(&defaultConfig.Url, "voucher", "v", "http://localhost:8000", "Voucher server to connect to.")
-	viper.BindPFlag("url", rootCmd.Flags().Lookup("voucher"))
+	rootCmd.Flags().StringVarP(&defaultConfig.Hostname, "voucher", "v", "http://localhost:8000", "Voucher server to connect to.")
+	viper.BindPFlag("hostname", rootCmd.Flags().Lookup("voucher"))
 	rootCmd.Flags().StringVar(&defaultConfig.Username, "username", "", "Username to authenticate against Voucher with")
 	viper.BindPFlag("username", rootCmd.Flags().Lookup("username"))
 	rootCmd.Flags().StringVar(&defaultConfig.Password, "password", "", "Password to authenticate against Voucher with")
