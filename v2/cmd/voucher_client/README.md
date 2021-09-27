@@ -22,7 +22,7 @@ Below are the configuration options for Voucher Client:
 
 | Key         | Description                                                                                |
 | :---------- | :----------------------------------------------------------------------------------------- |
-| `server`  | The Voucher server to connect to.                                                          |
+| `server`    | The Voucher server to connect to.                                                          |
 | `timeout`   | The number of seconds to wait before failing (defaults to 240).                            |
 | `username`  | Username to authenticate against Voucher with.                                             |
 | `password`  | Password to authenticate against Voucher with.                                             |
