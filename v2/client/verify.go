@@ -19,7 +19,7 @@ func (c *Client) Verify(ctx context.Context, check string, image reference.Canon
 }
 
 func (c *Client) toVoucherVerifyURL(checkname string) string {
-	newVoucherURL := c.URL()
+	newVoucherURL := c.CopyURL()
 	newVoucherURL.Path = path.Join(newVoucherURL.Path, checkname, "verify")
 	return newVoucherURL.String()
 }

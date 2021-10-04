@@ -20,7 +20,7 @@ func (c *Client) Check(ctx context.Context, check string, image reference.Canoni
 }
 
 func (c *Client) toVoucherCheckURL(checkname string) string {
-	newVoucherURL := c.URL()
+	newVoucherURL := c.CopyURL()
 	newVoucherURL.Path = path.Join(newVoucherURL.Path, checkname)
 	return newVoucherURL.String()
 }

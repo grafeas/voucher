@@ -53,8 +53,8 @@ func (c *Client) SetBasicAuth(username, password string) {
 	c.password = password
 }
 
-func (c *Client) URL() *url.URL {
-	// Copy our URL, so we are not exposing the original.
+// CopyURL returns a copy of this client's URL
+func (c *Client) CopyURL() *url.URL {
 	urlCopy := (*c.url)
 	return &urlCopy
 }

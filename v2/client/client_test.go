@@ -41,7 +41,7 @@ func TestNewClient(t *testing.T) {
 				assert.Equal(t, tc.errMsg, err.Error())
 			} else {
 				require.NoError(t, err)
-				assert.Equal(t, tc.hostname, c.URL().String())
+				assert.Equal(t, tc.hostname, c.CopyURL().String())
 			}
 		})
 	}
