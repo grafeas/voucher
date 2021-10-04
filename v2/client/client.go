@@ -12,7 +12,6 @@ import (
 	"strings"
 
 	"github.com/docker/distribution/reference"
-
 	voucher "github.com/grafeas/voucher/v2"
 )
 
@@ -20,57 +19,32 @@ var errNoHost = errors.New("cannot create client with empty hostname")
 
 // Client is a client for the Voucher API.
 type Client struct {
-	hostname   *url.URL
+	url        *url.URL
 	httpClient *http.Client
 	username   string
 	password   string
 }
 
-// Check executes a request to a Voucher server, to the appropriate check URI, and
-// with the passed reference.Canonical. Returns a voucher.Response and an error.
-func (c *Client) Check(ctx context.Context, check string, image reference.Canonical) (voucher.Response, error) {
-	var checkResp voucher.Response
-	var buffer bytes.Buffer
-
-	err := json.NewEncoder(&buffer).Encode(voucher.Request{
-		ImageURL: image.String(),
-	})
-	if err != nil {
-		return checkResp, fmt.Errorf("could not parse image, error: %s", err)
+// NewClient creates a new Client set to connect to the passed
+// hostname.
+func NewClient(voucherURL string) (*Client, error) {
+	if "" == voucherURL {
+		return nil, errNoHost
 	}
 
-	var req *http.Request
-
-	req, err = http.NewRequestWithContext(
-		ctx,
-		http.MethodPost,
-		toVoucherCheckURL(c.hostname, check),
-		&buffer,
-	)
+	u, err := url.Parse(voucherURL)
 	if nil != err {
-		return checkResp, err
+		return nil, fmt.Errorf("could not parse voucher hostname: %s", err)
+	}
+	if "" == u.Scheme {
+		u.Scheme = "https"
 	}
 
-	req.Header.Set("Content-Type", "application/json")
-	if c.username != "" && c.password != "" {
-		req.SetBasicAuth(c.username, c.password)
+	client := &Client{
+		url:        u,
+		httpClient: &http.Client{},
 	}
-	resp, err := c.httpClient.Do(req)
-	if nil != err {
-		return checkResp, err
-	}
-
-	if !strings.Contains(resp.Header.Get("Content-Type"), "application/json") {
-		var b []byte
-		b, err = ioutil.ReadAll(resp.Body)
-		if nil == err {
-			err = fmt.Errorf("failed to get response: %s", strings.TrimSpace(string(b)))
-		}
-		return checkResp, err
-	}
-
-	err = json.NewDecoder(resp.Body).Decode(&checkResp)
-	return checkResp, err
+	return client, nil
 }
 
 // SetBasicAuth adds the username and password to the Client struct
@@ -79,28 +53,54 @@ func (c *Client) SetBasicAuth(username, password string) {
 	c.password = password
 }
 
-// NewClient creates a new Client set to connect to the passed
-// hostname.
-func NewClient(hostname string) (*Client, error) {
-	var err error
+// CopyURL returns a copy of this client's URL
+func (c *Client) CopyURL() *url.URL {
+	urlCopy := (*c.url)
+	return &urlCopy
+}
 
-	if "" == hostname {
-		return nil, errNoHost
+func (c *Client) newVoucherRequest(ctx context.Context, url string, image reference.Canonical) (*http.Request, error) {
+	voucherReq := voucher.Request{
+		ImageURL: image.String(),
 	}
 
-	hostnameURL, err := url.Parse(hostname)
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(voucherReq); err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, &buf)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	if c.username != "" && c.password != "" {
+		req.SetBasicAuth(c.username, c.password)
+	}
+	return req, nil
+}
+
+func (c *Client) doVoucherRequest(ctx context.Context, url string, image reference.Canonical) (*voucher.Response, error) {
+	req, err := c.newVoucherRequest(ctx, url, image)
+	if err != nil {
+		return nil, fmt.Errorf("could create voucher request: %w", err)
+	}
+	resp, err := c.httpClient.Do(req)
 	if nil != err {
-		return nil, fmt.Errorf("could not parse voucher hostname: %s", err)
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if !strings.Contains(resp.Header.Get("Content-Type"), "application/json") {
+		b, err := ioutil.ReadAll(resp.Body)
+		if nil == err {
+			err = fmt.Errorf("failed to get response: %s", strings.TrimSpace(string(b)))
+		}
+		return nil, err
 	}
 
-	if "" == hostnameURL.Scheme {
-		hostnameURL.Scheme = "https"
+	var voucherResp voucher.Response
+	if err := json.NewDecoder(resp.Body).Decode(&voucherResp); err != nil {
+		return nil, err
 	}
-
-	client := &Client{
-		hostname:   hostnameURL,
-		httpClient: &http.Client{},
-	}
-
-	return client, nil
+	return &voucherResp, nil
 }
