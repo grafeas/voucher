@@ -9,7 +9,7 @@ import (
 )
 
 type config struct {
-	Hostname string
+	Server   string
 	Username string
 	Password string
 	Timeout  int
@@ -23,7 +23,7 @@ func getCheck() string {
 }
 
 func getVoucherClient() (voucher.Interface, error) {
-	newClient, err := client.NewClient(defaultConfig.Hostname)
+	newClient, err := client.NewClient(defaultConfig.Server)
 	if nil == err {
 		newClient.SetBasicAuth(defaultConfig.Username, defaultConfig.Password)
 	}
