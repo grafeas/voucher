@@ -43,9 +43,6 @@ func NewClient(voucherURL string) (*Client, error) {
 
 	authClient, err := idtoken.NewClient(context.Background(), voucherURL)
 	if nil != err {
-		if err.Error() != `idtoken: credential must be service_account, found "authorized_user"` {
-			return nil, fmt.Errorf("could not create HTTP client: %s", err)
-		}
 		authClient = &http.Client{}
 	}
 
