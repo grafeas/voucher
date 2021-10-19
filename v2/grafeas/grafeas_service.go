@@ -142,12 +142,13 @@ func (g *apiServiceImpl) httpCall(urlAddr *url.URL, payload []byte, method strin
 		}
 		return nil, err
 	}
+	defer resp.Body.Close()
+
 	statusCode := resp.StatusCode
 	data, err := ioutil.ReadAll(resp.Body)
 	if statusCode != http.StatusOK || err != nil {
 		return nil, NewAPIError(statusCode, urlAddr.Path, method, data)
 	}
-	resp.Body.Close()
 
 	return data, err
 }
