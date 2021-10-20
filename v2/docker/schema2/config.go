@@ -42,7 +42,6 @@ func RequestConfig(client *http.Client, ref reference.Canonical, manifest distri
 	if nil != err {
 		return nil, err
 	}
-
 	defer resp.Body.Close()
 
 	if resp.StatusCode < 300 {
