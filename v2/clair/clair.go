@@ -142,7 +142,10 @@ func getClairVulnerabilities(manifest distribution.Manifest, config Config, toke
 
 	switch {
 	case s2.IsManifest(manifest):
-		m := s2.ToManifest(manifest)
+		m, mfErr := s2.ToManifest(manifest)
+		if mfErr != nil {
+			return nil, fmt.Errorf("fetching manifest: %w", mfErr)
+		}
 
 		vulns, err = getSchema2Layers(m, config, tokenSrc, image, parent)
 	case s1.IsManifest(manifest):

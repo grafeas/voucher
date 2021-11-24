@@ -3,6 +3,7 @@ package schema2
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/docker/distribution"
@@ -23,7 +24,10 @@ func RequestConfig(client *http.Client, ref reference.Canonical, manifest distri
 		return nil, errors.New("cannot request schema2 config for non-schema2 manifest")
 	}
 
-	v2Manifest := ToManifest(manifest)
+	v2Manifest, err := ToManifest(manifest)
+	if err != nil {
+		return nil, fmt.Errorf("fetching manifest: %w", err)
+	}
 
 	var wrapper v2Blob
 
