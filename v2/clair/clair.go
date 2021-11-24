@@ -2,6 +2,7 @@ package clair
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -142,7 +143,8 @@ func getClairVulnerabilities(manifest distribution.Manifest, config Config, toke
 
 	switch {
 	case s2.IsManifest(manifest):
-		m, mfErr := s2.ToManifest(manifest)
+		client := oauth2.NewClient(context.TODO(), tokenSrc)
+		m, mfErr := s2.ToManifest(client, image, manifest)
 		if mfErr != nil {
 			return nil, fmt.Errorf("fetching manifest: %w", mfErr)
 		}

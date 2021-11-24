@@ -19,7 +19,7 @@ func TestRequestManifest(t *testing.T) {
 	manifest, err := RequestManifest(client, ref)
 	require.NoError(t, err)
 
-	schema2Manifest, err := schema2.ToManifest(manifest)
+	schema2Manifest, err := schema2.ToManifest(client, ref, manifest)
 	require.NoError(t, err)
 
 	assert.Equal(

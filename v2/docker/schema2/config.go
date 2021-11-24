@@ -24,7 +24,7 @@ func RequestConfig(client *http.Client, ref reference.Canonical, manifest distri
 		return nil, errors.New("cannot request schema2 config for non-schema2 manifest")
 	}
 
-	v2Manifest, err := ToManifest(manifest)
+	v2Manifest, err := ToManifest(client, ref, manifest)
 	if err != nil {
 		return nil, fmt.Errorf("fetching manifest: %w", err)
 	}
