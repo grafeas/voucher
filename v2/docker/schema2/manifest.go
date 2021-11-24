@@ -1,6 +1,7 @@
 package schema2
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -9,6 +10,7 @@ import (
 	"github.com/docker/distribution/manifest/manifestlist"
 	v2 "github.com/docker/distribution/manifest/schema2"
 	"github.com/docker/distribution/reference"
+	"github.com/grafeas/voucher/v2/docker/uri"
 )
 
 // IsManifest returns true if the passed manifest is a schema2 manifest.
@@ -54,8 +56,21 @@ func resolveManifestFromList(client *http.Client, ref reference.Named, mfs *mani
 			continue
 		}
 
-		// TODO: use the client and the fancy new uri.Manifest helper to grab this platform's manifest, return that
-		// that's doable - this commit is focussed on wiring dependencies to this function
+		req, err := http.NewRequest("GET", uri.GetManifestURI(ref, string(mf.Digest)), nil)
+		if err != nil {
+			return v2.Manifest{}, fmt.Errorf("preparing request to fetch manifest from list: %w", err)
+		}
+		resp, err := client.Do(req)
+		if err != nil {
+			return v2.Manifest{}, fmt.Errorf("fetching manifest from list: %w", err)
+		}
+		defer resp.Body.Close()
+
+		var archManifest v2.DeserializedManifest
+		if err := json.NewDecoder(resp.Body).Decode(&archManifest); err != nil {
+			return v2.Manifest{}, fmt.Errorf("decoding fetched manifest from list: %w", err)
+		}
+		return archManifest.Manifest, nil
 	}
 	return v2.Manifest{}, fmt.Errorf("no manifest matching %s/%s found", targetOS, targetArch)
 }
