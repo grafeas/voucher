@@ -17,7 +17,7 @@ import (
 func RequestManifest(client *http.Client, ref reference.Canonical) (distribution.Manifest, error) {
 	var manifest distribution.Manifest
 
-	request, err := http.NewRequest(http.MethodGet, uri.GetManifestURI(ref), nil)
+	request, err := http.NewRequest(http.MethodGet, uri.GetDigestManifestURI(ref), nil)
 	if nil != err {
 		return nil, err
 	}

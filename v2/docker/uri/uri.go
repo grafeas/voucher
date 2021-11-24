@@ -30,25 +30,22 @@ func GetBlobURI(ref reference.Named, digest digest.Digest) string {
 	return u.String()
 }
 
-// GetManifestURI gets a manifest URI based on the passed repository and
-// digest.
-func GetManifestURI(ref reference.Canonical) string {
-	u := createURL(ref, reference.Path(ref), "manifests", string(ref.Digest()))
+// GetManifestURI gets a manifest URI based on the passed repository and label (tag or digest).
+func GetManifestURI(ref reference.Named, label string) string {
+	u := createURL(ref, reference.Path(ref), "manifests", label)
 	return u.String()
 }
 
 // GetTagManifestURI gets a manifest URI based on the passed repository and
 // tag.
 func GetTagManifestURI(ref reference.NamedTagged) string {
-	u := createURL(ref, reference.Path(ref), "manifests", ref.Tag())
-	return u.String()
+	return GetManifestURI(ref, ref.Tag())
 }
 
 // GetDigestManifestURI gets a manifest URI based on the passed repository and
-// tag.
+// digest.
 func GetDigestManifestURI(ref reference.Canonical) string {
-	u := createURL(ref, reference.Path(ref), "manifests", string(ref.Digest()))
-	return u.String()
+	return GetManifestURI(ref, string(ref.Digest()))
 }
 
 func createURL(ref reference.Named, pathSegments ...string) url.URL {
