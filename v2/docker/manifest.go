@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/docker/distribution"
+	"github.com/docker/distribution/manifest/manifestlist"
 	"github.com/docker/distribution/manifest/schema1"
 	"github.com/docker/distribution/manifest/schema2"
 	"github.com/docker/distribution/reference"
@@ -22,6 +23,7 @@ func RequestManifest(client *http.Client, ref reference.Canonical) (distribution
 		return nil, err
 	}
 
+	request.Header.Add("Accept", manifestlist.MediaTypeManifestList)
 	request.Header.Add("Accept", schema2.MediaTypeManifest)
 	request.Header.Add("Accept", schema1.MediaTypeManifest)
 	request.Header.Add("Accept", schema1.MediaTypeSignedManifest)
