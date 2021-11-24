@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/docker/distribution/manifest/manifestlist"
 	"github.com/docker/distribution/manifest/schema1"
 	"github.com/docker/distribution/manifest/schema2"
 	dockerTypes "github.com/docker/docker/api/types"
@@ -56,6 +57,9 @@ func (mock *dockerAPIMock) ServeHTTP(writer http.ResponseWriter, req *http.Reque
 		return
 	case "/v2/path/to/image/blobs/sha256:b5b2b2c507a0944348e0303114d8d93bbbb081732b86451d9bce1f432a537bc7":
 		jsonRespond(writer, schema2.MediaTypeImageConfig, NewTestRootImageConfig())
+		return
+	case "/v2/path/to/image/manifests/sha256:fefafefa52ba402ed7dd98d73f5a41836ece508d1f4704b274562ac0c9b3b7da":
+		jsonRespond(writer, manifestlist.MediaTypeManifestList, NewTestManifestList())
 		return
 	}
 
