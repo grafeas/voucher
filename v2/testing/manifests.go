@@ -2,6 +2,8 @@ package vtesting
 
 import (
 	"github.com/docker/distribution"
+	"github.com/docker/distribution/manifest"
+	"github.com/docker/distribution/manifest/manifestlist"
 	"github.com/docker/distribution/manifest/schema1"
 	"github.com/docker/distribution/manifest/schema2"
 	"github.com/docker/libtrust"
@@ -43,6 +45,40 @@ func NewTestManifest() *schema2.DeserializedManifest {
 	}
 
 	return newManifest
+}
+
+func NewTestManifestList() *manifestlist.ManifestList {
+	return &manifestlist.ManifestList{
+		Versioned: manifest.Versioned{
+			MediaType: manifestlist.MediaTypeManifestList,
+		},
+		Manifests: []manifestlist.ManifestDescriptor{
+			// Wrong arch
+			{
+				Platform: manifestlist.PlatformSpec{
+					OS:           "linux",
+					Architecture: "arm64",
+				},
+			},
+			// Wrong OS
+			{
+				Platform: manifestlist.PlatformSpec{
+					OS:           "windows",
+					Architecture: "amd64",
+				},
+			},
+			// Matched manifest
+			{
+				Platform: manifestlist.PlatformSpec{
+					OS:           "linux",
+					Architecture: "amd64",
+				},
+				Descriptor: distribution.Descriptor{
+					Digest: "sha256:b148c8af52ba402ed7dd98d73f5a41836ece508d1f4704b274562ac0c9b3b7da",
+				},
+			},
+		},
+	}
 }
 
 // NewTestRootManifest creates a test schema2 manifest for our mock Docker API, which points to an image whose user is configured to be root
