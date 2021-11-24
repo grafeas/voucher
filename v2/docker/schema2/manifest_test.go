@@ -12,7 +12,7 @@ import (
 func TestToManifest(t *testing.T) {
 	newManifest := vtesting.NewTestManifest()
 
-	manifest, err := ToManifest(newManifest)
+	manifest, err := ToManifest(nil, nil, newManifest)
 	require.NoError(t, err)
 	assert.NotNil(t, manifest)
 }
