@@ -8,6 +8,7 @@ import (
 
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/manifest/manifestlist"
+	"github.com/docker/distribution/manifest/schema2"
 	v2 "github.com/docker/distribution/manifest/schema2"
 	"github.com/docker/distribution/reference"
 	"github.com/grafeas/voucher/v2/docker/uri"
@@ -56,15 +57,21 @@ func resolveManifestFromList(client *http.Client, ref reference.Named, mfs *mani
 			continue
 		}
 
-		req, err := http.NewRequest("GET", uri.GetManifestURI(ref, string(mf.Digest)), nil)
+		manifestURI := uri.GetManifestURI(ref, string(mf.Digest))
+		req, err := http.NewRequest("GET", manifestURI, nil)
 		if err != nil {
 			return v2.Manifest{}, fmt.Errorf("preparing request to fetch manifest from list: %w", err)
 		}
+		req.Header.Add("Accept", schema2.MediaTypeManifest)
+
 		resp, err := client.Do(req)
 		if err != nil {
 			return v2.Manifest{}, fmt.Errorf("fetching manifest from list: %w", err)
 		}
 		defer resp.Body.Close()
+		if resp.StatusCode >= 300 {
+			return v2.Manifest{}, fmt.Errorf("could not load manifest %q - %s", manifestURI, resp.Status)
+		}
 
 		var archManifest v2.DeserializedManifest
 		if err := json.NewDecoder(resp.Body).Decode(&archManifest); err != nil {
