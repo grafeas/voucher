@@ -16,6 +16,14 @@ func NewTestReference(t *testing.T) reference.Canonical {
 	return parseReference(t, "localhost/path/to/image@sha256:b148c8af52ba402ed7dd98d73f5a41836ece508d1f4704b274562ac0c9b3b7da")
 }
 
+// NewTestManifestListReference creates a new reference to be used throughout the docker tests.
+// The returned reference is assumed to be a manifest list, with images for multiple platforms.
+func NewTestManifestListReference(t *testing.T) reference.Canonical {
+	t.Helper()
+
+	return parseReference(t, "localhost/path/to/image@sha256:fefafefa52ba402ed7dd98d73f5a41836ece508d1f4704b274562ac0c9b3b7da")
+}
+
 // NewBadTestReference creates a new reference to be used throughout the docker tests.
 // The returned reference is assumed to not, and does not have valid configuration
 // or layers.
