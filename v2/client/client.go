@@ -13,6 +13,7 @@ import (
 
 	"github.com/docker/distribution/reference"
 	voucher "github.com/grafeas/voucher/v2"
+	"google.golang.org/api/idtoken"
 )
 
 var errNoHost = errors.New("cannot create client with empty hostname")
@@ -40,9 +41,14 @@ func NewClient(voucherURL string) (*Client, error) {
 		u.Scheme = "https"
 	}
 
+	authClient, err := idtoken.NewClient(context.Background(), voucherURL)
+	if nil != err {
+		authClient = &http.Client{}
+	}
+
 	client := &Client{
 		url:        u,
-		httpClient: &http.Client{},
+		httpClient: authClient,
 	}
 	return client, nil
 }

@@ -3,8 +3,10 @@ module github.com/grafeas/voucher/v2
 go 1.16
 
 require (
-	cloud.google.com/go v0.52.0
-	cloud.google.com/go/pubsub v1.0.1
+	cloud.google.com/go/containeranalysis v0.1.0
+	cloud.google.com/go/grafeas v0.1.0
+	cloud.google.com/go/kms v1.0.0
+	cloud.google.com/go/pubsub v1.3.1
 	github.com/DataDog/datadog-api-client-go v1.3.0
 	github.com/DataDog/datadog-go v3.4.0+incompatible
 	github.com/Shopify/ejson v1.2.0
@@ -16,9 +18,8 @@ require (
 	github.com/docker/libtrust v0.0.0-20160708172513-aabc10ec26b7
 	github.com/dustin/gojson v0.0.0-20160307161227-2e71ec9dd5ad // indirect
 	github.com/fernet/fernet-go v0.0.0-20180830025343-9eac43b88a5e // indirect
-	github.com/golang/mock v1.4.4
-	github.com/google/uuid v1.1.1 // indirect
-	github.com/googleapis/gax-go/v2 v2.0.5
+	github.com/golang/mock v1.6.0
+	github.com/googleapis/gax-go/v2 v2.1.1
 	github.com/gorilla/mux v1.6.2
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/mennanov/fieldmask-utils v0.0.0-20190703161732-eca3212cf9f3
@@ -31,11 +32,11 @@ require (
 	github.com/smartystreets/goconvey v0.0.0-20190731233626-505e41936337 // indirect
 	github.com/spf13/cobra v0.0.3
 	github.com/spf13/viper v1.4.0
-	github.com/stretchr/testify v1.5.1
+	github.com/stretchr/testify v1.6.1
 	go.mozilla.org/sops/v3 v3.7.1
 	golang.org/x/crypto v0.0.0-20210220033148-5ea612d1eb83
-	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
-	google.golang.org/api v0.15.0
-	google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013
-	google.golang.org/grpc v1.27.0
+	golang.org/x/oauth2 v0.0.0-20210819190943-2bc19b11175f
+	google.golang.org/api v0.58.0
+	google.golang.org/genproto v0.0.0-20210921142501-181ce0d877f6
+	google.golang.org/grpc v1.40.0
 )
