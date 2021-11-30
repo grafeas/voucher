@@ -39,6 +39,10 @@ var serverCmd = &cobra.Command{
 
 		config.RegisterDynamicChecks()
 
+		if config.IsCloudRun() {
+			serverConfig.RequireAuth = false
+		}
+
 		voucherServer := server.NewServer(&serverConfig, secrets, metricsClient)
 
 		for groupName, checks := range config.GetRequiredChecksFromConfig() {
