@@ -80,14 +80,14 @@ func (c *Client) doVoucherRequest(ctx context.Context, url string, image referen
 		return nil, fmt.Errorf("could create voucher request: %w", err)
 	}
 	resp, err := c.httpClient.Do(req)
-	if nil != err {
+	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
 
 	if !strings.Contains(resp.Header.Get("Content-Type"), "application/json") {
 		b, err := ioutil.ReadAll(resp.Body)
-		if nil == err {
+		if err == nil {
 			err = fmt.Errorf("failed to get response: %s", strings.TrimSpace(string(b)))
 		}
 		return nil, err
@@ -106,7 +106,7 @@ func newClient(voucherURL string, httpClient *http.Client) (*Client, error) {
 	}
 
 	u, err := url.Parse(voucherURL)
-	if nil != err {
+	if err != nil {
 		return nil, fmt.Errorf("could not parse voucher hostname: %s", err)
 	}
 	if u.Scheme == "" {
