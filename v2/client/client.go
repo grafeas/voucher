@@ -37,7 +37,7 @@ func NewClient(voucherURL string) (*Client, error) {
 func NewAuthClient(voucherURL string) (*Client, error) {
 	authClient, err := idtoken.NewClient(context.Background(), voucherURL)
 	if err != nil {
-		return NewClient(voucherURL)
+		return nil, err
 	}
 	return newClient(voucherURL, authClient)
 }
