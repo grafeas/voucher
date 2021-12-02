@@ -29,28 +29,17 @@ type Client struct {
 // NewClient creates a new Client set to connect to the passed
 // hostname.
 func NewClient(voucherURL string) (*Client, error) {
-	if "" == voucherURL {
-		return nil, errNoHost
-	}
+	return newClient(voucherURL, &http.Client{})
+}
 
-	u, err := url.Parse(voucherURL)
-	if nil != err {
-		return nil, fmt.Errorf("could not parse voucher hostname: %s", err)
-	}
-	if "" == u.Scheme {
-		u.Scheme = "https"
-	}
-
+// NewAuthClient creates a new auth Client set to connect to the passed
+// hostname using tokens.
+func NewAuthClient(voucherURL string) (*Client, error) {
 	authClient, err := idtoken.NewClient(context.Background(), voucherURL)
-	if nil != err {
-		authClient = &http.Client{}
+	if err != nil {
+		return nil, err
 	}
-
-	client := &Client{
-		url:        u,
-		httpClient: authClient,
-	}
-	return client, nil
+	return newClient(voucherURL, authClient)
 }
 
 // SetBasicAuth adds the username and password to the Client struct
@@ -91,14 +80,14 @@ func (c *Client) doVoucherRequest(ctx context.Context, url string, image referen
 		return nil, fmt.Errorf("could create voucher request: %w", err)
 	}
 	resp, err := c.httpClient.Do(req)
-	if nil != err {
+	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
 
 	if !strings.Contains(resp.Header.Get("Content-Type"), "application/json") {
 		b, err := ioutil.ReadAll(resp.Body)
-		if nil == err {
+		if err == nil {
 			err = fmt.Errorf("failed to get response: %s", strings.TrimSpace(string(b)))
 		}
 		return nil, err
@@ -109,4 +98,24 @@ func (c *Client) doVoucherRequest(ctx context.Context, url string, image referen
 		return nil, err
 	}
 	return &voucherResp, nil
+}
+
+func newClient(voucherURL string, httpClient *http.Client) (*Client, error) {
+	if voucherURL == "" {
+		return nil, errNoHost
+	}
+
+	u, err := url.Parse(voucherURL)
+	if err != nil {
+		return nil, fmt.Errorf("could not parse voucher hostname: %s", err)
+	}
+	if u.Scheme == "" {
+		u.Scheme = "https"
+	}
+
+	client := &Client{
+		url:        u,
+		httpClient: httpClient,
+	}
+	return client, nil
 }
