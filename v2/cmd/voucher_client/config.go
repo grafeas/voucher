@@ -23,9 +23,13 @@ func getCheck() string {
 }
 
 func getVoucherClient() (voucher.Interface, error) {
-	newClient, err := client.NewClient(defaultConfig.Server)
-	if nil == err {
-		newClient.SetBasicAuth(defaultConfig.Username, defaultConfig.Password)
+	var newClient *client.Client
+	newClient, err := client.NewAuthClient(defaultConfig.Server)
+	if err != nil {
+		newClient, err = client.NewClient(defaultConfig.Server)
+		if err == nil {
+			newClient.SetBasicAuth(defaultConfig.Username, defaultConfig.Password)
+		}
 	}
 	return newClient, err
 }
