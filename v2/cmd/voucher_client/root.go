@@ -53,6 +53,8 @@ func init() {
 	viper.BindPFlag("timeout", rootCmd.Flags().Lookup("timeout"))
 	rootCmd.Flags().StringVarP(&defaultConfig.Check, "check", "c", "all", "the name of the checks to run against Voucher with")
 	viper.BindPFlag("check", rootCmd.Flags().Lookup("check"))
+	rootCmd.Flags().StringVarP(&defaultConfig.Auth, "auth", "a", "basic", "the method to authenticate against Voucher with. Supported types: basic, idtoken")
+	viper.BindPFlag("auth", rootCmd.Flags().Lookup("auth"))
 }
 
 // initConfig reads in config file and ENV variables if set.

@@ -14,6 +14,7 @@ type config struct {
 	Password string
 	Timeout  int
 	Check    string
+	Auth     string
 }
 
 var defaultConfig = &config{}
@@ -23,15 +24,17 @@ func getCheck() string {
 }
 
 func getVoucherClient() (voucher.Interface, error) {
-	var newClient *client.Client
-	newClient, err := client.NewAuthClient(defaultConfig.Server)
-	if err != nil {
-		newClient, err = client.NewClient(defaultConfig.Server)
+	switch defaultConfig.Auth {
+	case "idtoken":
+		newClient, err := client.NewAuthClient(defaultConfig.Server)
+		return newClient, err
+	default:
+		newClient, err := client.NewClient(defaultConfig.Server)
 		if err == nil {
 			newClient.SetBasicAuth(defaultConfig.Username, defaultConfig.Password)
 		}
+		return newClient, err
 	}
-	return newClient, err
 }
 
 func newContext() (context.Context, context.CancelFunc) {
