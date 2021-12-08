@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"strings"
 	"time"
 
 	voucher "github.com/grafeas/voucher/v2"
@@ -24,16 +26,18 @@ func getCheck() string {
 }
 
 func getVoucherClient() (voucher.Interface, error) {
-	switch defaultConfig.Auth {
+	switch strings.ToLower(defaultConfig.Auth) {
 	case "idtoken":
 		newClient, err := client.NewAuthClient(defaultConfig.Server)
 		return newClient, err
-	default:
+	case "basic":
 		newClient, err := client.NewClient(defaultConfig.Server)
 		if err == nil {
 			newClient.SetBasicAuth(defaultConfig.Username, defaultConfig.Password)
 		}
 		return newClient, err
+	default:
+		return nil, fmt.Errorf("invalid auth value: %q", defaultConfig.Auth)
 	}
 }
 
