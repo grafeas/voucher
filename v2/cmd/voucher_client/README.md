@@ -26,7 +26,7 @@ Below are the configuration options for Voucher Client:
 | `timeout`   | The number of seconds to wait before failing (defaults to 240).                            |
 | `username`  | Username to authenticate against Voucher with. (When auth = basic)                         |
 | `password`  | Password to authenticate against Voucher with. (When auth = basic)                         |
-| `auth`      | The method to authicate against Voucher with. (defaults to basic)                          |
+| `auth`      | The method to authenticate against Voucher with. (defaults to basic)                          |
 
 Configuration options can be overridden at runtime by setting the appropriate flag. For example, if you set the "port" flag when running `voucher_server`, that value will override whatever is in the configuration.
 
