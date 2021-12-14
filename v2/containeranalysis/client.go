@@ -194,6 +194,9 @@ func NewClient(ctx context.Context, binauthProject string, keyring signer.Attest
 	if err != nil {
 		return nil, err
 	}
+	if err := caClient.Close(); err != nil {
+		return nil, err
+	}
 
 	client := &Client{
 		containeranalysis: caClient.GetGrafeasClient(),
