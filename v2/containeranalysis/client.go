@@ -189,6 +189,7 @@ func (g *Client) GetBuildDetail(ctx context.Context, ref reference.Canonical) (r
 
 // NewClient creates a new containeranalysis Grafeas Client.
 func NewClient(ctx context.Context, binauthProject string, keyring signer.AttestationSigner) (*Client, error) {
+	// These options emulate cloud.google.com/go/containeranalysis/apiv1.NewClient
 	grafeasClient, err := grafeasv1.NewClient(ctx, option.WithEndpoint("containeranalysis.googleapis.com:443"), option.WithScopes(containeranalysisapi.DefaultAuthScopes()...))
 	if err != nil {
 		return nil, err
