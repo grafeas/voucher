@@ -9,6 +9,7 @@ import (
 
 	"github.com/docker/distribution/reference"
 	"google.golang.org/api/iterator"
+	"google.golang.org/api/option"
 	grafeas "google.golang.org/genproto/googleapis/grafeas/v1"
 
 	voucher "github.com/grafeas/voucher/v2"
@@ -188,18 +189,12 @@ func (g *Client) GetBuildDetail(ctx context.Context, ref reference.Canonical) (r
 
 // NewClient creates a new containeranalysis Grafeas Client.
 func NewClient(ctx context.Context, binauthProject string, keyring signer.AttestationSigner) (*Client, error) {
-	var err error
-
-	caClient, err := containeranalysisapi.NewClient(ctx)
+	grafeasClient, err := grafeasv1.NewClient(ctx, option.WithEndpoint("containeranalysis.googleapis.com:443"), option.WithScopes(containeranalysisapi.DefaultAuthScopes()...))
 	if err != nil {
 		return nil, err
 	}
-	if err := caClient.Close(); err != nil {
-		return nil, err
-	}
-
 	client := &Client{
-		containeranalysis: caClient.GetGrafeasClient(),
+		containeranalysis: grafeasClient,
 		keyring:           keyring,
 		binauthProject:    binauthProject,
 	}
