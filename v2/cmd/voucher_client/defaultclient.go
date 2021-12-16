@@ -54,7 +54,7 @@ func NewAuthClientWithToken(ctx context.Context, voucherURL string) (*client.Cli
 }
 
 func getDefaultTokenSource(ctx context.Context, audience string) (oauth2.TokenSource, error) {
-	src, err := google.DefaultTokenSource(context.Background())
+	src, err := google.DefaultTokenSource(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("error creating token source: %w", err)
 	}
@@ -63,7 +63,7 @@ func getDefaultTokenSource(ctx context.Context, audience string) (oauth2.TokenSo
 }
 
 func newHTTPClient(ctx context.Context, audience string, ts oauth2.TokenSource) (*http.Client, error) {
-	t, err := htransport.NewTransport(context.Background(), http.DefaultTransport, option.WithTokenSource(ts))
+	t, err := htransport.NewTransport(ctx, http.DefaultTransport, option.WithTokenSource(ts))
 	if err != nil {
 		return nil, fmt.Errorf("error creating client: %w", err)
 	}
