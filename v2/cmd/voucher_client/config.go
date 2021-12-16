@@ -37,7 +37,7 @@ func getVoucherClient() (voucher.Interface, error) {
 		}
 		return newClient, err
 	case "default-access-token":
-		newClient, err := NewAuthClientWithToken(defaultConfig.Server)
+		newClient, err := NewAuthClientWithToken(context.Background(), defaultConfig.Server)
 		if err != nil {
 			return nil, err
 		}
