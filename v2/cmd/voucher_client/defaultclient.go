@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/grafeas/voucher/v2/client"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
@@ -39,33 +38,16 @@ func (s *idTokenSource) Token() (*oauth2.Token, error) {
 	}, nil
 }
 
-// NewAuthClientWithToken creates an auth client using the token created from ADC
-func NewAuthClientWithToken(ctx context.Context, voucherURL string) (*client.Client, error) {
-	ts, err := getDefaultTokenSource(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	c, err := newHTTPClient(ctx, ts)
-	if err != nil {
-		return nil, err
-	}
-	return client.NewCustomClient(voucherURL, c)
-}
-
-func getDefaultTokenSource(ctx context.Context) (oauth2.TokenSource, error) {
+func getDefaultTokenSourceClient(ctx context.Context) (*http.Client, error) {
 	src, err := google.DefaultTokenSource(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("error creating token source: %w", err)
 	}
 	ts := oauth2.ReuseTokenSource(nil, &idTokenSource{TokenSource: src})
-	return ts, nil
-}
 
-func newHTTPClient(ctx context.Context, ts oauth2.TokenSource) (*http.Client, error) {
-	t, err := htransport.NewTransport(ctx, http.DefaultTransport, option.WithTokenSource(ts))
+	transport, err := htransport.NewTransport(ctx, http.DefaultTransport, option.WithTokenSource(ts))
 	if err != nil {
 		return nil, fmt.Errorf("error creating client: %w", err)
 	}
-	return &http.Client{Transport: t}, nil
+	return &http.Client{Transport: transport}, nil
 }

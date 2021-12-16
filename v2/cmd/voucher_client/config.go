@@ -8,6 +8,7 @@ import (
 
 	voucher "github.com/grafeas/voucher/v2"
 	"github.com/grafeas/voucher/v2/client"
+	"google.golang.org/api/idtoken"
 )
 
 type config struct {
@@ -26,30 +27,35 @@ func getCheck() string {
 }
 
 func getVoucherClient() (voucher.Interface, error) {
-	var newClient *client.Client
-	var err error
+	options := []client.Option{
+		client.WithUserAgent(fmt.Sprintf("voucher-client/%s", version)),
+	}
 	switch strings.ToLower(defaultConfig.Auth) {
-	case "idtoken":
-		newClient, err = client.NewAuthClient(defaultConfig.Server)
-		if err != nil {
-			return nil, err
-		}
 	case "basic":
-		newClient, err = client.NewClient(defaultConfig.Server)
+		options = append(options, client.WithBasicAuth(defaultConfig.Username, defaultConfig.Password))
+
+	case "idtoken":
+		idClient, err := idtoken.NewClient(context.Background(), defaultConfig.Server)
 		if err != nil {
 			return nil, err
 		}
-		newClient.SetBasicAuth(defaultConfig.Username, defaultConfig.Password)
+		options = append(options, client.WithHTTPClient(idClient))
+
 	case "default-access-token":
-		newClient, err = NewAuthClientWithToken(context.Background(), defaultConfig.Server)
+		tokenClient, err := getDefaultTokenSourceClient(context.Background())
 		if err != nil {
 			return nil, err
 		}
+		options = append(options, client.WithHTTPClient(tokenClient))
+
 	default:
 		return nil, fmt.Errorf("invalid auth value: %q", defaultConfig.Auth)
 	}
 
-	newClient.SetUserAgent(fmt.Sprintf("voucher-client/%s", version))
+	newClient, err := client.NewClient(defaultConfig.Server, options...)
+	if err != nil {
+		return nil, err
+	}
 	return newClient, nil
 }
 

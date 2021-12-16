@@ -31,12 +31,37 @@ const DefaultUserAgent = "voucher-client/2"
 
 // NewClient creates a new Client set to connect to the passed
 // hostname.
-func NewClient(voucherURL string) (*Client, error) {
-	return newClient(voucherURL, &http.Client{})
+func NewClient(voucherURL string, opts ...Option) (*Client, error) {
+	return newClient(voucherURL, &http.Client{}, opts...)
+}
+
+type Option func(*Client)
+
+// WithHTTPClient sets the http.Client to use for the client.
+func WithHTTPClient(httpClient *http.Client) Option {
+	return func(c *Client) {
+		c.httpClient = httpClient
+	}
+}
+
+// WithUserAgent sets the User-Agent header for the client.
+func WithUserAgent(userAgent string) Option {
+	return func(c *Client) {
+		c.userAgent = userAgent
+	}
+}
+
+// WithBasicAuth sets the username and password to use for the client.
+func WithBasicAuth(username, password string) Option {
+	return func(c *Client) {
+		c.username = username
+		c.password = password
+	}
 }
 
 // NewAuthClient creates a new auth Client set to connect to the passed
 // hostname using tokens.
+// Deprecated: use the WithHTTPClient option instead
 func NewAuthClient(voucherURL string) (*Client, error) {
 	authClient, err := idtoken.NewClient(context.Background(), voucherURL)
 	if err != nil {
@@ -45,21 +70,11 @@ func NewAuthClient(voucherURL string) (*Client, error) {
 	return newClient(voucherURL, authClient)
 }
 
-// NewCustomClient creates a new Client set to connect to passed
-// hostname using a passed http client
-func NewCustomClient(voucherURL string, client *http.Client) (*Client, error) {
-	return newClient(voucherURL, client)
-}
-
 // SetBasicAuth adds the username and password to the Client struct
+// Deprecated: use the WithBasicAuth option instead
 func (c *Client) SetBasicAuth(username, password string) {
 	c.username = username
 	c.password = password
-}
-
-// SetUserAgent customizes the user agent used by the client
-func (c *Client) SetUserAgent(userAgent string) {
-	c.userAgent = userAgent
 }
 
 // CopyURL returns a copy of this client's URL
@@ -117,7 +132,7 @@ func (c *Client) doVoucherRequest(ctx context.Context, url string, image referen
 	return &voucherResp, nil
 }
 
-func newClient(voucherURL string, httpClient *http.Client) (*Client, error) {
+func newClient(voucherURL string, httpClient *http.Client, options ...Option) (*Client, error) {
 	if voucherURL == "" {
 		return nil, errNoHost
 	}
@@ -134,6 +149,9 @@ func newClient(voucherURL string, httpClient *http.Client) (*Client, error) {
 		url:        u,
 		httpClient: httpClient,
 		userAgent:  DefaultUserAgent,
+	}
+	for _, opt := range options {
+		opt(client)
 	}
 	return client, nil
 }

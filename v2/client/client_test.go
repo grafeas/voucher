@@ -70,8 +70,7 @@ func TestVoucher_CustomUserAgent(t *testing.T) {
 	srv := httptest.NewServer(v)
 	defer srv.Close()
 
-	c, err := client.NewClient(srv.URL)
-	c.SetUserAgent(customUserAgent)
+	c, err := client.NewClient(srv.URL, client.WithUserAgent(customUserAgent))
 	require.NoError(t, err)
 	res, err := c.Check(context.Background(), "diy", canonical(t, image))
 	require.NoError(t, err)
