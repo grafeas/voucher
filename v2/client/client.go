@@ -45,6 +45,12 @@ func NewAuthClient(voucherURL string) (*Client, error) {
 	return newClient(voucherURL, authClient)
 }
 
+// NewCustomClient creates a new Client set to connect to passed
+// hostname using a passed http client
+func NewCustomClient(voucherURL string, client *http.Client) (*Client, error) {
+	return newClient(voucherURL, client)
+}
+
 // SetBasicAuth adds the username and password to the Client struct
 func (c *Client) SetBasicAuth(username, password string) {
 	c.username = username

@@ -27,20 +27,24 @@ func getCheck() string {
 
 func getVoucherClient() (voucher.Interface, error) {
 	var newClient *client.Client
+	var err error
 	switch strings.ToLower(defaultConfig.Auth) {
 	case "idtoken":
-		var err error
 		newClient, err = client.NewAuthClient(defaultConfig.Server)
 		if err != nil {
 			return nil, err
 		}
 	case "basic":
-		var err error
 		newClient, err = client.NewClient(defaultConfig.Server)
 		if err != nil {
 			return nil, err
 		}
 		newClient.SetBasicAuth(defaultConfig.Username, defaultConfig.Password)
+	case "default-access-token":
+		newClient, err = NewAuthClientWithToken(context.Background(), defaultConfig.Server)
+		if err != nil {
+			return nil, err
+		}
 	default:
 		return nil, fmt.Errorf("invalid auth value: %q", defaultConfig.Auth)
 	}

@@ -3,6 +3,7 @@ module github.com/grafeas/voucher/v2
 go 1.16
 
 require (
+	// if updating containeranalysis or grafeas, ensure the options in containeranalysis/client.go are still valid
 	cloud.google.com/go/containeranalysis v0.1.0
 	cloud.google.com/go/grafeas v0.1.0
 	cloud.google.com/go/kms v1.0.0
