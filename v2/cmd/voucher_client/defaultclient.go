@@ -41,19 +41,19 @@ func (s *idTokenSource) Token() (*oauth2.Token, error) {
 
 // NewAuthClientWithToken creates an auth client using the token created from ADC
 func NewAuthClientWithToken(ctx context.Context, voucherURL string) (*client.Client, error) {
-	ts, err := getDefaultTokenSource(ctx, voucherURL)
+	ts, err := getDefaultTokenSource(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	c, err := newHTTPClient(ctx, voucherURL, ts)
+	c, err := newHTTPClient(ctx, ts)
 	if err != nil {
 		return nil, err
 	}
 	return client.NewCustomClient(voucherURL, c)
 }
 
-func getDefaultTokenSource(ctx context.Context, audience string) (oauth2.TokenSource, error) {
+func getDefaultTokenSource(ctx context.Context) (oauth2.TokenSource, error) {
 	src, err := google.DefaultTokenSource(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("error creating token source: %w", err)
@@ -62,7 +62,7 @@ func getDefaultTokenSource(ctx context.Context, audience string) (oauth2.TokenSo
 	return ts, nil
 }
 
-func newHTTPClient(ctx context.Context, audience string, ts oauth2.TokenSource) (*http.Client, error) {
+func newHTTPClient(ctx context.Context, ts oauth2.TokenSource) (*http.Client, error) {
 	t, err := htransport.NewTransport(ctx, http.DefaultTransport, option.WithTokenSource(ts))
 	if err != nil {
 		return nil, fmt.Errorf("error creating client: %w", err)
