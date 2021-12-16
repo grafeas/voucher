@@ -36,6 +36,12 @@ func getVoucherClient() (voucher.Interface, error) {
 			newClient.SetBasicAuth(defaultConfig.Username, defaultConfig.Password)
 		}
 		return newClient, err
+	case "default-access-token":
+		newClient, err := NewAuthClientWithToken(context.Background(), defaultConfig.Server)
+		if err != nil {
+			return nil, err
+		}
+		return newClient, err
 	default:
 		return nil, fmt.Errorf("invalid auth value: %q", defaultConfig.Auth)
 	}
