@@ -90,7 +90,7 @@ func generateIdToken(ctx context.Context) {
 		fmt.Errorf("get id token into: %w", err)
 	}
 
-	client, err := google.DefaultClient(ctx, "https://www.googleapis.com/auth/iam")
+	client, err := google.DefaultClient(ctx, "https://www.googleapis.com/auth/cloud-platform")
 	req, err := http.NewRequest(
 		http.MethodPost,
 		fmt.Sprintf("https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/%s:generateIdToken", tokenInfo.Email),
