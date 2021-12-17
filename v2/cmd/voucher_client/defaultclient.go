@@ -81,31 +81,30 @@ func generateIdToken(ctx context.Context) {
 		fmt.Errorf("get token info: %w", err)
 	}
 
-	stuff := map[string]string{
+	requestBody := map[string]string{
 		"audience": defaultConfig.Server,
 	}
 
-	body, err := json.Marshal(stuff)
+	body, err := json.Marshal(requestBody)
 	if err != nil {
 		fmt.Errorf("get id token into: %w", err)
 	}
 
-	fmt.Printf("%v\n", body)
-	client, err := google.DefaultClient(ctx, "https://www.googleapis.com/auth/cloud-platform")
+	client, err := google.DefaultClient(ctx, "https://www.googleapis.com/auth/iam")
 	req, err := http.NewRequest(
 		http.MethodPost,
 		fmt.Sprintf("https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/%s:generateIdToken", tokenInfo.Email),
 		bytes.NewBuffer(body),
 	)
 	if err != nil {
-		fmt.Errorf("get id token into: %w", err)
+		fmt.Errorf("get id token info: %w", err)
 	}
 
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Errorf("get id token into: %w", err)
+		fmt.Errorf("get id token info: %w", err)
 	}
 	defer resp.Body.Close()
+
 	fmt.Println("response Status:", resp.Status)
-	fmt.Println("response Headers:", resp.Header)
 }
