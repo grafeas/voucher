@@ -36,7 +36,7 @@ func TestNewClient(t *testing.T) {
 	}
 	for label, tc := range cases {
 		t.Run(label, func(t *testing.T) {
-			c, err := client.NewClient(context.Background(), tc.input)
+			c, err := client.NewClient(tc.input)
 			if tc.errMsg != "" {
 				assert.EqualError(t, err, tc.errMsg)
 			} else {
@@ -55,7 +55,7 @@ func TestVoucher_Check(t *testing.T) {
 	srv := httptest.NewServer(v)
 	defer srv.Close()
 
-	c, err := client.NewClient(context.Background(), srv.URL)
+	c, err := client.NewClient(srv.URL)
 	require.NoError(t, err)
 	res, err := c.Check(context.Background(), "diy", canonical(t, image))
 	require.NoError(t, err)
@@ -70,7 +70,7 @@ func TestVoucher_CustomUserAgent(t *testing.T) {
 	srv := httptest.NewServer(v)
 	defer srv.Close()
 
-	c, err := client.NewClient(context.Background(), srv.URL, client.WithUserAgent(customUserAgent))
+	c, err := client.NewClientContext(context.Background(), srv.URL, client.WithUserAgent(customUserAgent))
 	require.NoError(t, err)
 	res, err := c.Check(context.Background(), "diy", canonical(t, image))
 	require.NoError(t, err)
@@ -83,7 +83,7 @@ func TestVoucher_Verify(t *testing.T) {
 	srv := httptest.NewServer(v)
 	defer srv.Close()
 
-	c, err := client.NewClient(context.Background(), srv.URL)
+	c, err := client.NewClient(srv.URL)
 	require.NoError(t, err)
 	res, err := c.Verify(context.Background(), "diy", canonical(t, image))
 	require.NoError(t, err)

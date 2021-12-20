@@ -33,9 +33,9 @@ type Client struct {
 
 const DefaultUserAgent = "voucher-client/2"
 
-// NewClient creates a new Client set to connect to the passed
+// NewClientContext creates a new Client set to connect to the passed
 // hostname.
-func NewClient(ctx context.Context, voucherURL string, options ...Option) (*Client, error) {
+func NewClientContext(ctx context.Context, voucherURL string, options ...Option) (*Client, error) {
 	if voucherURL == "" {
 		return nil, errNoHost
 	}
@@ -121,9 +121,15 @@ func WithUserAgent(userAgent string) Option {
 
 // NewAuthClient creates a new auth Client set to connect to the passed
 // hostname using tokens.
-// Deprecated: use the WithIDTokenAuth option instead
-func NewAuthClient(ctx context.Context, voucherURL string) (*Client, error) {
-	return NewClient(ctx, voucherURL, WithIDTokenAuth())
+// Deprecated: use NewClientContext and the WithIDTokenAuth option instead
+func NewAuthClient(voucherURL string) (*Client, error) {
+	return NewClientContext(context.Background(), voucherURL, WithIDTokenAuth())
+}
+
+// NewClient creates a new auth Client.
+// Deprecated: use NewClientContext
+func NewClient(voucherURL string) (*Client, error) {
+	return NewClientContext(context.Background(), voucherURL)
 }
 
 // SetBasicAuth adds the username and password to the Client struct

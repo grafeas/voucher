@@ -40,11 +40,9 @@ func getVoucherClient() (voucher.Interface, error) {
 		return nil, fmt.Errorf("invalid auth value: %q", defaultConfig.Auth)
 	}
 
-	newClient, err := client.NewClient(context.Background(), defaultConfig.Server, options...)
-	if err != nil {
-		return nil, err
-	}
-	return newClient, nil
+	ctx, cancel := newContext()
+	defer cancel()
+	return client.NewClientContext(ctx, defaultConfig.Server, options...)
 }
 
 func newContext() (context.Context, context.CancelFunc) {
