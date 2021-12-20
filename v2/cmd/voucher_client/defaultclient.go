@@ -92,7 +92,7 @@ func generateIDToken(ctx context.Context, tok *oauth2.Token) (string, error) {
 	}
 	tokenInfo, err := googOauth.Tokeninfo().Do()
 	if err != nil {
-		return "", fmt.Errorf("error creating google oauth client: %w", err)
+		return "", fmt.Errorf("error fetching token info: %w", err)
 	}
 
 	// Generate an id token for that serviceAccount
