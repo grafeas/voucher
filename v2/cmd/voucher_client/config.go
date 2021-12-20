@@ -8,7 +8,6 @@ import (
 
 	voucher "github.com/grafeas/voucher/v2"
 	"github.com/grafeas/voucher/v2/client"
-	"google.golang.org/api/idtoken"
 )
 
 type config struct {
@@ -33,26 +32,15 @@ func getVoucherClient() (voucher.Interface, error) {
 	switch strings.ToLower(defaultConfig.Auth) {
 	case "basic":
 		options = append(options, client.WithBasicAuth(defaultConfig.Username, defaultConfig.Password))
-
 	case "idtoken":
-		idClient, err := idtoken.NewClient(context.Background(), defaultConfig.Server)
-		if err != nil {
-			return nil, err
-		}
-		options = append(options, client.WithHTTPClient(idClient))
-
+		options = append(options, client.WithIDTokenAuth())
 	case "default-access-token":
-		tokenClient, err := getDefaultTokenSourceClient(context.Background())
-		if err != nil {
-			return nil, err
-		}
-		options = append(options, client.WithHTTPClient(tokenClient))
-
+		options = append(options, client.WithDefaultTokenAuth())
 	default:
 		return nil, fmt.Errorf("invalid auth value: %q", defaultConfig.Auth)
 	}
 
-	newClient, err := client.NewClient(defaultConfig.Server, options...)
+	newClient, err := client.NewClient(context.Background(), defaultConfig.Server, options...)
 	if err != nil {
 		return nil, err
 	}

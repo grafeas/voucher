@@ -13,7 +13,11 @@ import (
 
 	"github.com/docker/distribution/reference"
 	voucher "github.com/grafeas/voucher/v2"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
 	"google.golang.org/api/idtoken"
+	"google.golang.org/api/option"
+	httptransport "google.golang.org/api/transport/http"
 )
 
 var errNoHost = errors.New("cannot create client with empty hostname")
@@ -31,46 +35,72 @@ const DefaultUserAgent = "voucher-client/2"
 
 // NewClient creates a new Client set to connect to the passed
 // hostname.
-func NewClient(voucherURL string, opts ...Option) (*Client, error) {
-	return newClient(voucherURL, &http.Client{}, opts...)
+func NewClient(ctx context.Context, voucherURL string, opts ...Option) (*Client, error) {
+	return newClient(ctx, voucherURL, opts...)
 }
 
-type Option func(*Client) error
+type Option func(context.Context, *Client) error
 
-// WithHTTPClient sets the http.Client to use for the client.
+// WithHTTPClient customizes the http.Client used by the client.
+// Customize the client's Transport to do arbitrary authentication.
 func WithHTTPClient(httpClient *http.Client) Option {
-	return func(c *Client) error {
+	return func(_ context.Context, c *Client) error {
 		c.httpClient = httpClient
-		return nil
-	}
-}
-
-// WithUserAgent sets the User-Agent header for the client.
-func WithUserAgent(userAgent string) Option {
-	return func(c *Client) error {
-		c.userAgent = userAgent
 		return nil
 	}
 }
 
 // WithBasicAuth sets the username and password to use for the client.
 func WithBasicAuth(username, password string) Option {
-	return func(c *Client) error {
+	return func(_ context.Context, c *Client) error {
 		c.username = username
 		c.password = password
 		return nil
 	}
 }
 
+// WithIDTokenAuth configures the client to use an ID token.
+func WithIDTokenAuth() Option {
+	return func(ctx context.Context, c *Client) error {
+		idClient, err := idtoken.NewClient(ctx, c.url.String())
+		if err != nil {
+			return err
+		}
+		c.httpClient = idClient
+		return nil
+	}
+}
+
+func WithDefaultTokenAuth() Option {
+	return func(ctx context.Context, c *Client) error {
+		src, err := google.DefaultTokenSource(ctx)
+		if err != nil {
+			return fmt.Errorf("error getting default token source: %w", err)
+		}
+		ts := oauth2.ReuseTokenSource(nil, &idTokenSource{TokenSource: src, audience: c.url.String()})
+
+		transport, err := httptransport.NewTransport(ctx, http.DefaultTransport, option.WithTokenSource(ts))
+		if err != nil {
+			return fmt.Errorf("error creating client: %w", err)
+		}
+		c.httpClient = &http.Client{Transport: transport}
+		return nil
+	}
+}
+
+// WithUserAgent sets the User-Agent header for the client.
+func WithUserAgent(userAgent string) Option {
+	return func(_ context.Context, c *Client) error {
+		c.userAgent = userAgent
+		return nil
+	}
+}
+
 // NewAuthClient creates a new auth Client set to connect to the passed
 // hostname using tokens.
-// Deprecated: use the WithHTTPClient option instead
-func NewAuthClient(voucherURL string) (*Client, error) {
-	authClient, err := idtoken.NewClient(context.Background(), voucherURL)
-	if err != nil {
-		return nil, err
-	}
-	return newClient(voucherURL, authClient)
+// Deprecated: use the WithIDTokenAuth option instead
+func NewAuthClient(ctx context.Context, voucherURL string) (*Client, error) {
+	return newClient(ctx, voucherURL, WithIDTokenAuth())
 }
 
 // SetBasicAuth adds the username and password to the Client struct
@@ -135,7 +165,7 @@ func (c *Client) doVoucherRequest(ctx context.Context, url string, image referen
 	return &voucherResp, nil
 }
 
-func newClient(voucherURL string, httpClient *http.Client, options ...Option) (*Client, error) {
+func newClient(ctx context.Context, voucherURL string, options ...Option) (*Client, error) {
 	if voucherURL == "" {
 		return nil, errNoHost
 	}
@@ -150,11 +180,11 @@ func newClient(voucherURL string, httpClient *http.Client, options ...Option) (*
 
 	client := &Client{
 		url:        u,
-		httpClient: httpClient,
+		httpClient: &http.Client{},
 		userAgent:  DefaultUserAgent,
 	}
 	for _, opt := range options {
-		if err := opt(client); err != nil {
+		if err := opt(ctx, client); err != nil {
 			return nil, err
 		}
 	}
