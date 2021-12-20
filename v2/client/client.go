@@ -35,27 +35,30 @@ func NewClient(voucherURL string, opts ...Option) (*Client, error) {
 	return newClient(voucherURL, &http.Client{}, opts...)
 }
 
-type Option func(*Client)
+type Option func(*Client) error
 
 // WithHTTPClient sets the http.Client to use for the client.
 func WithHTTPClient(httpClient *http.Client) Option {
-	return func(c *Client) {
+	return func(c *Client) error {
 		c.httpClient = httpClient
+		return nil
 	}
 }
 
 // WithUserAgent sets the User-Agent header for the client.
 func WithUserAgent(userAgent string) Option {
-	return func(c *Client) {
+	return func(c *Client) error {
 		c.userAgent = userAgent
+		return nil
 	}
 }
 
 // WithBasicAuth sets the username and password to use for the client.
 func WithBasicAuth(username, password string) Option {
-	return func(c *Client) {
+	return func(c *Client) error {
 		c.username = username
 		c.password = password
+		return nil
 	}
 }
 
@@ -151,7 +154,9 @@ func newClient(voucherURL string, httpClient *http.Client, options ...Option) (*
 		userAgent:  DefaultUserAgent,
 	}
 	for _, opt := range options {
-		opt(client)
+		if err := opt(client); err != nil {
+			return nil, err
+		}
 	}
 	return client, nil
 }
