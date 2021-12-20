@@ -24,7 +24,10 @@ type Client struct {
 	httpClient *http.Client
 	username   string
 	password   string
+	userAgent  string
 }
+
+const DefaultUserAgent = "voucher-client/2"
 
 // NewClient creates a new Client set to connect to the passed
 // hostname.
@@ -54,6 +57,11 @@ func (c *Client) SetBasicAuth(username, password string) {
 	c.password = password
 }
 
+// SetUserAgent customizes the user agent used by the client
+func (c *Client) SetUserAgent(userAgent string) {
+	c.userAgent = userAgent
+}
+
 // CopyURL returns a copy of this client's URL
 func (c *Client) CopyURL() *url.URL {
 	urlCopy := (*c.url)
@@ -74,6 +82,9 @@ func (c *Client) newVoucherRequest(ctx context.Context, url string, image refere
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	if c.userAgent != "" {
+		req.Header.Set("User-Agent", c.userAgent)
+	}
 	if c.username != "" && c.password != "" {
 		req.SetBasicAuth(c.username, c.password)
 	}
@@ -122,6 +133,7 @@ func newClient(voucherURL string, httpClient *http.Client) (*Client, error) {
 	client := &Client{
 		url:        u,
 		httpClient: httpClient,
+		userAgent:  DefaultUserAgent,
 	}
 	return client, nil
 }
