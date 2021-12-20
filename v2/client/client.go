@@ -35,8 +35,30 @@ const DefaultUserAgent = "voucher-client/2"
 
 // NewClient creates a new Client set to connect to the passed
 // hostname.
-func NewClient(ctx context.Context, voucherURL string, opts ...Option) (*Client, error) {
-	return newClient(ctx, voucherURL, opts...)
+func NewClient(ctx context.Context, voucherURL string, options ...Option) (*Client, error) {
+	if voucherURL == "" {
+		return nil, errNoHost
+	}
+
+	u, err := url.Parse(voucherURL)
+	if err != nil {
+		return nil, fmt.Errorf("could not parse voucher hostname: %w", err)
+	}
+	if u.Scheme == "" {
+		u.Scheme = "https"
+	}
+
+	client := &Client{
+		url:        u,
+		httpClient: &http.Client{},
+		userAgent:  DefaultUserAgent,
+	}
+	for _, opt := range options {
+		if err := opt(ctx, client); err != nil {
+			return nil, err
+		}
+	}
+	return client, nil
 }
 
 type Option func(context.Context, *Client) error
@@ -71,6 +93,7 @@ func WithIDTokenAuth() Option {
 	}
 }
 
+// WithDefaultTokenAuth configures the client to use Google's default token.
 func WithDefaultTokenAuth() Option {
 	return func(ctx context.Context, c *Client) error {
 		src, err := google.DefaultTokenSource(ctx)
@@ -100,7 +123,7 @@ func WithUserAgent(userAgent string) Option {
 // hostname using tokens.
 // Deprecated: use the WithIDTokenAuth option instead
 func NewAuthClient(ctx context.Context, voucherURL string) (*Client, error) {
-	return newClient(ctx, voucherURL, WithIDTokenAuth())
+	return NewClient(ctx, voucherURL, WithIDTokenAuth())
 }
 
 // SetBasicAuth adds the username and password to the Client struct
@@ -163,30 +186,4 @@ func (c *Client) doVoucherRequest(ctx context.Context, url string, image referen
 		return nil, err
 	}
 	return &voucherResp, nil
-}
-
-func newClient(ctx context.Context, voucherURL string, options ...Option) (*Client, error) {
-	if voucherURL == "" {
-		return nil, errNoHost
-	}
-
-	u, err := url.Parse(voucherURL)
-	if err != nil {
-		return nil, fmt.Errorf("could not parse voucher hostname: %s", err)
-	}
-	if u.Scheme == "" {
-		u.Scheme = "https"
-	}
-
-	client := &Client{
-		url:        u,
-		httpClient: &http.Client{},
-		userAgent:  DefaultUserAgent,
-	}
-	for _, opt := range options {
-		if err := opt(ctx, client); err != nil {
-			return nil, err
-		}
-	}
-	return client, nil
 }
