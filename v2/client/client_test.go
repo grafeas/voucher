@@ -38,7 +38,7 @@ func TestNewClient(t *testing.T) {
 		t.Run(label, func(t *testing.T) {
 			c, err := client.NewClient(tc.input)
 			if tc.errMsg != "" {
-				assert.Equal(t, tc.errMsg, err.Error())
+				assert.EqualError(t, err, tc.errMsg)
 			} else {
 				require.NoError(t, err)
 				assert.Equal(t, tc.hostname, c.CopyURL().String())
@@ -50,7 +50,7 @@ func TestNewClient(t *testing.T) {
 const image = "gcr.io/project/image@sha256:0000000000000000000000000000000000000000000000000000000000000000"
 
 func TestVoucher_Check(t *testing.T) {
-	v := &mockVoucher{}
+	v := &mockVoucher{t: t}
 	v.checks = append(v.checks, &voucher.Response{Image: image, Success: true})
 	srv := httptest.NewServer(v)
 	defer srv.Close()
@@ -62,8 +62,23 @@ func TestVoucher_Check(t *testing.T) {
 	assert.True(t, res.Success)
 }
 
+func TestVoucher_CustomUserAgent(t *testing.T) {
+	const customUserAgent = "my-awesome-voucher/1.0"
+	v := &mockVoucher{t: t}
+	v.ua = customUserAgent
+	v.checks = append(v.checks, &voucher.Response{Image: image, Success: true})
+	srv := httptest.NewServer(v)
+	defer srv.Close()
+
+	c, err := client.NewClientContext(context.Background(), srv.URL, client.WithUserAgent(customUserAgent))
+	require.NoError(t, err)
+	res, err := c.Check(context.Background(), "diy", canonical(t, image))
+	require.NoError(t, err)
+	assert.True(t, res.Success)
+}
+
 func TestVoucher_Verify(t *testing.T) {
-	v := &mockVoucher{}
+	v := &mockVoucher{t: t}
 	v.verifications = append(v.verifications, &voucher.Response{Image: image, Success: true})
 	srv := httptest.NewServer(v)
 	defer srv.Close()
@@ -76,11 +91,21 @@ func TestVoucher_Verify(t *testing.T) {
 }
 
 type mockVoucher struct {
+	t             *testing.T
+	ua            string
 	checks        []*voucher.Response
 	verifications []*voucher.Response
 }
 
 func (v *mockVoucher) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	hdr := r.Header
+	assert.Equal(v.t, "application/json", hdr.Get("Content-Type"))
+	if v.ua != "" {
+		assert.Equal(v.t, v.ua, hdr.Get("User-Agent"))
+	} else {
+		assert.Equal(v.t, client.DefaultUserAgent, hdr.Get("User-Agent"))
+	}
+
 	var req voucher.Request
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "", http.StatusBadRequest)
