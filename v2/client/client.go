@@ -93,14 +93,14 @@ func WithIDTokenAuth() Option {
 	}
 }
 
-// WithDefaultTokenAuth configures the client to use Google's default token.
-func WithDefaultTokenAuth() Option {
+// WithDefaultIDTokenAuth configures the client to use Google's default token.
+func WithDefaultIDTokenAuth() Option {
 	return func(ctx context.Context, c *Client) error {
 		src, err := google.DefaultTokenSource(ctx)
 		if err != nil {
 			return fmt.Errorf("error getting default token source: %w", err)
 		}
-		ts := oauth2.ReuseTokenSource(nil, &idTokenSource{TokenSource: src, audience: c.url.String()})
+		ts := oauth2.ReuseTokenSource(nil, &defaultIDTokenSource{TokenSource: src, audience: c.url.String()})
 
 		transport, err := httptransport.NewTransport(ctx, http.DefaultTransport, option.WithTokenSource(ts))
 		if err != nil {

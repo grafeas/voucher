@@ -11,15 +11,15 @@ import (
 	"google.golang.org/api/option"
 )
 
-// idTokenSource is an oauth2.TokenSource that wraps another
+// defaultIDTokenSource is an oauth2.TokenSource that wraps another
 // It takes the id_token from TokenSource and passes that on as a bearer token
 // Implementation from: https://github.com/googleapis/google-api-go-client/issues/873
-type idTokenSource struct {
+type defaultIDTokenSource struct {
 	TokenSource oauth2.TokenSource
 	audience    string
 }
 
-func (s *idTokenSource) Token() (*oauth2.Token, error) {
+func (s *defaultIDTokenSource) Token() (*oauth2.Token, error) {
 	tok, err := s.TokenSource.Token()
 	if err != nil {
 		return nil, err

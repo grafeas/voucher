@@ -35,7 +35,7 @@ func getVoucherClient() (voucher.Interface, error) {
 	case "idtoken":
 		options = append(options, client.WithIDTokenAuth())
 	case "default-access-token":
-		options = append(options, client.WithDefaultTokenAuth())
+		options = append(options, client.WithDefaultIDTokenAuth())
 	default:
 		return nil, fmt.Errorf("invalid auth value: %q", defaultConfig.Auth)
 	}
