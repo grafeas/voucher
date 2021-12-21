@@ -26,31 +26,23 @@ func getCheck() string {
 }
 
 func getVoucherClient() (voucher.Interface, error) {
-	var newClient *client.Client
-	var err error
+	options := []client.Option{
+		client.WithUserAgent(fmt.Sprintf("voucher-client/%s", version)),
+	}
 	switch strings.ToLower(defaultConfig.Auth) {
-	case "idtoken":
-		newClient, err = client.NewAuthClient(defaultConfig.Server)
-		if err != nil {
-			return nil, err
-		}
 	case "basic":
-		newClient, err = client.NewClient(defaultConfig.Server)
-		if err != nil {
-			return nil, err
-		}
-		newClient.SetBasicAuth(defaultConfig.Username, defaultConfig.Password)
+		options = append(options, client.WithBasicAuth(defaultConfig.Username, defaultConfig.Password))
+	case "idtoken":
+		options = append(options, client.WithIDTokenAuth())
 	case "default-access-token":
-		newClient, err = NewAuthClientWithToken(context.Background(), defaultConfig.Server)
-		if err != nil {
-			return nil, err
-		}
+		options = append(options, client.WithDefaultIDTokenAuth())
 	default:
 		return nil, fmt.Errorf("invalid auth value: %q", defaultConfig.Auth)
 	}
 
-	newClient.SetUserAgent(fmt.Sprintf("voucher-client/%s", version))
-	return newClient, nil
+	ctx, cancel := newContext()
+	defer cancel()
+	return client.NewClientContext(ctx, defaultConfig.Server, options...)
 }
 
 func newContext() (context.Context, context.CancelFunc) {
