@@ -67,6 +67,8 @@ $ git push -u <your username> <the name of your branch>
 are adding code which would be untested, please consider adding tests to cover
 that code.
 
+- For new features or changes users should be aware of, add an entry to `CHANGELOG.md`.
+
 - Open a PR against grafeas/voucher
 
 ## Making a release
@@ -74,15 +76,15 @@ that code.
 If you are maintaining the Voucher project you can make a release of Voucher
 using `goreleaser`.
 
-First, update the master branch to the commit that you'd like to create a
+First, update the default branch to the commit that you'd like to create a
 release for.
 
 ```shell
-$ git checkout master
+$ git checkout main
 $ git pull
 ```
 
-If everything looks good, create a new tag. Voucher uses
+If everything looks good, decide the new version. Voucher uses
 [Semantic Versioning](https://semver.org) which basically means that API
 compatible changes should bump the last digit, backwards compatible changes
 should bump the second, and API incompatible changes should bump the first
@@ -91,7 +93,12 @@ we can bump from v1.0.0 to v1.0.1. If the change is backwards compatible with
 the previous version, we can bump from v1.0.0 to v1.1.0. If the change is
 not backwards compatible, we must bump the version from v1.0.0 to v2.0.0.
 
-Run the following, where `version` is replaced with the appropriate version for
+Edit the `CHANGELOG.md`:
+* Move the `Unreleased` section to the version chosen above.
+* Keep a blank `Unreleased` section at the top of the file.
+* Commit and [send in your changes](#send-in-your-changes), including the reason you selected the target version.
+
+Once your changes are approved, run the following, where `version` is replaced with the appropriate version for
 this release.
 
 (Note that you will need to have Git configured to sign tags with 
@@ -101,34 +108,11 @@ your OpenPGP key or this command will fail.)
 $ git tag -s <version>
 ```
 
-Before pushing your tag, build a release version of Voucher to ensure that
-everything builds properly:
-
-```shell
-$ make release
-```
-
-If this step fails, please do not make a release without fixing it. In
-addition, please delete the tag so it can be replaced once the issue is
-fixed.
-
-If this step is successful, the ready-to-be released files will be found
-under `dist/`.
-
-Next, push the tag to the server, where `version` is the same version you
+Push the tag to the server, where `version` is the same version you
 specified before:
 
 ```shell
 $ git push origin refs/tags/<version>
 ```
 
-Finally, create a new release in GitHub for the new version for the tag you
-created and signed. In the `dist/` directory you will find the automatically
-generated binary tar archives and `checksums.txt` file, which will need to
-be added to the release in GitHub.
-
-In the release description, paste the output of the `CHANGELOG.md` file,
-also automatically generated in `dist/`. This should be touched up to
-remove unnecessary commit descriptions.
-
-Once you're ready, publish the release and tell everyone about it!
+Once pushed, the release will be published automatically by goreleaser running in GitHub Actions.
