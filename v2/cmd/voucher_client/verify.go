@@ -32,14 +32,14 @@ func verifyImage(ctx context.Context, client voucher.Interface, check string, ca
 func LookupAndVerify(args []string) {
 	var err error
 
-	client, err := getVoucherClient()
+	ctx, cancel := newContext()
+	defer cancel()
+
+	client, err := getVoucherClient(ctx)
 	if nil != err {
 		errorf("creating client failed: %s", err)
 		os.Exit(1)
 	}
-
-	ctx, cancel := newContext()
-	defer cancel()
 
 	canonicalRef, err := lookupCanonical(ctx, args[0])
 	if nil != err {
