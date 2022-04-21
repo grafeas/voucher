@@ -4,16 +4,14 @@ import (
 	"context"
 	"errors"
 
+	"github.com/CycloneDX/cyclonedx-go"
 	"github.com/docker/distribution/reference"
 )
-
-type SBOM struct {
-}
 
 // SBOMClient is an interface that represents something that gets SBOMs
 type SBOMClient interface {
 	GetVulnerabilities(ctx context.Context, ref reference.Canonical) ([]Vulnerability, error)
-	GetSBOM(context.Context, reference.Canonical) (SBOM, error)
+	GetSBOM(context.Context, reference.Canonical) (cyclonedx.BOM, error)
 	Close()
 }
 

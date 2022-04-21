@@ -3,8 +3,8 @@ package sbomgcr
 import (
 	"context"
 
-	"github.com/docker/docker/reference"
-	sbom "github.com/grafeas/voucher/v2"
+	"github.com/CycloneDX/cyclonedx-go"
+	"github.com/docker/distribution/reference"
 	voucher "github.com/grafeas/voucher/v2"
 	"github.com/grafeas/voucher/v2/signer"
 )
@@ -18,12 +18,12 @@ func (c *Client) GetVulnerabilities(ctx context.Context, ref reference.Canonical
 	return []voucher.Vulnerability{}, nil
 }
 
-// GetBuildDetail gets the BuildDetail for the passed image.
-func (g *Client) GetSBOM(ctx context.Context, ref reference.Canonical) (sbom.SBOM, error) {
-	return sbom.SBOM{}, nil
+// GetSBOM gets the SBOM for the passed image.
+func (g *Client) GetSBOM(ctx context.Context, ref reference.Canonical) (cyclonedx.BOM, error) {
+	return cyclonedx.BOM{}, nil
 }
 
-// NewClient creates a new containeranalysis Grafeas Client.
+// NewClient creates a new
 func NewClient(ctx context.Context, binauthProject string, keyring signer.AttestationSigner) (*Client, error) {
 	client := &Client{}
 
