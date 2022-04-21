@@ -2,6 +2,7 @@ package sbomgcr
 
 import (
 	"context"
+	"strings"
 
 	"github.com/CycloneDX/cyclonedx-go"
 	"github.com/docker/distribution/reference"
@@ -20,6 +21,14 @@ func (c *Client) GetVulnerabilities(ctx context.Context, ref reference.Canonical
 
 // GetSBOM gets the SBOM for the passed image.
 func (g *Client) GetSBOM(ctx context.Context, ref reference.Canonical) (cyclonedx.BOM, error) {
+	digest := ref.Digest().String()
+	tag := strings.Replace(digest, "@", "-", 1)
+	// get repo (similar to gcloud describe) or parse as ReferenceToProjectName
+	// lets authenticate this thing
+	// list tags https://pkg.go.dev/github.com/google/go-containerregistry@v0.8.0/pkg/v1/google#List
+	// match tag to sbom
+	// get sbom
+
 	return cyclonedx.BOM{}, nil
 }
 
