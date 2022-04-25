@@ -2,16 +2,50 @@ package sbomgcr
 
 import (
 	"context"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
+	"io"
 	"strings"
+	"time"
 
 	"github.com/CycloneDX/cyclonedx-go"
 	"github.com/docker/distribution/reference"
 	"github.com/google/go-containerregistry/pkg/authn"
+	"github.com/google/go-containerregistry/pkg/crane"
 	"github.com/google/go-containerregistry/pkg/name"
+	v1 "github.com/google/go-containerregistry/pkg/v1"
 	gcr "github.com/google/go-containerregistry/pkg/v1/google"
 	voucher "github.com/grafeas/voucher/v2"
 )
+
+// structs for unmarshalling
+
+type Envelope struct {
+	PayloadType string      `json:"payloadType"`
+	Payload     string      `json:"payload"`
+	Signatures  []Signature `json:"signatures"`
+}
+
+type Signature struct {
+	KeyID string `json:"keyid"`
+	Sig   string `json:"sig"`
+}
+
+type CustomPredicate struct {
+	Type          string `json:"_type"`
+	PredicateType string `json:"predicateType"`
+	Subject       []struct {
+		Name   string `json:"name"`
+		Digest struct {
+			Sha256 string `json:"sha256"`
+		} `json:"digest"`
+	} `json:"subject"`
+	Predicate struct {
+		Data      string    `json:"Data"`
+		Timestamp time.Time `json:"Timestamp"`
+	} `json:"predicate"`
+}
 
 // Client connects to GCR
 type Client struct {
@@ -24,41 +58,123 @@ func (c *Client) GetVulnerabilities(ctx context.Context, ref reference.Canonical
 }
 
 // GetSBOM gets the SBOM for the passed image.
-func (c *Client) GetSBOM(ctx context.Context, ref reference.Canonical) (cyclonedx.BOM, error) {
-	digest := ref.Digest().String()
-	tag := strings.Replace(digest, "@", "-", 1)
+func (c *Client) GetSBOM(ctx context.Context, refImageName string) (cyclonedx.BOM, error) {
+	refImageSplit := strings.Split(refImageName, "@")
+	repoName, imageSHA := refImageSplit[0], refImageSplit[1]
 
-	// we can call the GetRepoTags method to get back all the gcr.Tags on a specific repo
-	// then match the tag we make from the digest against it
-	// then get the sbom
+	tag := strings.Replace(imageSHA, ":", "-", 1) + ".att"
 
-	return cyclonedx.BOM{}, nil
+	sbomDigest, err := c.GetSBOMDigestWithTag(ctx, repoName, tag)
+
+	if err != nil {
+		return cyclonedx.BOM{}, fmt.Errorf("error getting sbom digest with tag %w", err)
+	}
+
+	sbomImageName := repoName + "@" + sbomDigest
+
+	sbom, err := crane.Pull(sbomImageName)
+
+	if err != nil {
+		return cyclonedx.BOM{}, fmt.Errorf("error pulling image from gcr with crane %w", err)
+	}
+
+	cycloneDX, err := c.GetSbomFromImage(sbom)
+
+	if err != nil {
+		return cyclonedx.BOM{}, fmt.Errorf("error getting SBOM from image %w", err)
+	}
+
+	return cycloneDX, nil
 }
 
-// GetRepoTags gets the gcr tags for the passed image.
-func (c *Client) GetRepoTags(ctx context.Context, repoName string) (*gcr.Tags, error) {
+// GetSBOMDigestWithTag gets the gcr tags for the passed image.
+func (c *Client) GetSBOMDigestWithTag(ctx context.Context, repoName string, tag string) (string, error) {
 	repository, err := name.NewRepository(repoName)
+
 	if err != nil {
-		fmt.Errorf("error returning authenticator %w", err)
+		return "", fmt.Errorf("error returning repo name %w", err)
 	}
 
 	tags, err := gcr.List(repository, gcr.WithAuth(c.authenticator), gcr.WithContext(ctx))
+
 	if err != nil {
-		return nil, fmt.Errorf("error occured when trying to retrieve tags from this repo %w", err)
+		return "", fmt.Errorf("error occurred when trying to retrieve tags from this repo %w", err)
 	}
 
-	return tags, err
+	for digest, manifest := range tags.Manifests {
+		for _, t := range manifest.Tags {
+			if tag == t {
+				return digest, nil
+			}
+		}
+	}
+
+	return "", fmt.Errorf("no digest found in Client.GetSBOMDigestWithTag")
+}
+
+func (c *Client) GetSbomFromImage(image v1.Image) (cyclonedx.BOM, error) {
+	var cyclonedxBOM cyclonedx.BOM
+	layer, err := image.Layers()
+
+	if err != nil {
+		return cyclonedxBOM, fmt.Errorf("error getting layers from image %w", err)
+	}
+
+	readCloser, _ := layer[0].Uncompressed()
+
+	envelope, err := getEnvelopeFromReader(readCloser)
+
+	if err != nil {
+		return cyclonedxBOM, fmt.Errorf("error getting envelope %w", err)
+	}
+
+	customPredicate, err := getCustomPredicateFromEnvelope(envelope)
+
+	if err != nil {
+		return cyclonedxBOM, fmt.Errorf("error getting custom predicate %w", err)
+	}
+
+	err = json.Unmarshal([]byte(customPredicate.Predicate.Data), &cyclonedxBOM)
+
+	if err != nil {
+		return cyclonedxBOM, fmt.Errorf("error unmarshalling into cycloneDX SBOM %w", err)
+	}
+
+	return cyclonedxBOM, nil
+}
+
+func getEnvelopeFromReader(reader io.ReadCloser) (Envelope, error) {
+	bt, _ := io.ReadAll(reader)
+	var envelope Envelope
+
+	err := json.Unmarshal(bt, &envelope)
+
+	if err != nil {
+		return envelope, fmt.Errorf("error unmarshalling into envelope %w", err)
+	}
+
+	return envelope, nil
+}
+
+func getCustomPredicateFromEnvelope(envelope Envelope) (CustomPredicate, error) {
+	decoded, _ := base64.StdEncoding.DecodeString(string(envelope.Payload))
+	var predicate CustomPredicate
+
+	err := json.Unmarshal(decoded, &predicate)
+
+	if err != nil {
+		return predicate, fmt.Errorf("error unmarshalling into custom predicate %w", err)
+	}
+
+	return predicate, nil
 }
 
 // NewClient creates a new
 func NewClient() (*Client, error) {
-	// This authenticator is the only one that seems to use ADC?? lets try it
 	auth, err := gcr.NewEnvAuthenticator()
 	if err != nil {
-		fmt.Errorf("error returning authenticator %w", err)
+		return nil, fmt.Errorf("error returning authenticator %w", err)
 	}
-
 	client := &Client{authenticator: auth}
-
 	return client, nil
 }
