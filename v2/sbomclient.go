@@ -12,8 +12,7 @@ import (
 type SBOMClient interface {
 	GetVulnerabilities(ctx context.Context, ref reference.Canonical) ([]Vulnerability, error)
 	GetSBOM(context.Context, reference.Canonical) (cyclonedx.BOM, error)
-	Close()
 }
 
-// NoSBOMError is an error that is returned when we request sbom that should exist but doesn't
-var NoSBOMError = errors.New("No SBOM was found")
+// ErrNoSBOM is an error that is returned when we request sbom that should exist but doesn't
+var ErrNoSBOM = errors.New("No SBOM was found")

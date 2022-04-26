@@ -11,7 +11,6 @@ import (
 
 	"github.com/CycloneDX/cyclonedx-go"
 	"github.com/docker/distribution/reference"
-	"github.com/google/go-containerregistry/pkg/authn"
 	"github.com/google/go-containerregistry/pkg/crane"
 	"github.com/google/go-containerregistry/pkg/name"
 	v1 "github.com/google/go-containerregistry/pkg/v1"
@@ -48,9 +47,7 @@ type CustomPredicate struct {
 }
 
 // Client connects to GCR
-type Client struct {
-	authenticator authn.Authenticator
-}
+type Client struct{}
 
 // GetVulnerabilities returns the detected vulnerabilities for the Image described by voucher.ImageData.
 func (c *Client) GetVulnerabilities(ctx context.Context, ref reference.Canonical) (vulnerabilities []voucher.Vulnerability, err error) {
@@ -58,9 +55,9 @@ func (c *Client) GetVulnerabilities(ctx context.Context, ref reference.Canonical
 }
 
 // GetSBOM gets the SBOM for the passed image.
-func (c *Client) GetSBOM(ctx context.Context, refImageName string) (cyclonedx.BOM, error) {
-	refImageSplit := strings.Split(refImageName, "@")
-	repoName, imageSHA := refImageSplit[0], refImageSplit[1]
+func (c *Client) GetSBOM(ctx context.Context, ref reference.Canonical) (cyclonedx.BOM, error) {
+	repoName := ref.Name()
+	imageSHA := string(ref.Digest())
 
 	tag := strings.Replace(imageSHA, ":", "-", 1) + ".att"
 
@@ -95,7 +92,13 @@ func (c *Client) GetSBOMDigestWithTag(ctx context.Context, repoName string, tag 
 		return "", fmt.Errorf("error returning repo name %w", err)
 	}
 
-	tags, err := gcr.List(repository, gcr.WithAuth(c.authenticator), gcr.WithContext(ctx))
+	auth, err := gcr.NewEnvAuthenticator()
+
+	if err != nil {
+		return "", fmt.Errorf("error returning auth %w", err)
+	}
+
+	tags, err := gcr.List(repository, gcr.WithAuth(auth), gcr.WithContext(ctx))
 
 	if err != nil {
 		return "", fmt.Errorf("error occurred when trying to retrieve tags from this repo %w", err)
@@ -169,12 +172,8 @@ func getCustomPredicateFromEnvelope(envelope Envelope) (CustomPredicate, error) 
 	return predicate, nil
 }
 
-// NewClient creates a new
-func NewClient() (*Client, error) {
-	auth, err := gcr.NewEnvAuthenticator()
-	if err != nil {
-		return nil, fmt.Errorf("error returning authenticator %w", err)
-	}
-	client := &Client{authenticator: auth}
-	return client, nil
+// NewClient creates a new sbomgcr
+func NewClient() *Client {
+	client := new(Client)
+	return client
 }
