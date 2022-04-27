@@ -8,11 +8,12 @@ import (
 	"github.com/docker/distribution/reference"
 )
 
+// ErrNoSBOM is an error that is returned when we request sbom that should exist but doesn't
+var ErrNoSBOM = errors.New("no SBOM was found")
+
 // SBOMClient is an interface that represents something that gets SBOMs
 type SBOMClient interface {
 	GetVulnerabilities(ctx context.Context, ref reference.Canonical) ([]Vulnerability, error)
-	GetSBOM(context.Context, reference.Canonical) (cyclonedx.BOM, error)
+	GetSBOM(context.Context, string) (cyclonedx.BOM, error)
+	GetSBOMDigestWithTag(context.Context, string, string) (string, error)
 }
-
-// ErrNoSBOM is an error that is returned when we request sbom that should exist but doesn't
-var ErrNoSBOM = errors.New("No SBOM was found")

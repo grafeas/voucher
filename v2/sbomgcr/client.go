@@ -13,9 +13,13 @@ import (
 	"github.com/docker/distribution/reference"
 	"github.com/google/go-containerregistry/pkg/crane"
 	"github.com/google/go-containerregistry/pkg/name"
-	v1 "github.com/google/go-containerregistry/pkg/v1"
+	goregistryv1 "github.com/google/go-containerregistry/pkg/v1"
 	gcr "github.com/google/go-containerregistry/pkg/v1/google"
 	voucher "github.com/grafeas/voucher/v2"
+)
+
+const (
+	MediaTypeDSSE = "application/vnd.dsse.envelope.v1+json"
 )
 
 // structs for unmarshalling
@@ -46,30 +50,21 @@ type CustomPredicate struct {
 	} `json:"predicate"`
 }
 
+type Client interface {
+	GetSBOM(ctx context.Context, ref reference.Canonical) (cyclonedx.BOM, error)
+}
+
 // Client connects to GCR
-type Client struct{}
+type client struct{}
 
 // GetVulnerabilities returns the detected vulnerabilities for the Image described by voucher.ImageData.
-func (c *Client) GetVulnerabilities(ctx context.Context, ref reference.Canonical) (vulnerabilities []voucher.Vulnerability, err error) {
+func (c *client) GetVulnerabilities(ctx context.Context, ref reference.Canonical) (vulnerabilities []voucher.Vulnerability, err error) {
 	return []voucher.Vulnerability{}, nil
 }
 
 // GetSBOM gets the SBOM for the passed image.
-func (c *Client) GetSBOM(ctx context.Context, ref reference.Canonical) (cyclonedx.BOM, error) {
-	repoName := ref.Name()
-	imageSHA := string(ref.Digest())
-
-	tag := strings.Replace(imageSHA, ":", "-", 1) + ".att"
-
-	sbomDigest, err := c.GetSBOMDigestWithTag(ctx, repoName, tag)
-
-	if err != nil {
-		return cyclonedx.BOM{}, fmt.Errorf("error getting sbom digest with tag %w", err)
-	}
-
-	sbomImageName := repoName + "@" + sbomDigest
-
-	sbom, err := crane.Pull(sbomImageName)
+func (c *client) GetSBOM(ctx context.Context, sbomName string) (cyclonedx.BOM, error) {
+	sbom, err := crane.Pull(sbomName)
 
 	if err != nil {
 		return cyclonedx.BOM{}, fmt.Errorf("error pulling image from gcr with crane %w", err)
@@ -85,7 +80,7 @@ func (c *Client) GetSBOM(ctx context.Context, ref reference.Canonical) (cycloned
 }
 
 // GetSBOMDigestWithTag gets the gcr tags for the passed image.
-func (c *Client) GetSBOMDigestWithTag(ctx context.Context, repoName string, tag string) (string, error) {
+func (c *client) GetSBOMDigestWithTag(ctx context.Context, repoName string, tag string) (string, error) {
 	repository, err := name.NewRepository(repoName)
 
 	if err != nil {
@@ -115,15 +110,31 @@ func (c *Client) GetSBOMDigestWithTag(ctx context.Context, repoName string, tag 
 	return "", fmt.Errorf("no digest found in Client.GetSBOMDigestWithTag")
 }
 
-func (c *Client) GetSbomFromImage(image v1.Image) (cyclonedx.BOM, error) {
+func (c *client) GetSbomFromImage(image goregistryv1.Image) (cyclonedx.BOM, error) {
 	var cyclonedxBOM cyclonedx.BOM
-	layer, err := image.Layers()
 
+	layer, err := image.Layers()
 	if err != nil {
 		return cyclonedxBOM, fmt.Errorf("error getting layers from image %w", err)
 	}
 
+	if len(layer) == 0 {
+		return cyclonedxBOM, fmt.Errorf("no layers found in image")
+	}
+
 	readCloser, _ := layer[0].Uncompressed()
+
+	// Get the media type of the Manifest
+	// TODO: This is a temporary fix until we support multiple media types
+	// TODO: Eventually make the matching to be switch case based on the media type
+	mediaType, err := layer[0].MediaType()
+	if err != nil {
+		return cyclonedxBOM, fmt.Errorf("error getting media type of manifest %w", err)
+	}
+
+	if string(mediaType) != MediaTypeDSSE {
+		return cyclonedxBOM, fmt.Errorf("media type is not DSSE, skipping")
+	}
 
 	envelope, err := getEnvelopeFromReader(readCloser)
 
@@ -144,6 +155,13 @@ func (c *Client) GetSbomFromImage(image v1.Image) (cyclonedx.BOM, error) {
 	}
 
 	return cyclonedxBOM, nil
+}
+
+func GetSBOMTagFromImage(i voucher.ImageData) string {
+	// Parse the image reference
+	imageSHA := string(i.Digest())
+	tag := strings.Replace(imageSHA, ":", "-", 1) + ".att"
+	return tag
 }
 
 func getEnvelopeFromReader(reader io.ReadCloser) (Envelope, error) {
@@ -173,7 +191,7 @@ func getCustomPredicateFromEnvelope(envelope Envelope) (CustomPredicate, error) 
 }
 
 // NewClient creates a new sbomgcr
-func NewClient() *Client {
-	client := new(Client)
+func NewClient() *client {
+	client := new(client)
 	return client
 }
