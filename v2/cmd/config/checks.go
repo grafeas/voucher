@@ -17,6 +17,8 @@ import (
 	_ "github.com/grafeas/voucher/v2/checks/snakeoil"
 	// Register the Repo check
 	_ "github.com/grafeas/voucher/v2/checks/approved"
+	// Register the Sbom check
+	_ "github.com/grafeas/voucher/v2/checks/sbom"
 )
 
 // setAuth sets the Auth for the passed Check, if that Check implements
