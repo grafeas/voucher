@@ -2,10 +2,6 @@
 	"openpgpkeys": {
 		"snakeoil": "ENC[AES256_GCM,data:dSwVlA==,iv:SqgLfrwjvBwUl0+IZgSo2xkihshUby0NjhZ25ovJ9/k=,tag:xFTjoH82+rEk6RPDWo99ig==,type:str]"
 	},
-	"clair": {
-		"username": "ENC[AES256_GCM,data:Dseq/2ld,iv:+AeBN2t6uLCJf3Is+54ysYURZH48p0qzfgDxm6NuOFs=,tag:eXKPug8Z8GjEIRCkW1dp9Q==,type:str]",
-		"password": "ENC[AES256_GCM,data:WJQJt9HO2yjh,iv:WeYOhymeKJq8dmO/D+LfSYLc4SWCh8MXrm4Ct8zaGYQ=,tag:bNo2L+zgLKYZ09hdQcQDqw==,type:str]"
-	},
 	"repositories": {
 		"organization-name": {
 			"token": "ENC[AES256_GCM,data:cOfWrtqcFfUxMTVBN/XwkQxw1Tfv,iv:ZWR2+haVvIrgvcer2cE1SWmo7BWrwzdPmxAGHovi7+I=,tag:qIZqahCuSLz0JjIJp6fCsw==,type:str]"

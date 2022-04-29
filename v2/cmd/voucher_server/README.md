@@ -57,7 +57,7 @@ Below are the configuration options for Voucher Server:
 | `ejson`              | `dir`                        | The path to the ejson keys directory.                                                                 |
 | `ejson`              | `secrets`                    | The path to the ejson secrets.                                                                        |
 | `sops`               | `file`                       | The path to the SOPS secrets.                                                                         |
-| `clair`              |  `address`                   | The hostname that Clair exists at. If "http://" or "https://" is omitted, this will default to HTTPS. |
+| `clair`              |  `address`                   |(Deprecated, clair is no longer supported) The hostname that Clair exists at. If "http://" or "https://" is omitted, this will default to HTTPS. |
 | `repository.[alias]` | `org-url`                    | The URL used to determine if a repository is owned by an organization.                                |
 | `required.[env]`     | (test name here)             | A test that is active when running "env" tests.                                                       |
 | `statsd`             | `backend`                    | The destination for reporting metrics, can be `statsd` for local aggregation, or `datadog`.           |
@@ -74,8 +74,8 @@ Secret values are stored encrypted in an ejson or SOPS file, and can not be over
 | Group                | Key                          | Description                                                                                           |
 | :-------------       | :--------------------------- | :---------------------------------------------------------------------------------------------------- |
 | `openpgpkeys`        | (test name here)             | The PGP key to use for signing attestations of a specific test.                                       |
-| `clair`              | `username`                   | Username for CoreOS Clair, if configured as a scanner.                                                |
-| `clair`              | `password`                   | Password for CoreOS Clair, if configured as a scanner.                                                |
+| `clair`              | `username`                   | (Deprecated, clair is no longer supported) Username for CoreOS Clair, if configured as a scanner.                                                |
+| `clair`              | `password`                   | (Deprecated, clair is no longer supported) Password for CoreOS Clair, if configured as a scanner.                                                |
 | `datadog`            | `api_key`                    | API key for direct submission when configuration `statsd.backend == "datadog"`.                       |
 | `datadog`            | `app_key`                    | App key for direct submission when configuration `statsd.backend == "datadog"`.                       |
 | `repositories`       | (repository owner name here) | Credentials for repository authentication.                                                            |
@@ -86,9 +86,10 @@ The `scanner` option in the configuration is used to select the Vulnerability sc
 
 This option supports two values:
 
-- `c` or `clair` to use an instance of CoreOS's Clair.
+- (Deprecated, clair is no longer supported) `c` or `clair` to use an instance of CoreOS's Clair.
 - `metadata` to use Google Container Analysis. (Note that `g` and `gca` are being deprecated in favor of `metadata`.)
 
+(Deprecated, clair is no longer supported)
 If you decide to use Clair, you will need to update the clair configuration block to specify the correct address for the server.
 
 ### Fail-On: Failing on vulnerabilities

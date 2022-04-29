@@ -14,12 +14,10 @@ require (
 	github.com/Shopify/ejson v1.2.0
 	github.com/antihax/optional v1.0.0
 	github.com/bradleyfalzon/ghinstallation v1.1.1
-	github.com/coreos/clair v2.0.5+incompatible
 	github.com/docker/distribution v2.7.1+incompatible
 	github.com/docker/docker v20.10.12+incompatible
 	github.com/docker/libtrust v0.0.0-20160708172513-aabc10ec26b7
 	github.com/dustin/gojson v0.0.0-20160307161227-2e71ec9dd5ad // indirect
-	github.com/fernet/fernet-go v0.0.0-20180830025343-9eac43b88a5e // indirect
 	github.com/golang/mock v1.6.0
 	github.com/google/go-containerregistry v0.8.0
 	github.com/googleapis/gax-go/v2 v2.1.1
@@ -27,7 +25,6 @@ require (
 	github.com/mennanov/fieldmask-utils v0.0.0-20190703161732-eca3212cf9f3
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/opencontainers/go-digest v1.0.0
-	github.com/pborman/uuid v0.0.0-20180906182336-adf5a7427709 // indirect
 	github.com/shurcooL/githubv4 v0.0.0-20190718010115-4ba037080260
 	github.com/shurcooL/graphql v0.0.0-20181231061246-d48a9a75455f // indirect
 	github.com/sirupsen/logrus v1.8.1

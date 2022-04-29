@@ -14,6 +14,7 @@ Make sure that you update the `ejson` or `sops` specific blocks to point to the 
 
 ## Create secrets
 
+(Deprecated, clair is no longer supported)
 If you plan on creating attestations (rather than just running checks against your images), or if you plan on using Clair as your Vulnerability Scanner, you will need to create a secrets file to store secret values like the OpenPGP keys and/or Clair login information.
 
 ### Create ejson configuration
@@ -41,7 +42,6 @@ You can then create an `ejson` file using the public key included. For example:
 {
     "_public_key": "<public key>",
     "openpgpkeys": {},
-    "clair": {}
 }
 ```
 
@@ -214,7 +214,6 @@ Next, create a new value in the `openpgpkeys` block in your secrets file. Make s
     "openpgpkeys": {
         "diy": "-----BEGIN PGP PRIVATE KEY BLOCK-----\nlQcYBFt23t8BEADuZqi...."
     },
-    "clair": {}
 }
 ```
 

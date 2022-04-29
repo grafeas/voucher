@@ -5,21 +5,14 @@ import (
 	"github.com/spf13/viper"
 
 	voucher "github.com/grafeas/voucher/v2"
-	"github.com/grafeas/voucher/v2/clair"
 )
 
 func newScanner(secrets *Secrets, metadataClient voucher.MetadataClient, auth voucher.Auth) (scanner voucher.VulnerabilityScanner) {
 	scannerName := viper.GetString("scanner")
+	// silence linter errors
+	_ = secrets
+	_ = auth
 	switch scannerName {
-	case "clair", "c":
-		if secrets == nil {
-			log.Fatalf("No secrets were configured, unable to use Clair as scanner")
-		}
-		config := secrets.ClairConfig
-		if "" == config.Hostname {
-			config.Hostname = viper.GetString("clair.address")
-		}
-		scanner = clair.NewScanner(config, auth)
 	case "gca", "g":
 		log.Warningf("the %s option for `scanner` has been deprecated and will be removed in the future. Please use `metadata` instead.", scannerName)
 		scanner = voucher.NewScanner(metadataClient)
