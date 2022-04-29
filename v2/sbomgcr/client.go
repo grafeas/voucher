@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"strings"
 	"time"
 
 	"github.com/CycloneDX/cyclonedx-go"
@@ -50,27 +49,38 @@ type CustomPredicate struct {
 	} `json:"predicate"`
 }
 
-type Client interface {
-	GetSBOM(ctx context.Context, ref reference.Canonical) (cyclonedx.BOM, error)
+type GCRClient interface {
+	GetSBOM(ctx context.Context, imageName, tag string) (cyclonedx.BOM, error)
+	GetVulnerabilities(ctx context.Context, ref reference.Canonical) (vulnerabilities []voucher.Vulnerability, err error)
+	GetSBOMFromImage(sbom *goregistryv1.Image) (cyclonedx.BOM, error)
+	GetSBOMDigestWithTag(ctx context.Context, repoName string, tag string) (string, error)
 }
 
 // Client connects to GCR
-type client struct{}
+type Client struct{}
 
 // GetVulnerabilities returns the detected vulnerabilities for the Image described by voucher.ImageData.
-func (c *client) GetVulnerabilities(ctx context.Context, ref reference.Canonical) (vulnerabilities []voucher.Vulnerability, err error) {
+func (c *Client) GetVulnerabilities(ctx context.Context, ref reference.Canonical) (vulnerabilities []voucher.Vulnerability, err error) {
 	return []voucher.Vulnerability{}, nil
 }
 
 // GetSBOM gets the SBOM for the passed image.
-func (c *client) GetSBOM(ctx context.Context, sbomName string) (cyclonedx.BOM, error) {
+func (c *Client) GetSBOM(ctx context.Context, imageName, tag string) (cyclonedx.BOM, error) {
+	// Get digest of the sbom and build a reference string
+	// So we can pull the sbom from the image repository
+	sbomDigest, err := GetSBOMDigestWithTag(context.Background(), imageName, tag)
+	if err != nil {
+		return cyclonedx.BOM{}, fmt.Errorf("error getting digest with tag %w", err)
+	}
+
+	sbomName := imageName + "@" + sbomDigest
 	sbom, err := crane.Pull(sbomName)
 
 	if err != nil {
 		return cyclonedx.BOM{}, fmt.Errorf("error pulling image from gcr with crane %w", err)
 	}
 
-	cycloneDX, err := c.GetSbomFromImage(sbom)
+	cycloneDX, err := GetSBOMFromImage(sbom)
 
 	if err != nil {
 		return cyclonedx.BOM{}, fmt.Errorf("error getting SBOM from image %w", err)
@@ -79,8 +89,8 @@ func (c *client) GetSBOM(ctx context.Context, sbomName string) (cyclonedx.BOM, e
 	return cycloneDX, nil
 }
 
-// GetSBOMDigestWithTag gets the gcr tags for the passed image.
-func (c *client) GetSBOMDigestWithTag(ctx context.Context, repoName string, tag string) (string, error) {
+// GetSBOMDigestWithTag gets the sbom digest using a repo and tag.
+func GetSBOMDigestWithTag(ctx context.Context, repoName string, tag string) (string, error) {
 	repository, err := name.NewRepository(repoName)
 
 	if err != nil {
@@ -110,7 +120,7 @@ func (c *client) GetSBOMDigestWithTag(ctx context.Context, repoName string, tag 
 	return "", fmt.Errorf("no digest found in Client.GetSBOMDigestWithTag")
 }
 
-func (c *client) GetSbomFromImage(image goregistryv1.Image) (cyclonedx.BOM, error) {
+func GetSBOMFromImage(image goregistryv1.Image) (cyclonedx.BOM, error) {
 	var cyclonedxBOM cyclonedx.BOM
 
 	layer, err := image.Layers()
@@ -157,13 +167,6 @@ func (c *client) GetSbomFromImage(image goregistryv1.Image) (cyclonedx.BOM, erro
 	return cyclonedxBOM, nil
 }
 
-func GetSBOMTagFromImage(i voucher.ImageData) string {
-	// Parse the image reference
-	imageSHA := string(i.Digest())
-	tag := strings.Replace(imageSHA, ":", "-", 1) + ".att"
-	return tag
-}
-
 func getEnvelopeFromReader(reader io.ReadCloser) (Envelope, error) {
 	bt, _ := io.ReadAll(reader)
 	var envelope Envelope
@@ -191,7 +194,7 @@ func getCustomPredicateFromEnvelope(envelope Envelope) (CustomPredicate, error) 
 }
 
 // NewClient creates a new sbomgcr
-func NewClient() *client {
-	client := new(client)
+func NewClient() *Client {
+	client := new(Client)
 	return client
 }

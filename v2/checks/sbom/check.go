@@ -2,9 +2,9 @@ package sbom
 
 import (
 	"context"
+	"strings"
 
 	"github.com/grafeas/voucher/v2"
-	"github.com/grafeas/voucher/v2/sbomgcr"
 )
 
 // check is a check that verifies if there's an sbom attached with
@@ -23,18 +23,18 @@ func (c *check) SetSBOMClient(sbomClient voucher.SBOMClient) {
 func (c *check) hasSBOM(i voucher.ImageData) bool {
 	// Parse the image reference
 	imageName := i.Name()
-	tag := sbomgcr.GetSBOMTagFromImage(i)
+	tag := getSBOMTagFromImage(i)
 
-	// Get digest of the sbom and build a reference string
-	// So we can pull the sbom from the image repository
-	sbomDigest, err := c.sbomClient.GetSBOMDigestWithTag(context.Background(), imageName, tag)
-	if err != nil {
-		return false
-	}
-
-	sbomName := imageName + "@" + sbomDigest
-	_, err = c.sbomClient.GetSBOM(context.Background(), sbomName)
+	_, err := c.sbomClient.GetSBOM(context.Background(), imageName, tag)
 	return err == nil
+}
+
+// GetSBOMTagFromImage returns the sbom tag from the image
+func getSBOMTagFromImage(i voucher.ImageData) string {
+	// Parse the image reference
+	imageSHA := string(i.Digest())
+	tag := strings.Replace(imageSHA, ":", "-", 1) + ".att"
+	return tag
 }
 
 // check checks if an image was built by a trusted source
