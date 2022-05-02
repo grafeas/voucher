@@ -10,10 +10,9 @@ import (
 
 	"github.com/CycloneDX/cyclonedx-go"
 	"github.com/docker/distribution/reference"
-	"github.com/google/go-containerregistry/pkg/crane"
 	"github.com/google/go-containerregistry/pkg/name"
 	goregistryv1 "github.com/google/go-containerregistry/pkg/v1"
-	gcr "github.com/google/go-containerregistry/pkg/v1/google"
+	"github.com/google/go-containerregistry/pkg/v1/google"
 	voucher "github.com/grafeas/voucher/v2"
 )
 
@@ -49,15 +48,10 @@ type CustomPredicate struct {
 	} `json:"predicate"`
 }
 
-type GCRClient interface {
-	GetSBOM(ctx context.Context, imageName, tag string) (cyclonedx.BOM, error)
-	GetVulnerabilities(ctx context.Context, ref reference.Canonical) (vulnerabilities []voucher.Vulnerability, err error)
-	GetSBOMFromImage(sbom *goregistryv1.Image) (cyclonedx.BOM, error)
-	GetSBOMDigestWithTag(ctx context.Context, repoName string, tag string) (string, error)
-}
-
 // Client connects to GCR
-type Client struct{}
+type Client struct {
+	service GCRService
+}
 
 // GetVulnerabilities returns the detected vulnerabilities for the Image described by voucher.ImageData.
 func (c *Client) GetVulnerabilities(ctx context.Context, ref reference.Canonical) (vulnerabilities []voucher.Vulnerability, err error) {
@@ -66,22 +60,28 @@ func (c *Client) GetVulnerabilities(ctx context.Context, ref reference.Canonical
 
 // GetSBOM gets the SBOM for the passed image.
 func (c *Client) GetSBOM(ctx context.Context, imageName, tag string) (cyclonedx.BOM, error) {
-	// Get digest of the sbom and build a reference string
-	// So we can pull the sbom from the image repository
-	sbomDigest, err := GetSBOMDigestWithTag(context.Background(), imageName, tag)
+	repository, err := name.NewRepository(imageName)
+	if err != nil {
+		return cyclonedx.BOM{}, fmt.Errorf("error getting repository name %w", err)
+	}
+
+	tags, err := c.service.ListTags(ctx, repository)
+	if err != nil {
+		return cyclonedx.BOM{}, fmt.Errorf("error listing tags %w", err)
+	}
+
+	sbomDigest, err := GetSBOMDigestWithTag(imageName, tags, tag)
 	if err != nil {
 		return cyclonedx.BOM{}, fmt.Errorf("error getting digest with tag %w", err)
 	}
 
 	sbomName := imageName + "@" + sbomDigest
-	sbom, err := crane.Pull(sbomName)
-
+	sbom, err := c.service.PullImage(sbomName)
 	if err != nil {
 		return cyclonedx.BOM{}, fmt.Errorf("error pulling image from gcr with crane %w", err)
 	}
 
 	cycloneDX, err := GetSBOMFromImage(sbom)
-
 	if err != nil {
 		return cyclonedx.BOM{}, fmt.Errorf("error getting SBOM from image %w", err)
 	}
@@ -90,33 +90,14 @@ func (c *Client) GetSBOM(ctx context.Context, imageName, tag string) (cyclonedx.
 }
 
 // GetSBOMDigestWithTag gets the sbom digest using a repo and tag.
-func GetSBOMDigestWithTag(ctx context.Context, repoName string, tag string) (string, error) {
-	repository, err := name.NewRepository(repoName)
-
-	if err != nil {
-		return "", fmt.Errorf("error returning repo name %w", err)
-	}
-
-	auth, err := gcr.NewEnvAuthenticator()
-
-	if err != nil {
-		return "", fmt.Errorf("error returning auth %w", err)
-	}
-
-	tags, err := gcr.List(repository, gcr.WithAuth(auth), gcr.WithContext(ctx))
-
-	if err != nil {
-		return "", fmt.Errorf("error occurred when trying to retrieve tags from this repo %w", err)
-	}
-
-	for digest, manifest := range tags.Manifests {
+func GetSBOMDigestWithTag(repoName string, allTags *google.Tags, tagToMatch string) (string, error) {
+	for digest, manifest := range allTags.Manifests {
 		for _, t := range manifest.Tags {
-			if tag == t {
+			if tagToMatch == t {
 				return digest, nil
 			}
 		}
 	}
-
 	return "", fmt.Errorf("no digest found in Client.GetSBOMDigestWithTag")
 }
 
@@ -194,7 +175,7 @@ func getCustomPredicateFromEnvelope(envelope Envelope) (CustomPredicate, error) 
 }
 
 // NewClient creates a new sbomgcr
-func NewClient() *Client {
-	client := new(Client)
+func NewClient(service GCRService) *Client {
+	client := &Client{service: service}
 	return client
 }

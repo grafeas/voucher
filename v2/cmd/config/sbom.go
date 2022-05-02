@@ -6,5 +6,6 @@ import (
 )
 
 func newSBOMClient() voucher.SBOMClient {
-	return sbomgcr.NewClient()
+	service := sbomgcr.NewGCRService()
+	return sbomgcr.NewClient(service)
 }
