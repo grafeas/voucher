@@ -61,7 +61,6 @@ func (c *Client) GetVulnerabilities(ctx context.Context, ref reference.Canonical
 // GetSBOM gets the SBOM for the passed image.
 func (c *Client) GetSBOM(ctx context.Context, imageName, tag string) (cyclonedx.BOM, error) {
 	repository, err := name.NewRepository(imageName)
-	fmt.Println(repository.Name())
 	if err != nil {
 		return cyclonedx.BOM{}, fmt.Errorf("error getting repository name %w", err)
 	}
