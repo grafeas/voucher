@@ -1,0 +1,13 @@
+{
+   "schemaVersion": 2,
+   "manifests": [
+      {
+         "mediaType": "application/vnd.oci.image.manifest.v1+json",
+         "size": 455,
+         "digest": "sha256:8d6f75268a5320cdd5473acb891ec60fc481cd84d0ee9b04be8569a974608d4c",
+         "annotations": {
+            "dev.ggcr.image.name": "gcr.io/shopify-codelab-and-demos/sbom-lab/apps/production/clouddo-ui@sha256:8d6f75268a5320cdd5473acb891ec60fc481cd84d0ee9b04be8569a974608d4c"
+         }
+      }
+   ]
+}
