@@ -3,6 +3,7 @@ package sbomgcr
 import (
 	"context"
 	"fmt"
+	"testing"
 
 	"github.com/google/go-containerregistry/pkg/name"
 	v1 "github.com/google/go-containerregistry/pkg/v1"
@@ -37,12 +38,12 @@ func (m mockGCRService) PullImage(src string) (v1.Image, error) {
 	return img, err
 }
 
-// func TestGetSBOM(t *testing.T) {
-// 	mockService := NewMockGCRService("sha256-551182244aa6ab6997900bc04dd4e170ef13455c068360e93fc7b149eb2bc45f.att")
-// 	client := NewClient(mockService)
-// 	ctx := context.Background()
+func TestGetSBOM(t *testing.T) {
+	// mockService := NewMockGCRService("sha256-551182244aa6ab6997900bc04dd4e170ef13455c068360e93fc7b149eb2bc45f.att")
+	// client := NewClient(mockService)
+	// ctx := context.Background()
 
-// 	boms, err := client.GetSBOM(ctx, "gcr.io/shopify-codelab-and-demos/sbom-lab/apps/production/clouddo-ui", "sha256-551182244aa6ab6997900bc04dd4e170ef13455c068360e93fc7b149eb2bc45f.att")
-// 	assert.NoError(t, err)
-// 	fmt.Println(boms)
-// }
+	// boms, err := client.GetSBOM(ctx, "gcr.io/shopify-codelab-and-demos/sbom-lab/apps/production/clouddo-ui", "sha256-551182244aa6ab6997900bc04dd4e170ef13455c068360e93fc7b149eb2bc45f.att")
+	// assert.NoError(t, err)
+	fmt.Println("hello")
+}
