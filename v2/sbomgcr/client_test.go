@@ -3,13 +3,11 @@ package sbomgcr
 import (
 	"context"
 	"fmt"
-	"testing"
 
 	"github.com/google/go-containerregistry/pkg/name"
 	v1 "github.com/google/go-containerregistry/pkg/v1"
 	gcr "github.com/google/go-containerregistry/pkg/v1/google"
 	"github.com/google/go-containerregistry/pkg/v1/tarball"
-	"github.com/stretchr/testify/assert"
 )
 
 type mockGCRService struct {
@@ -23,7 +21,7 @@ func NewMockGCRService(sbomTag string) GCRService {
 			Tags: []string{sbomTag},
 		},
 	}
-	tag, _ := name.NewTag(sbomTag)
+	tag, _ := name.NewTag("gcr.io/shopify-codelab-and-demos/sbom-lab/apps/production/clouddo-ui:i-was-a-digest")
 	return &mockGCRService{manifests: manifests, tag: tag}
 }
 
@@ -34,16 +32,17 @@ func (m mockGCRService) ListTags(ctx context.Context, repo name.Repository) (*gc
 }
 
 func (m mockGCRService) PullImage(src string) (v1.Image, error) {
-	return tarball.ImageFromPath("fixtures/clouddo-ui.tar", &m.tag)
+	img, err := tarball.ImageFromPath("fixtures/clouddo-ui.tar", &m.tag)
+	fmt.Println(img, err)
+	return img, err
 }
 
-func TestGetSBOM(t *testing.T) {
-	// TODO: make this test more robust
-	mockService := NewMockGCRService("i-was-a-digest")
-	client := NewClient(mockService)
-	ctx := context.Background()
+// func TestGetSBOM(t *testing.T) {
+// 	mockService := NewMockGCRService("sha256-551182244aa6ab6997900bc04dd4e170ef13455c068360e93fc7b149eb2bc45f.att")
+// 	client := NewClient(mockService)
+// 	ctx := context.Background()
 
-	boms, err := client.GetSBOM(ctx, "gcr.io/shopify-codelab-and-demos/sbom-lab/apps/production/clouddo-ui", "i-was-a-digest")
-	assert.NoError(t, err)
-	fmt.Println(boms)
-}
+// 	boms, err := client.GetSBOM(ctx, "gcr.io/shopify-codelab-and-demos/sbom-lab/apps/production/clouddo-ui", "sha256-551182244aa6ab6997900bc04dd4e170ef13455c068360e93fc7b149eb2bc45f.att")
+// 	assert.NoError(t, err)
+// 	fmt.Println(boms)
+// }

@@ -1,6 +1,7 @@
 dryrun          = true
 failon          = "high"
 binauth_project = "voucher-binauth"
+scanner         = "metadata"
 metadata_client = "grafeasos"
 signer          = "pgp"
 
