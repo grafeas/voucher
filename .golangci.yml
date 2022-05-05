@@ -150,6 +150,11 @@ issues:
 
     # Exclude some staticcheck messages
     - linters:
+        - staticcheck
+      text: "SA1019:"
+
+    # Exclude some staticcheck messages
+    - linters:
         - errcheck 
       text: "Error return value of `viper.BindPFlag`"
 
@@ -163,7 +168,7 @@ issues:
       text: "^Error return value of `.*\\.Close` is not checked"
 
     - linters:
-        - golint 
+        - golint
       text: "^exported .* should have comment.*or be unexported"
 
     - linters:
