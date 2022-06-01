@@ -22,8 +22,11 @@ func (err *ErrNoProjectInReference) Error() string {
 // should start with `gcr.io/my-cool-project`.
 func ReferenceToProjectName(ref reference.Reference) (string, error) {
 	values := strings.Split(ref.String(), "/")
-	if 2 < len(values) {
+	if len(values) > 2 {
 		if values[0] == "gcr.io" {
+			return values[1], nil
+		}
+		if strings.HasSuffix(values[0], ".pkg.dev") {
 			return values[1], nil
 		}
 	}
