@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/docker/distribution/reference"
 	"golang.org/x/oauth2"
@@ -51,7 +52,14 @@ func (a *gAuth) ToClient(ctx context.Context, image reference.Named) (*http.Clie
 
 // IsForDomain validates the domain part of the Named image reference
 func (a *gAuth) IsForDomain(image reference.Named) bool {
-	return "gcr.io" == reference.Domain(image)
+	domain := reference.Domain(image)
+	if domain == "gcr.io" {
+		// Google Container Registry
+		return true
+	}
+
+	// Google Artifact Registry
+	return strings.HasSuffix(domain, ".pkg.dev")
 }
 
 // NewAuth returns a new voucher.Auth to access Google specific resources.
