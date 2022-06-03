@@ -166,7 +166,15 @@ func (g *Client) GetBuildDetail(ctx context.Context, ref reference.Canonical) (r
 		return repository.BuildDetail{}, err
 	}
 
-	req := &grafeas.ListOccurrencesRequest{Parent: projectPath(project), Filter: filterStr}
+	// appEnv := os.Getenv("APP_ENV")
+
+	// if appEnv == "production" {
+	parent := projectPath(project)
+	// } else {
+	// 	parent = "projects/shopify-docker-images"
+	// }
+
+	req := &grafeas.ListOccurrencesRequest{Parent: parent, Filter: filterStr}
 	occIterator := g.containeranalysis.ListOccurrences(ctx, req)
 
 	occ, err := occIterator.Next()
