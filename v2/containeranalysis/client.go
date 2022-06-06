@@ -3,6 +3,7 @@ package containeranalysis
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	containeranalysisapi "cloud.google.com/go/containeranalysis/apiv1"
 	grafeasv1 "cloud.google.com/go/grafeas/apiv1"
@@ -180,6 +181,7 @@ func (g *Client) GetBuildDetail(ctx context.Context, ref reference.Canonical) (r
 	if g.buildDetailProject != "" {
 		projectToScan = append(projectToScan, projectPath(g.buildDetailProject))
 	}
+	fmt.Println("projectToScan:", projectToScan)
 
 	buildDetail := repository.BuildDetail{}
 	for _, project := range projectToScan {
@@ -189,7 +191,7 @@ func (g *Client) GetBuildDetail(ctx context.Context, ref reference.Canonical) (r
 		occ, err := occIterator.Next()
 
 		// If this is the first project and it errors, we can continue to the fallback
-		if project != g.buildDetailProject && err != nil {
+		if project != g.buildDetailProject && g.buildDetailProject != "" && err != nil {
 			continue
 		}
 
