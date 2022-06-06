@@ -137,6 +137,7 @@ func (g *Client) GetBuildDetail(ctx context.Context, ref reference.Canonical) (r
 		return repository.BuildDetail{}, err
 	}
 
+	// TODO: Figure out if we need to add a fallback project for build details.
 	items, err := g.getAllOccurrences(ctx, project)
 	if nil != err {
 		return repository.BuildDetail{}, err

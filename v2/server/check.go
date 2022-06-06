@@ -43,18 +43,35 @@ func (s *Server) handleChecks(w http.ResponseWriter, r *http.Request, name ...st
 	}
 	defer metadataClient.Close()
 
-	buildDetail, err := metadataClient.GetBuildDetail(ctx, imageData)
-	if nil != err {
-		LogWarning(fmt.Sprintf("could not get image metadata for %s", imageData), err)
-	} else {
-		if s.secrets != nil {
+	// buildDetail, err := metadataClient.GetBuildDetail(ctx, imageData)
+	// if nil != err {
+	// 	LogWarning(fmt.Sprintf("could not get image metadata for %s", imageData), err)
+	// } else {
+	// 	if s.secrets != nil {
+	// 		repositoryClient, err = config.NewRepositoryClient(ctx, s.secrets.RepositoryAuthentication, buildDetail.RepositoryURL)
+	// 		if nil != err {
+	// 			LogWarning("failed to create repository client, continuing without git repo support:", err)
+	// 		}
+	// 	} else {
+	// 		log.Warning("failed to create repository client, no secrets configured")
+	// 	}
+	// }
+
+	// Initalize repository client if and only if we have a secrets that represents the org repo
+	if s.secrets != nil {
+		// Get the buildDetail from the metadataClient.
+		// If no buildDetail is found, we will skip initializing the repository client.
+		buildDetail, err := metadataClient.GetBuildDetail(ctx, imageData)
+		if err != nil {
+			LogWarning(fmt.Sprintf("could not get image metadata for %s. Skipping repository client initalization", imageData), err)
+		} else {
 			repositoryClient, err = config.NewRepositoryClient(ctx, s.secrets.RepositoryAuthentication, buildDetail.RepositoryURL)
 			if nil != err {
 				LogWarning("failed to create repository client, continuing without git repo support:", err)
 			}
-		} else {
-			log.Warning("failed to create repository client, no secrets configured")
 		}
+	} else {
+		log.Warning("failed to create repository client, no secrets configured")
 	}
 
 	checksuite, err := config.NewCheckSuite(metadataClient, repositoryClient, name...)
