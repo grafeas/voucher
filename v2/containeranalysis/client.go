@@ -184,12 +184,11 @@ func (g *Client) GetBuildDetail(ctx context.Context, ref reference.Canonical) (r
 
 	buildDetail := repository.BuildDetail{}
 	for _, project := range projectToScan {
-		req := &grafeas.ListOccurrencesRequest{Parent: parent, Filter: filterStr}
+		req := &grafeas.ListOccurrencesRequest{Parent: project, Filter: filterStr}
 		occIterator := g.containeranalysis.ListOccurrences(ctx, req)
 
 		occ, err := occIterator.Next()
 
-		// If this is the first project and it errors, we can continue to the fallback
 		if !strings.HasSuffix(project, g.buildDetailProject) && err != nil {
 			continue
 		}
