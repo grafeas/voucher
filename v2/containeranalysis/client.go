@@ -178,7 +178,7 @@ func (g *Client) GetBuildDetail(ctx context.Context, ref reference.Canonical) (r
 	// 4. Image has multiple build notes (image has build metadata)
 	projectToScan := []string{parent}
 	if g.buildDetailProject != "" {
-		projectToScan = append(projectToScan, g.buildDetailProject)
+		projectToScan = append(projectToScan, projectPath(g.buildDetailProject))
 	}
 
 	buildDetail := repository.BuildDetail{}
