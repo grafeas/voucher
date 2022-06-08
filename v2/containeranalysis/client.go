@@ -183,18 +183,25 @@ func (g *Client) GetBuildDetail(ctx context.Context, ref reference.Canonical) (r
 	}
 
 	buildDetail := repository.BuildDetail{}
-	for _, project := range projectToScan {
-		req := &grafeas.ListOccurrencesRequest{Parent: project, Filter: filterStr}
+	for _, p := range projectToScan {
+		req := &grafeas.ListOccurrencesRequest{Parent: p, Filter: filterStr}
 		occIterator := g.containeranalysis.ListOccurrences(ctx, req)
 
 		occ, err := occIterator.Next()
 
-		if !strings.HasSuffix(project, g.buildDetailProject) && err != nil {
+		// If no build notes found, continue to fallback project.
+		if !strings.HasSuffix(p, g.buildDetailProject) && err != nil {
 			continue
 		}
 
 		if err != nil {
-			return repository.BuildDetail{}, toIterError(err)
+			if err == iterator.Done {
+				return repository.BuildDetail{}, &voucher.NoMetadataError{
+					Type: voucher.BuildDetailsType,
+					Err:  errNoOccurrences,
+				}
+			}
+			return repository.BuildDetail{}, err
 		}
 
 		// Muliple build notes found - invalid
@@ -222,14 +229,4 @@ func NewClient(ctx context.Context, binauthProject string, buildDetailproject st
 	}
 
 	return client, nil
-}
-
-func toIterError(err error) error {
-	if err == iterator.Done {
-		return &voucher.NoMetadataError{
-			Type: voucher.VulnerabilityType,
-			Err:  errNoOccurrences,
-		}
-	}
-	return err
 }
