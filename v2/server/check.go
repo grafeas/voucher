@@ -43,16 +43,16 @@ func (s *Server) handleChecks(w http.ResponseWriter, r *http.Request, name ...st
 	}
 	defer metadataClient.Close()
 
-	// Initalize repository client if and only if we have a secrets that represents the org repo
+	// Initialize repository client if and only if we have a secrets that represents the org repo
 	if s.secrets != nil {
 		// Get the buildDetail from the metadataClient.
 		// If no buildDetail is found, we will skip initializing the repository client.
 		buildDetail, err := metadataClient.GetBuildDetail(ctx, imageData)
 		if err != nil {
-			LogWarning(fmt.Sprintf("could not get image metadata for %s. Skipping repository client initalization", imageData), err)
+			LogWarning(fmt.Sprintf("could not get image metadata for %s. Skipping repository client initialization", imageData), err)
 		} else {
 			repositoryClient, err = config.NewRepositoryClient(ctx, s.secrets.RepositoryAuthentication, buildDetail.RepositoryURL)
-			if nil != err {
+			if err != nil {
 				LogWarning("failed to create repository client, continuing without git repo support:", err)
 			}
 		}
