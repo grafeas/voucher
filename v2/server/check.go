@@ -49,7 +49,7 @@ func (s *Server) handleChecks(w http.ResponseWriter, r *http.Request, name ...st
 		// If no buildDetail is found, we will skip initializing the repository client.
 		buildDetail, buildErr := metadataClient.GetBuildDetail(ctx, imageData)
 		if buildErr != nil {
-			LogWarning(fmt.Sprintf("could not get image metadata for %s. Skipping repository client initialization", imageData), err)
+			LogWarning(fmt.Sprintf("could not get image metadata for %s. Skipping repository client initialization", imageData), buildErr)
 		} else {
 			repositoryClient, err = config.NewRepositoryClient(ctx, s.secrets.RepositoryAuthentication, buildDetail.RepositoryURL)
 			if err != nil {
