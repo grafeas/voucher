@@ -204,7 +204,7 @@ func (g *Client) GetBuildDetail(ctx context.Context, ref reference.Canonical) (r
 			return repository.BuildDetail{}, err
 		}
 
-		// Muliple build notes found - invalid
+		// Multiple build notes found - invalid
 		if _, err := occIterator.Next(); err != iterator.Done {
 			return repository.BuildDetail{}, errors.New("Found multiple Grafeas occurrences for " + ref.String())
 		}
