@@ -3,7 +3,6 @@ package containeranalysis
 import (
 	"context"
 	"errors"
-	"strings"
 
 	containeranalysisapi "cloud.google.com/go/containeranalysis/apiv1"
 	grafeasv1 "cloud.google.com/go/grafeas/apiv1"
@@ -161,57 +160,44 @@ func (g *Client) Close() {
 func (g *Client) GetBuildDetail(ctx context.Context, ref reference.Canonical) (repository.BuildDetail, error) {
 	var err error
 
-	filterStr := kindFilterStr(ref, grafeas.NoteKind_BUILD)
-
 	project, err := uri.ReferenceToProjectName(ref)
-	if nil != err {
+	if err != nil {
 		return repository.BuildDetail{}, err
 	}
 
-	parent := projectPath(project)
-
-	// Scan thru image project for build details and fallback to buildDetailProject if buildDetailProject is set.
-	// and the build details are not found in the image project.
-	// Cases:
-	// 1. No build notes found for image + fallback (image does not have build metadata)
-	// 2. No build notes found for image project, but build notes found for fallback project (image has a central local for storing build metadata)
-	// 3. Build notes found for image project (image has build metadata)
-	// 4. Image has multiple build notes (image has build metadata)
-	projectToScan := []string{parent}
-	if g.buildDetailProject != "" {
-		projectToScan = append(projectToScan, projectPath(g.buildDetailProject))
+	buildDetail, err := g.getBuildDetailFromProject(ctx, project, ref)
+	if err != nil && g.buildDetailProject != "" {
+		return g.getBuildDetailFromProject(ctx, g.buildDetailProject, ref)
 	}
 
-	buildDetail := repository.BuildDetail{}
-	for _, p := range projectToScan {
-		req := &grafeas.ListOccurrencesRequest{Parent: p, Filter: filterStr}
-		occIterator := g.containeranalysis.ListOccurrences(ctx, req)
+	return buildDetail, err
+}
 
-		occ, err := occIterator.Next()
+// GetBuildDetailFromProject gets the BuildDetail for the passed image from the given project.
+func (g *Client) getBuildDetailFromProject(ctx context.Context, project string, ref reference.Canonical) (repository.BuildDetail, error) {
+	filterStr := kindFilterStr(ref, grafeas.NoteKind_BUILD)
 
-		// If no build notes found, continue to fallback project.
-		if !strings.HasSuffix(p, g.buildDetailProject) && err != nil {
-			continue
-		}
+	req := &grafeas.ListOccurrencesRequest{Parent: projectPath(project), Filter: filterStr}
+	occIterator := g.containeranalysis.ListOccurrences(ctx, req)
 
-		if err != nil {
-			if err == iterator.Done {
-				return repository.BuildDetail{}, &voucher.NoMetadataError{
-					Type: voucher.BuildDetailsType,
-					Err:  errNoOccurrences,
-				}
+	occ, err := occIterator.Next()
+
+	if err != nil {
+		if err == iterator.Done {
+			return repository.BuildDetail{}, &voucher.NoMetadataError{
+				Type: voucher.BuildDetailsType,
+				Err:  errNoOccurrences,
 			}
-			return repository.BuildDetail{}, err
 		}
-
-		// Multiple build notes found - invalid
-		if _, err := occIterator.Next(); err != iterator.Done {
-			return repository.BuildDetail{}, errors.New("Found multiple Grafeas occurrences for " + ref.String())
-		}
-
-		buildDetail = OccurrenceToBuildDetail(occ)
+		return repository.BuildDetail{}, err
 	}
-	return buildDetail, nil
+
+	// Multiple build notes found - invalid
+	if _, err := occIterator.Next(); err != iterator.Done {
+		return repository.BuildDetail{}, errors.New("Found multiple Grafeas occurrences for " + ref.String())
+	}
+
+	return OccurrenceToBuildDetail(occ), nil
 }
 
 // NewClient creates a new containeranalysis Grafeas Client.
