@@ -166,7 +166,7 @@ func (g *Client) GetBuildDetail(ctx context.Context, ref reference.Canonical) (r
 	}
 
 	buildDetail, err := g.getBuildDetailFromProject(ctx, project, ref)
-	if err != nil && g.buildDetailProject != "" {
+	if err != nil && g.buildDetailProject != "" && g.buildDetailProject != project {
 		return g.getBuildDetailFromProject(ctx, g.buildDetailProject, ref)
 	}
 
