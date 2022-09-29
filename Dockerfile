@@ -1,5 +1,5 @@
 # Builder
-FROM golang:1.16-alpine as builder
+FROM golang:1.19-alpine as builder
 
 LABEL maintainer "catherinejones"
 WORKDIR /go/src/github.com/grafeas/voucher
@@ -14,7 +14,7 @@ COPY . .
 RUN make voucher_server
 
 # Final build
-FROM alpine:3.12
+FROM alpine:3.16
 
 COPY --from=builder /go/src/github.com/grafeas/voucher/build/voucher_server /usr/local/bin/voucher_server
 COPY --from=builder /go/src/github.com/grafeas/voucher/entrypoint.sh /usr/local/entrypoint.sh
