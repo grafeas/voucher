@@ -34,9 +34,6 @@ password = "bcrypt hash of your password"
 dir = "/key"
 secrets = "/etc/voucher/secrets.production.ejson"
 
-[clair]
-address = "localhost:6060"
-
 [statsd]
 # with a local aggregator:
 backend = "statsd"

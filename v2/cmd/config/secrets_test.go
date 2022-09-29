@@ -9,7 +9,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/grafeas/voucher/v2/clair"
 	"github.com/grafeas/voucher/v2/repository"
 )
 
@@ -56,19 +55,6 @@ func TestGetRepositoryKeyRingNoEjson(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestGetClairConfig(t *testing.T) {
-	viper.Set("ejson.secrets", "../../../testdata/test.ejson")
-	viper.Set("ejson.dir", "../../../testdata/key")
-	t.Cleanup(viper.Reset)
-
-	data, err := ReadSecrets()
-	require.NoError(t, err)
-	assert.Equal(t, clair.Config{
-		Username: "testuser",
-		Password: "testpassword",
-	}, data.ClairConfig)
-}
-
 func TestGetPGPKeyRing(t *testing.T) {
 	viper.Set("ejson.secrets", "../../../testdata/test.ejson")
 	viper.Set("ejson.dir", "../../../testdata/key")
@@ -98,8 +84,5 @@ func TestReadSops(t *testing.T) {
 
 	data, err := ReadSecrets()
 	require.NoError(t, err)
-	assert.Equal(t, clair.Config{
-		Username: "eclair",
-		Password: "chocolate",
-	}, data.ClairConfig)
+	assert.Contains(t, data.Keys, "snakeoil")
 }
