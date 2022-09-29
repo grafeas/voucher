@@ -46,7 +46,7 @@ func NewMetadataClient(ctx context.Context, secrets *Secrets) (voucher.MetadataC
 	}
 }
 
-//NewAttestationSigner creates a new attestation signer
+// NewAttestationSigner creates a new attestation signer
 func NewAttestationSigner(secrets *Secrets) signer.AttestationSigner {
 	signerName := viper.GetString("signer")
 	if signerName == "pgp" || signerName == "" {

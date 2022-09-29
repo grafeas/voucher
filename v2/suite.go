@@ -58,7 +58,7 @@ func runner(ctx context.Context, name string, check Check, imageData ImageData, 
 //
 // For example, if a Suite has the "diy" and "nobody" tests, calling
 //
-//    Run(imageData)
+//	Run(imageData)
 //
 // will run the "diy" and "nobody" tests.
 //

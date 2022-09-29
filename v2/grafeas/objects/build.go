@@ -8,15 +8,15 @@ import (
 
 //note objects
 
-//Build based on
-//https://github.com/grafeas/client-go/blob/master/0.1.0/model_build_build.go
+// Build based on
+// https://github.com/grafeas/client-go/blob/master/0.1.0/model_build_build.go
 type Build struct {
 	BuilderVersion string          `json:"builderVersion,omitempty"` //required
 	Signature      *BuildSignature `json:"signature,omitempty"`
 }
 
-//BuildSignature based on
-//https://github.com/grafeas/client-go/blob/master/0.1.0/model_build_build_signature.go
+// BuildSignature based on
+// https://github.com/grafeas/client-go/blob/master/0.1.0/model_build_build_signature.go
 type BuildSignature struct {
 	PublicKey string `json:"publicKey,omitempty"`
 	Signature string `json:"signature,omitempty"` //required
@@ -25,14 +25,14 @@ type BuildSignature struct {
 
 //occurrence objects
 
-//BuildDetails based on
-//https://github.com/grafeas/client-go/blob/master/0.1.0/model_v1beta1build_details.go
+// BuildDetails based on
+// https://github.com/grafeas/client-go/blob/master/0.1.0/model_v1beta1build_details.go
 type BuildDetails struct {
 	Provenance      *ProvenanceBuild `json:"provenance,omitempty"` //required
 	ProvenanceBytes string           `json:"provenanceBytes,omitempty"`
 }
 
-//AsVoucherBuildDetail converts an BuildDetails to a Build_Detail
+// AsVoucherBuildDetail converts an BuildDetails to a Build_Detail
 func (bd *BuildDetails) AsVoucherBuildDetail() (detail repository.BuildDetail) {
 	buildProvenance := bd.Provenance
 
@@ -55,8 +55,8 @@ func (bd *BuildDetails) AsVoucherBuildDetail() (detail repository.BuildDetail) {
 	return
 }
 
-//ProvenanceBuild based on
-//https://github.com/grafeas/client-go/blob/master/0.1.0/model_provenance_build_provenance.go
+// ProvenanceBuild based on
+// https://github.com/grafeas/client-go/blob/master/0.1.0/model_provenance_build_provenance.go
 type ProvenanceBuild struct {
 	ID               string               `json:"id,omitempty"` //required
 	ProjectID        string               `json:"projectId,omitempty"`
@@ -72,31 +72,31 @@ type ProvenanceBuild struct {
 	BuilderVersion   string               `json:"builderVersion,omitempty"`
 }
 
-//ProvenanceArtifact based on
-//https://github.com/grafeas/client-go/blob/master/0.1.0/model_provenance_artifact.go
+// ProvenanceArtifact based on
+// https://github.com/grafeas/client-go/blob/master/0.1.0/model_provenance_artifact.go
 type ProvenanceArtifact struct {
 	Checksum string   `json:"checksum,omitempty"`
 	ID       string   `json:"id,omitempty"`
 	Names    []string `json:"names,omitempty"`
 }
 
-//ProvenanceSource based on
-//https://github.com/grafeas/client-go/blob/master/0.1.0/model_provenance_source.go
+// ProvenanceSource based on
+// https://github.com/grafeas/client-go/blob/master/0.1.0/model_provenance_source.go
 type ProvenanceSource struct {
 	ArtifactStorageSourceURI string          `json:"artifactStorageSourceUri,omitempty"`
 	Context                  *SourceContext  `json:"context,omitempty"`
 	AdditionalContexts       []SourceContext `json:"additionalContexts,omitempty"`
 }
 
-//SourceContext based on
-//https://github.com/grafeas/client-go/blob/master/0.1.0/model_source_source_context.go
+// SourceContext based on
+// https://github.com/grafeas/client-go/blob/master/0.1.0/model_source_source_context.go
 type SourceContext struct {
 	Git    *GitSourceContext `json:"git,omitempty"`
 	Labels map[string]string `json:"labels,omitempty"`
 }
 
-//GitSourceContext based on
-//https://github.com/grafeas/client-go/blob/master/0.1.0/model_source_git_source_context.go
+// GitSourceContext based on
+// https://github.com/grafeas/client-go/blob/master/0.1.0/model_source_git_source_context.go
 type GitSourceContext struct { //SourceGitSourceContext
 	URL        string `json:"url,omitempty"`
 	RevisionID string `json:"revisionId,omitempty"`

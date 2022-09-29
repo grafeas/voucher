@@ -2,11 +2,11 @@ package objects
 
 import "time"
 
-//NoteKind based on
-//https://github.com/grafeas/client-go/blob/master/0.1.0/model_v1beta1_note_kind.go
+// NoteKind based on
+// https://github.com/grafeas/client-go/blob/master/0.1.0/model_v1beta1_note_kind.go
 type NoteKind string
 
-//consts
+// consts
 const (
 	NoteKindUspecified    NoteKind = "NOTE_KIND_UNSPECIFIED"
 	NoteKindVulnerability NoteKind = "VULNERABILITY"
@@ -18,8 +18,8 @@ const (
 	NoteKindAttestation   NoteKind = "ATTESTATION"
 )
 
-//Note based on
-//https://github.com/grafeas/client-go/blob/master/0.1.0/model_v1beta1_note.go
+// Note based on
+// https://github.com/grafeas/client-go/blob/master/0.1.0/model_v1beta1_note.go
 type Note struct {
 	Name             string         `json:"name,omitempty"` //output only
 	ShortDescription string         `json:"shortDescription,omitempty"`
