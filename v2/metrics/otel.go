@@ -14,6 +14,8 @@ import (
 
 // OpenTelemetryClient is a Client using OpenTelemetry metrics.
 type OpenTelemetryClient struct {
+	opTimeout time.Duration
+
 	checkRunStart   syncint64.Counter
 	checkRunFailure syncint64.Counter
 	checkRunError   syncint64.Counter
@@ -39,7 +41,9 @@ var (
 // NewOpenTelemetryClient creates a new *OpenTelemetryClient
 func NewOpenTelemetryClient(mp metric.MeterProvider) (*OpenTelemetryClient, error) {
 	meter := mp.Meter("voucher").SyncInt64()
-	client := &OpenTelemetryClient{}
+	client := &OpenTelemetryClient{
+		opTimeout: 2 * time.Second,
+	}
 	if err := addRunMetrics(meter, client); err != nil {
 		return nil, err
 	}
@@ -137,11 +141,11 @@ func (o *OpenTelemetryClient) CheckAttestationSuccess(check string) {
 }
 
 func (o *OpenTelemetryClient) CheckRunLatency(check string, dur time.Duration) {
-	o.recordSeconds(o.checkRunLatency, dur, attrCheckName.String(check))
+	o.recordMillis(o.checkRunLatency, dur, attrCheckName.String(check))
 }
 
 func (o *OpenTelemetryClient) CheckAttestationLatency(check string, dur time.Duration) {
-	o.recordSeconds(o.attestLatency, dur, attrCheckName.String(check))
+	o.recordMillis(o.attestLatency, dur, attrCheckName.String(check))
 }
 
 func (o *OpenTelemetryClient) PubSubMessageReceived() {
@@ -149,19 +153,19 @@ func (o *OpenTelemetryClient) PubSubMessageReceived() {
 }
 
 func (o *OpenTelemetryClient) PubSubTotalLatency(dur time.Duration) {
-	o.recordSeconds(o.pubsubMsgLatency, dur)
+	o.recordMillis(o.pubsubMsgLatency, dur)
 }
 
 func (o *OpenTelemetryClient) incr(counter syncint64.Counter, labels ...attribute.KeyValue) {
 	o.withContext(func(ctx context.Context) { counter.Add(ctx, 1, labels...) })
 }
 
-func (o *OpenTelemetryClient) recordSeconds(hist syncint64.Histogram, dur time.Duration, labels ...attribute.KeyValue) {
+func (o *OpenTelemetryClient) recordMillis(hist syncint64.Histogram, dur time.Duration, labels ...attribute.KeyValue) {
 	o.withContext(func(ctx context.Context) { hist.Record(ctx, dur.Milliseconds(), labels...) })
 }
 
 func (o *OpenTelemetryClient) withContext(f func(context.Context)) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), o.opTimeout)
 	defer cancel()
 	f(ctx)
 }
