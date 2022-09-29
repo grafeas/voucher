@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"time"
@@ -14,27 +14,27 @@ import (
 	"github.com/grafeas/voucher/v2/grafeas/objects"
 )
 
-//GrafeasAPIService vars
+// GrafeasAPIService vars
 var (
 	ErrTimeout = errors.New("timeout error when getting REST data")
 	timeout    = time.Minute
 )
 
-//APIService is the interface for communicating with Grafeas
+// APIService is the interface for communicating with Grafeas
 type APIService interface {
 	CreateOccurrence(context.Context, string, objects.Occurrence) (objects.Occurrence, error)
 	ListNotes(context.Context, string, *objects.ListOpts) (objects.ListNotesResponse, error)
 	ListOccurrences(context.Context, string, *objects.ListOpts) (objects.ListOccurrencesResponse, error)
 }
 
-//apiServiceImpl for REST calls
+// apiServiceImpl for REST calls
 type apiServiceImpl struct {
 	basePath    string
 	versionPath string
 	client      *http.Client
 }
 
-//NewAPIService creates new GrafeasAPIService
+// NewAPIService creates new GrafeasAPIService
 func NewAPIService(basePath, versionPath string) APIService {
 	return &apiServiceImpl{
 		basePath:    basePath,
@@ -45,8 +45,8 @@ func NewAPIService(basePath, versionPath string) APIService {
 	}
 }
 
-//CreateOccurrence based on
-//https://github.com/grafeas/client-go/blob/39fa98b49d38de3942716c0f58f3505012415470/0.1.0/api_grafeas_v1_beta1.go#L310
+// CreateOccurrence based on
+// https://github.com/grafeas/client-go/blob/39fa98b49d38de3942716c0f58f3505012415470/0.1.0/api_grafeas_v1_beta1.go#L310
 func (g *apiServiceImpl) CreateOccurrence(ctx context.Context, parent string, occurrence objects.Occurrence) (objects.Occurrence, error) {
 	urlPath, err := g.buildURL(parent, "/occurrences", nil)
 	if err != nil {
@@ -68,8 +68,8 @@ func (g *apiServiceImpl) CreateOccurrence(ctx context.Context, parent string, oc
 	return occ, nil
 }
 
-//ListNotes based on
-//https://github.com/grafeas/client-go/blob/39fa98b49d38de3942716c0f58f3505012415470/0.1.0/api_grafeas_v1_beta1.go#L1057
+// ListNotes based on
+// https://github.com/grafeas/client-go/blob/39fa98b49d38de3942716c0f58f3505012415470/0.1.0/api_grafeas_v1_beta1.go#L1057
 func (g *apiServiceImpl) ListNotes(ctx context.Context, parent string, optsNotes *objects.ListOpts) (objects.ListNotesResponse, error) {
 	urlPath, err := g.buildURL(parent, "/notes", optsNotes)
 	if err != nil {
@@ -87,8 +87,8 @@ func (g *apiServiceImpl) ListNotes(ctx context.Context, parent string, optsNotes
 	return notesResp, nil
 }
 
-//ListOccurrences based on
-//https://github.com/grafeas/client-go/blob/39fa98b49d38de3942716c0f58f3505012415470/0.1.0/api_grafeas_v1_beta1.go#L1165
+// ListOccurrences based on
+// https://github.com/grafeas/client-go/blob/39fa98b49d38de3942716c0f58f3505012415470/0.1.0/api_grafeas_v1_beta1.go#L1165
 func (g *apiServiceImpl) ListOccurrences(ctx context.Context, parent string, optsOccurrences *objects.ListOpts) (objects.ListOccurrencesResponse, error) {
 	urlPath, err := g.buildURL(parent, "/occurrences", optsOccurrences)
 	if err != nil {
@@ -131,7 +131,7 @@ func (g *apiServiceImpl) httpCall(urlAddr *url.URL, payload []byte, method strin
 		Method: method,
 		URL:    urlAddr,
 		Header: make(map[string][]string),
-		Body:   ioutil.NopCloser(bytes.NewReader(payload)),
+		Body:   io.NopCloser(bytes.NewReader(payload)),
 	}
 	req.Header.Add("Content-Type", "application/json")
 	resp, err := g.client.Do(&req)
@@ -145,7 +145,7 @@ func (g *apiServiceImpl) httpCall(urlAddr *url.URL, payload []byte, method strin
 	defer resp.Body.Close()
 
 	statusCode := resp.StatusCode
-	data, err := ioutil.ReadAll(resp.Body)
+	data, err := io.ReadAll(resp.Body)
 	if statusCode != http.StatusOK || err != nil {
 		return nil, NewAPIError(statusCode, urlAddr.Path, method, data)
 	}

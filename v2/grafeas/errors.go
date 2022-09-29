@@ -7,7 +7,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-//Grafeas client errors
+// Grafeas client errors
 var (
 	errNoOccurrences         = errors.New("no occurrences returned for image")
 	errDiscoveriesUnfinished = errors.New("discoveries have not finished processing")

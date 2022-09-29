@@ -2,7 +2,7 @@ package grafeas
 
 import "fmt"
 
-//APIError to store grafeas API errors
+// APIError to store grafeas API errors
 type APIError struct {
 	statusCode  int
 	url         string

@@ -1,7 +1,7 @@
 package docker
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/docker/distribution"
@@ -17,7 +17,7 @@ func getDockerManifest(client *http.Client, request *http.Request) (distribution
 
 	defer resp.Body.Close()
 
-	b, err := ioutil.ReadAll(resp.Body)
+	b, err := io.ReadAll(resp.Body)
 	if nil != err {
 		return nil, NewManifestError(err)
 	}
