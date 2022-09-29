@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -180,7 +180,7 @@ func (c *Client) doVoucherRequest(ctx context.Context, url string, image referen
 	defer resp.Body.Close()
 
 	if !strings.Contains(resp.Header.Get("Content-Type"), "application/json") {
-		b, err := ioutil.ReadAll(resp.Body)
+		b, err := io.ReadAll(resp.Body)
 		if err == nil {
 			err = fmt.Errorf("failed to get response: %s", strings.TrimSpace(string(b)))
 		}

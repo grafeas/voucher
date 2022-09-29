@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"time"
@@ -131,7 +131,7 @@ func (g *apiServiceImpl) httpCall(urlAddr *url.URL, payload []byte, method strin
 		Method: method,
 		URL:    urlAddr,
 		Header: make(map[string][]string),
-		Body:   ioutil.NopCloser(bytes.NewReader(payload)),
+		Body:   io.NopCloser(bytes.NewReader(payload)),
 	}
 	req.Header.Add("Content-Type", "application/json")
 	resp, err := g.client.Do(&req)
@@ -145,7 +145,7 @@ func (g *apiServiceImpl) httpCall(urlAddr *url.URL, payload []byte, method strin
 	defer resp.Body.Close()
 
 	statusCode := resp.StatusCode
-	data, err := ioutil.ReadAll(resp.Body)
+	data, err := io.ReadAll(resp.Body)
 	if statusCode != http.StatusOK || err != nil {
 		return nil, NewAPIError(statusCode, urlAddr.Path, method, data)
 	}

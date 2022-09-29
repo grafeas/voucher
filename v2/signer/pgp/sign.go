@@ -5,7 +5,7 @@ import (
 	"crypto"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 
 	"golang.org/x/crypto/openpgp"
 	"golang.org/x/crypto/openpgp/armor"
@@ -87,7 +87,7 @@ func Verify(keyring openpgp.KeyRing, signed string) (string, error) {
 		return "", errNoSigner
 	}
 
-	body, err := ioutil.ReadAll(messageDetails.UnverifiedBody)
+	body, err := io.ReadAll(messageDetails.UnverifiedBody)
 	if nil != err {
 		if nil != messageDetails.SignatureError {
 			err = messageDetails.SignatureError
