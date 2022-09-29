@@ -3,6 +3,7 @@ package metrics
 import (
 	"context"
 	"fmt"
+	"io"
 	"time"
 
 	"go.opentelemetry.io/otel/attribute"
@@ -14,7 +15,8 @@ import (
 
 // OpenTelemetryClient is a Client using OpenTelemetry metrics.
 type OpenTelemetryClient struct {
-	opTimeout time.Duration
+	opTimeout    time.Duration
+	shutdownHook shutdownHook
 
 	checkRunStart   syncint64.Counter
 	checkRunFailure syncint64.Counter
@@ -34,15 +36,21 @@ type OpenTelemetryClient struct {
 // Please follow https://prometheus.io/docs/practices/naming/ for metric/label naming conventions.
 
 var (
-	_             Client = (*OpenTelemetryClient)(nil)
-	attrCheckName        = attribute.Key("check_name")
+	_             Client    = (*OpenTelemetryClient)(nil)
+	_             io.Closer = (*OpenTelemetryClient)(nil)
+	attrCheckName           = attribute.Key("check_name")
 )
 
-// NewOpenTelemetryClient creates a new *OpenTelemetryClient
-func NewOpenTelemetryClient(mp metric.MeterProvider) (*OpenTelemetryClient, error) {
+type shutdownHook interface {
+	Shutdown(context.Context) error
+}
+
+// NewOpenTelemetryClient creates a new OpenTelemetryClient
+func NewOpenTelemetryClient(mp metric.MeterProvider, hook shutdownHook) (*OpenTelemetryClient, error) {
 	meter := mp.Meter("voucher").SyncInt64()
 	client := &OpenTelemetryClient{
-		opTimeout: 2 * time.Second,
+		opTimeout:    2 * time.Second,
+		shutdownHook: hook,
 	}
 	if err := addRunMetrics(meter, client); err != nil {
 		return nil, err
@@ -110,6 +118,16 @@ func addPubSubMetrics(ip syncint64.InstrumentProvider, client *OpenTelemetryClie
 		return fmt.Errorf("failed to create voucher_pubsub_message_latency_milliseconds histogram: %w", err)
 	}
 	return
+}
+
+func (o *OpenTelemetryClient) Close() error {
+	if o.shutdownHook == nil {
+		return nil
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	return o.shutdownHook.Shutdown(ctx)
 }
 
 func (o *OpenTelemetryClient) CheckRunStart(check string) {

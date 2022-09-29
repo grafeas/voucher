@@ -49,7 +49,7 @@ func MetricsClient(secrets *Secrets) (metrics.Client, error) {
 			metric.WithResource(res),
 			metric.WithReader(metric.NewPeriodicReader(exporter, metric.WithInterval(interval))),
 		)
-		return metrics.NewOpenTelemetryClient(mp)
+		return metrics.NewOpenTelemetryClient(mp, exporter)
 	case "datadog":
 		if secrets.Datadog.APIKey != "" && secrets.Datadog.AppKey != "" {
 			return metrics.NewDatadogClient(secrets.Datadog.APIKey, secrets.Datadog.AppKey, metrics.WithDatadogTags(tags)), nil

@@ -18,7 +18,7 @@ func TestOpenTelemetryClient(t *testing.T) {
 	reader := metric.NewManualReader()
 
 	// Exercise the client to produce some metrics:
-	client, err := metrics.NewOpenTelemetryClient(metric.NewMeterProvider(metric.WithReader(reader)))
+	client, err := metrics.NewOpenTelemetryClient(metric.NewMeterProvider(metric.WithReader(reader)), nil)
 	require.NoError(t, err)
 	for i := 0; i < 10; i++ {
 		client.CheckRunStart("diy")
