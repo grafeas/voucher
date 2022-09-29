@@ -44,6 +44,9 @@ backend = "statsd"
 addr = "localhost:8125"
 sample_rate = 0.1
 tags = []
+# OR: backend = otel
+#     addr = "grpc://localhost:4317"
+#     insecure = true
 
 [repository.shopify]
 org-url = "https://github.com/Shopify"
