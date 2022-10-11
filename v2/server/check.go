@@ -57,7 +57,7 @@ func (s *Server) handleChecks(w http.ResponseWriter, r *http.Request, name ...st
 		}
 	}
 
-	checksuite, err := config.NewCheckSuite(s.secrets, metadataClient, repositoryClient, name...)
+	checksuite, err := config.NewCheckSuite(metadataClient, repositoryClient, name...)
 	if nil != err {
 		http.Error(w, "server has been misconfigured", http.StatusInternalServerError)
 		LogError("failed to create CheckSuite", err)
