@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/grafeas/voucher/v2/metrics"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp"
@@ -51,7 +52,7 @@ func MetricsClient(secrets *Secrets) (metrics.Client, error) {
 		)
 		return metrics.NewOpenTelemetryClient(mp, exporter)
 	case "datadog":
-		if secrets.Datadog.APIKey != "" && secrets.Datadog.AppKey != "" {
+		if secrets != nil && secrets.Datadog.APIKey != "" && secrets.Datadog.AppKey != "" {
 			return metrics.NewDatadogClient(secrets.Datadog.APIKey, secrets.Datadog.AppKey, metrics.WithDatadogTags(tags)), nil
 		}
 		return &metrics.NoopClient{}, fmt.Errorf("missing secrets for datadog")
@@ -68,22 +69,32 @@ func otelExporter(ctx context.Context) (metric.Exporter, error) {
 	if err != nil {
 		return nil, fmt.Errorf("parsing otel url: %w", err)
 	}
+
+	log := logrus.WithFields(logrus.Fields{
+		"otel_addr": addr,
+		"insecure":  insecure,
+		"scheme":    otelURL.Scheme,
+		"host":      otelURL.Host,
+	})
+
 	switch otelURL.Scheme {
 	case "grpc":
 		opts := []otlpmetricgrpc.Option{
-			otlpmetricgrpc.WithEndpoint(addr),
+			otlpmetricgrpc.WithEndpoint(otelURL.Host),
 		}
 		if insecure {
 			opts = append(opts, otlpmetricgrpc.WithInsecure())
 		}
+		log.Info("creating otel exporter")
 		return otlpmetricgrpc.New(ctx, opts...)
 	case "http", "https":
 		opts := []otlpmetrichttp.Option{
-			otlpmetrichttp.WithEndpoint(addr),
+			otlpmetrichttp.WithEndpoint(otelURL.Host),
 		}
 		if insecure {
 			opts = append(opts, otlpmetrichttp.WithInsecure())
 		}
+		log.Info("creating otel exporter")
 		return otlpmetrichttp.New(ctx, opts...)
 	default:
 		return nil, fmt.Errorf("unknown otel scheme: %s", otelURL.Scheme)
