@@ -39,7 +39,7 @@ func (s *Subscriber) check(canonicalImageReference reference.Canonical) (bool, b
 		}
 	}
 
-	checksuite, err := config.NewCheckSuite(s.secrets, metadataClient, repositoryClient, s.cfg.RequiredChecks...)
+	checksuite, err := config.NewCheckSuite(metadataClient, repositoryClient, s.cfg.RequiredChecks...)
 	if nil != err {
 		s.log.Errorf("failed to create CheckSuite: %s", err)
 		return false, true

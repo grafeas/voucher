@@ -7,7 +7,7 @@ import (
 	voucher "github.com/grafeas/voucher/v2"
 )
 
-func newScanner(secrets *Secrets, metadataClient voucher.MetadataClient, auth voucher.Auth) (scanner voucher.VulnerabilityScanner) {
+func newScanner(metadataClient voucher.MetadataClient) (scanner voucher.VulnerabilityScanner) {
 	scannerName := viper.GetString("scanner")
 	switch scannerName {
 	case "gca", "g":
