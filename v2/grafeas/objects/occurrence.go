@@ -6,8 +6,8 @@ import (
 	"github.com/docker/distribution/reference"
 )
 
-//Occurrence based on
-//https://github.com/grafeas/client-go/blob/master/0.1.0/model_v1beta1_occurrence.go
+// Occurrence based on
+// https://github.com/grafeas/client-go/blob/master/0.1.0/model_v1beta1_occurrence.go
 type Occurrence struct {
 	//output only, form: `projects/[PROJECT_ID]/occurrences/[OCCURRENCE_ID]
 	Name          string                `json:"name,omitempty"`
@@ -23,13 +23,13 @@ type Occurrence struct {
 	Attestation   *AttestationDetails   `json:"attestation,omitempty"`
 }
 
-//Resource based on
-//https://github.com/grafeas/client-go/blob/master/0.1.0/model_v1beta1_resource.go
+// Resource based on
+// https://github.com/grafeas/client-go/blob/master/0.1.0/model_v1beta1_resource.go
 type Resource struct {
 	URI string `json:"uri,omitempty"` //required
 }
 
-//NewOccurrence creates new occurrence
+// NewOccurrence creates new occurrence
 func NewOccurrence(reference reference.Canonical, parentNoteID string, attestation *AttestationDetails, binauthProjectPath string) Occurrence {
 	noteName := binauthProjectPath + "/notes/" + parentNoteID
 
