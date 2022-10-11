@@ -14,7 +14,7 @@ Make sure that you update the `ejson` or `sops` specific blocks to point to the 
 
 ## Create secrets
 
-If you plan on creating attestations (rather than just running checks against your images), or if you plan on using Clair as your Vulnerability Scanner, you will need to create a secrets file to store secret values like the OpenPGP keys and/or Clair login information.
+If you plan on creating attestations (rather than just running checks against your images), you will need to create a secrets file to store secret values like the OpenPGP keys.
 
 ### Create ejson configuration
 
@@ -40,8 +40,7 @@ You can then create an `ejson` file using the public key included. For example:
 ```json
 {
     "_public_key": "<public key>",
-    "openpgpkeys": {},
-    "clair": {}
+    "openpgpkeys": {}
 }
 ```
 
@@ -144,7 +143,7 @@ Next you will be prompted for the key length. We'll use the largest possible val
 ```
 RSA keys may be between 1024 and 4096 bits long.
 What keysize do you want? (2048) 4096
-Requested keysize is 4096 bits       
+Requested keysize is 4096 bits
 ```
 
 When prompted for how long the key should be valid, select an [appropriate cryptoperiod](https://www.keylength.com/) for your deployment. For this tutorial we'll specify that the key does not expire.
@@ -163,12 +162,12 @@ Is this correct? (y/N) y
 
 You will next be asked to provide an ID for the GPG key. You will want to add a comment to clarify which Check this key is for.
 
-```                        
+```
 GnuPG needs to construct a user ID to identify your key.
 
-Real name: Cloud Security 
+Real name: Cloud Security
 Email address: cloudsecurityteam@example.com
-Comment: DIY                       
+Comment: DIY
 You selected this USER-ID:
     "Cloud Security (DIY) <cloudsecurityteam@example.com>"
 
@@ -213,8 +212,7 @@ Next, create a new value in the `openpgpkeys` block in your secrets file. Make s
 {
     "openpgpkeys": {
         "diy": "-----BEGIN PGP PRIVATE KEY BLOCK-----\nlQcYBFt23t8BEADuZqi...."
-    },
-    "clair": {}
+    }
 }
 ```
 

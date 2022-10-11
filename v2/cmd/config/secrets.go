@@ -9,7 +9,6 @@ import (
 	"github.com/spf13/viper"
 	"go.mozilla.org/sops/v3/decrypt"
 
-	"github.com/grafeas/voucher/v2/clair"
 	"github.com/grafeas/voucher/v2/repository"
 	"github.com/grafeas/voucher/v2/signer/pgp"
 )
@@ -18,7 +17,6 @@ import (
 // in.
 type Secrets struct {
 	Keys                     map[string]string  `json:"openpgpkeys"`
-	ClairConfig              clair.Config       `json:"clair"`
 	RepositoryAuthentication repository.KeyRing `json:"repositories"`
 	Datadog                  DatadogSecrets     `json:"datadog"`
 }
