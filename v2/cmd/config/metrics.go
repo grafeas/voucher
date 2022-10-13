@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/grafeas/voucher/v2/metrics"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp"
 	"go.opentelemetry.io/otel/sdk/metric"
@@ -39,9 +41,15 @@ func MetricsClient(secrets *Secrets) (metrics.Client, error) {
 		if interval == 0 {
 			interval = time.Minute
 		}
-		res, err := resource.New(ctx, resource.WithAttributes(
-			semconv.ServiceNameKey.String("voucher"),
-		))
+
+		attrs := make([]attribute.KeyValue, 0, len(tags)+1)
+		for _, tag := range tags {
+			s := strings.SplitN(tag, ":", 2)
+			attrs = append(attrs, attribute.String(s[0], s[1]))
+		}
+		attrs = append(attrs, semconv.ServiceNameKey.String("voucher"))
+
+		res, err := resource.New(ctx, resource.WithAttributes(attrs...))
 		if err != nil {
 			return nil, fmt.Errorf("creating otel resource: %w", err)
 		}
