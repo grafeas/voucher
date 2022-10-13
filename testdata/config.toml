@@ -1,5 +1,5 @@
 dryrun          = true
-scanner         = "clair"
+scanner         = "metadata"
 failon          = "high"
 binauth_project = "voucher-binauth"
 metadata_client = "grafeasos"
@@ -21,9 +21,6 @@ password        = "$2a$10$.PaOjV8GdqSHSmUtfolsJeF6LsAq/3CNsFCYGb3IoN/mO9xj1c/yG"
 [ejson]
 dir             = "../../testdata/key"
 secrets         = "../../testdata/test.ejson"
-
-[clair]
-address         = "localhost:6060"
 
 [repository.shopify]
 org-url = "https://github.com/Shopify"
