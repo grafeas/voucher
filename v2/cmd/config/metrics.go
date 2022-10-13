@@ -31,42 +31,49 @@ func MetricsClient(secrets *Secrets) (metrics.Client, error) {
 
 		log.Printf("No metrics client configured")
 		return &metrics.NoopClient{}, nil
+
 	case "otel", "opentelemetry":
-		ctx := context.Background()
-		exporter, err := otelExporter(ctx)
-		if err != nil {
-			return nil, fmt.Errorf("creating otel exporter: %w", err)
-		}
-		interval := viper.GetDuration("statsd.interval")
-		if interval == 0 {
-			interval = time.Minute
-		}
+		return otelMetricsClient(tags)
 
-		attrs := make([]attribute.KeyValue, 0, len(tags)+1)
-		for _, tag := range tags {
-			s := strings.SplitN(tag, ":", 2)
-			attrs = append(attrs, attribute.String(s[0], s[1]))
-		}
-		attrs = append(attrs, semconv.ServiceNameKey.String("voucher"))
-
-		res, err := resource.New(ctx, resource.WithAttributes(attrs...))
-		if err != nil {
-			return nil, fmt.Errorf("creating otel resource: %w", err)
-		}
-
-		mp := metric.NewMeterProvider(
-			metric.WithResource(res),
-			metric.WithReader(metric.NewPeriodicReader(exporter, metric.WithInterval(interval))),
-		)
-		return metrics.NewOpenTelemetryClient(mp, exporter)
 	case "datadog":
 		if secrets != nil && secrets.Datadog.APIKey != "" && secrets.Datadog.AppKey != "" {
 			return metrics.NewDatadogClient(secrets.Datadog.APIKey, secrets.Datadog.AppKey, metrics.WithDatadogTags(tags)), nil
 		}
 		return &metrics.NoopClient{}, fmt.Errorf("missing secrets for datadog")
+
 	default:
 		return &metrics.NoopClient{}, fmt.Errorf("unknown statsd backend: %s", backend)
 	}
+}
+
+func otelMetricsClient(tags []string) (*metrics.OpenTelemetryClient, error) {
+	ctx := context.Background()
+	exporter, err := otelExporter(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("creating otel exporter: %w", err)
+	}
+	interval := viper.GetDuration("statsd.interval")
+	if interval == 0 {
+		interval = time.Minute
+	}
+
+	attrs := make([]attribute.KeyValue, 0, len(tags)+1)
+	for _, tag := range tags {
+		s := strings.SplitN(tag, ":", 2)
+		attrs = append(attrs, attribute.String(s[0], s[1]))
+	}
+	attrs = append(attrs, semconv.ServiceNameKey.String("voucher"))
+
+	res, err := resource.New(ctx, resource.WithAttributes(attrs...))
+	if err != nil {
+		return nil, fmt.Errorf("creating otel resource: %w", err)
+	}
+
+	mp := metric.NewMeterProvider(
+		metric.WithResource(res),
+		metric.WithReader(metric.NewPeriodicReader(exporter, metric.WithInterval(interval))),
+	)
+	return metrics.NewOpenTelemetryClient(mp, exporter)
 }
 
 func otelExporter(ctx context.Context) (metric.Exporter, error) {
