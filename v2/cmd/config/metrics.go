@@ -20,9 +20,17 @@ import (
 )
 
 func MetricsClient(secrets *Secrets) (metrics.Client, error) {
-	tags := viper.GetStringSlice("statsd.tags")
+	// Prefer the [metrics] section, for common config - but fallback to the old [statsd] section
+	tags := viper.GetStringSlice("metrics.tags")
+	if len(tags) == 0 {
+		tags = viper.GetStringSlice("statsd.tags")
+	}
+	backend := viper.GetString("metrics.backend")
+	if backend == "" {
+		backend = viper.GetString("statsd.backend")
+	}
 
-	switch backend := viper.GetString("statsd.backend"); backend {
+	switch backend {
 	case "statsd", "":
 		if statsdAddr := viper.GetString("statsd.addr"); statsdAddr != "" {
 			sampleRate := viper.GetFloat64("statsd.sample_rate")
@@ -32,14 +40,14 @@ func MetricsClient(secrets *Secrets) (metrics.Client, error) {
 		log.Printf("No metrics client configured")
 		return &metrics.NoopClient{}, nil
 
-	case "otel", "opentelemetry":
-		return otelMetricsClient(tags)
-
 	case "datadog":
 		if secrets != nil && secrets.Datadog.APIKey != "" && secrets.Datadog.AppKey != "" {
 			return metrics.NewDatadogClient(secrets.Datadog.APIKey, secrets.Datadog.AppKey, metrics.WithDatadogTags(tags)), nil
 		}
 		return &metrics.NoopClient{}, fmt.Errorf("missing secrets for datadog")
+
+	case "otel", "opentelemetry":
+		return otelMetricsClient(tags)
 
 	default:
 		return &metrics.NoopClient{}, fmt.Errorf("unknown statsd backend: %s", backend)
@@ -52,7 +60,7 @@ func otelMetricsClient(tags []string) (*metrics.OpenTelemetryClient, error) {
 	if err != nil {
 		return nil, fmt.Errorf("creating otel exporter: %w", err)
 	}
-	interval := viper.GetDuration("statsd.interval")
+	interval := viper.GetDuration("opentelemetry.interval")
 	if interval == 0 {
 		interval = time.Minute
 	}
@@ -77,9 +85,9 @@ func otelMetricsClient(tags []string) (*metrics.OpenTelemetryClient, error) {
 }
 
 func otelExporter(ctx context.Context) (metric.Exporter, error) {
-	insecure := viper.GetBool("statsd.insecure")
+	insecure := viper.GetBool("opentelemetry.insecure")
 
-	addr := viper.GetString("statsd.addr")
+	addr := viper.GetString("opentelemetry.addr")
 	otelURL, err := url.Parse(addr)
 	if err != nil {
 		return nil, fmt.Errorf("parsing otel url: %w", err)
