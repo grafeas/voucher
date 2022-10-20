@@ -23,9 +23,10 @@ var errCannotAttest = errors.New("cannot create attestations, keyring is empty")
 
 // Client implements voucher.MetadataClient, connecting to containeranalysis Grafeas.
 type Client struct {
-	containeranalysis *grafeasv1.Client        // The client reference.
-	keyring           signer.AttestationSigner // The keyring used for signing metadata.
-	binauthProject    string                   // The project that Binauth Notes and Occurrences are written to.
+	containeranalysis  *grafeasv1.Client        // The client reference.
+	keyring            signer.AttestationSigner // The keyring used for signing metadata.
+	binauthProject     string                   // The project that Binauth Notes and Occurrences are written to.
+	buildDetailProject string                   // [optional] the fallback project where Build Notes are written to.
 }
 
 // CanAttest returns true if the client can create and sign attestations.
@@ -159,27 +160,39 @@ func (g *Client) Close() {
 func (g *Client) GetBuildDetail(ctx context.Context, ref reference.Canonical) (repository.BuildDetail, error) {
 	var err error
 
-	filterStr := kindFilterStr(ref, grafeas.NoteKind_BUILD)
-
 	project, err := uri.ReferenceToProjectName(ref)
-	if nil != err {
+	if err != nil {
 		return repository.BuildDetail{}, err
 	}
+
+	buildDetail, err := g.getBuildDetailFromProject(ctx, project, ref)
+	if err != nil && g.buildDetailProject != "" && g.buildDetailProject != project {
+		return g.getBuildDetailFromProject(ctx, g.buildDetailProject, ref)
+	}
+
+	return buildDetail, err
+}
+
+// GetBuildDetailFromProject gets the BuildDetail for the passed image from the given project.
+func (g *Client) getBuildDetailFromProject(ctx context.Context, project string, ref reference.Canonical) (repository.BuildDetail, error) {
+	filterStr := kindFilterStr(ref, grafeas.NoteKind_BUILD)
 
 	req := &grafeas.ListOccurrencesRequest{Parent: projectPath(project), Filter: filterStr}
 	occIterator := g.containeranalysis.ListOccurrences(ctx, req)
 
 	occ, err := occIterator.Next()
+
 	if err != nil {
 		if err == iterator.Done {
-			err = &voucher.NoMetadataError{
-				Type: voucher.VulnerabilityType,
+			return repository.BuildDetail{}, &voucher.NoMetadataError{
+				Type: voucher.BuildDetailsType,
 				Err:  errNoOccurrences,
 			}
 		}
 		return repository.BuildDetail{}, err
 	}
 
+	// Multiple build notes found - invalid
 	if _, err := occIterator.Next(); err != iterator.Done {
 		return repository.BuildDetail{}, errors.New("Found multiple Grafeas occurrences for " + ref.String())
 	}
@@ -188,16 +201,17 @@ func (g *Client) GetBuildDetail(ctx context.Context, ref reference.Canonical) (r
 }
 
 // NewClient creates a new containeranalysis Grafeas Client.
-func NewClient(ctx context.Context, binauthProject string, keyring signer.AttestationSigner) (*Client, error) {
+func NewClient(ctx context.Context, binauthProject string, buildDetailproject string, keyring signer.AttestationSigner) (*Client, error) {
 	// These options emulate cloud.google.com/go/containeranalysis/apiv1.NewClient
 	grafeasClient, err := grafeasv1.NewClient(ctx, option.WithEndpoint("containeranalysis.googleapis.com:443"), option.WithScopes(containeranalysisapi.DefaultAuthScopes()...))
 	if err != nil {
 		return nil, err
 	}
 	client := &Client{
-		containeranalysis: grafeasClient,
-		keyring:           keyring,
-		binauthProject:    binauthProject,
+		containeranalysis:  grafeasClient,
+		keyring:            keyring,
+		binauthProject:     binauthProject,
+		buildDetailProject: buildDetailproject,
 	}
 
 	return client, nil

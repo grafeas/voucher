@@ -26,6 +26,7 @@ func NewMetadataClient(ctx context.Context, secrets *Secrets) (voucher.MetadataC
 		return containeranalysis.NewClient(
 			ctx,
 			viper.GetString("binauth_project"),
+			viper.GetString("containeranalysis.build_detail_fallback_project"),
 			keyring,
 		)
 	case "grafeasos":
@@ -41,6 +42,7 @@ func NewMetadataClient(ctx context.Context, secrets *Secrets) (voucher.MetadataC
 		return containeranalysis.NewClient(
 			ctx,
 			viper.GetString("binauth_project"),
+			viper.GetString("containeranalysis.build_detail_fallback_project"),
 			keyring,
 		)
 	}
