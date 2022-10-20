@@ -59,10 +59,13 @@ Below are the configuration options for Voucher Server:
 | `sops`               | `file`                       | The path to the SOPS secrets.                                                                         |
 | `repository.[alias]` | `org-url`                    | The URL used to determine if a repository is owned by an organization.                                |
 | `required.[env]`     | (test name here)             | A test that is active when running "env" tests.                                                       |
-| `statsd`             | `backend`                    | The destination for reporting metrics, can be `statsd` for local aggregation, or `datadog`.           |
-| `statsd`             | `addr`                       | The UDP endpoint to use when `statsd.backend == "statsd"`.                                            |
-| `statsd`             | `tags`                       | List of tags in `key:value` format that apply to every metric. Example: `env:production`.                |
-| `statsd`             | `sample_rate`                | Configurable sample rate to limit metrics overhead.                                                    |
+| `metrics`            | `backend`                    | The destination for reporting metrics, can be `statsd` for local aggregation, `datadog` for direct Datadog API, or `opentelemetry` for an otel collector. |
+| `metrics`            | `tags`                       | List of tags in `key:value` format that apply to every metric. Example: `env:production`.             |
+| `statsd`             | `addr`                       | The UDP endpoint to use when `metrics.backend == "statsd"`                                            |
+| `statsd`             | `sample_rate`                | Configurable sample rate to limit metrics overhead.                                                   |
+| `opentelemetry`      | `interval`                   | The interval at which to flush metrics to the opentelemetry collector.                                |
+| `opentelemetry`      | `addr`                       | The `http://`, `https://` or `grpc://` address for the opentelemetry collector.                       |
+| `opentelemetry`      | `insecure`                   | Disable transport security like HTTPS for the opentelemetry collector.                                |
 
 Configuration options can be overridden at runtime by setting the appropriate flag. For example, if you set the "port" flag when running `voucher_server`, that value will override whatever is in the configuration.
 

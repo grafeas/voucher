@@ -34,13 +34,21 @@ password = "bcrypt hash of your password"
 dir = "/key"
 secrets = "/etc/voucher/secrets.production.ejson"
 
-[statsd]
-# with a local aggregator:
+[metrics]
 backend = "statsd"
-# OR: backend = datadog
+# OR: backend = "datadog"
+# OR: backend = "opentelemetry"
+tags = []
+
+# for statsd metrics backend
+[statsd]
 addr = "localhost:8125"
 sample_rate = 0.1
-tags = []
+
+# for opentelemetry backend
+[opentelemetry]
+addr = "grpc://localhost:4317"
+insecure = true
 
 [repository.shopify]
 org-url = "https://github.com/Shopify"
