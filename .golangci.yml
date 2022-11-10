@@ -18,7 +18,6 @@ run:
 
   modules-download-mode: readonly
 
-
 # output configuration options
 output:
   # colored-line-number|line-number|json|tab|checkstyle|code-climate, default is "colored-line-number"
@@ -84,7 +83,7 @@ linters-settings:
     # with golangci-lint call it on a directory with the changed file.
     check-exported: false
   whitespace:
-    multi-if: false   # Enforces newlines (or comments) after every multi-line if statement
+    multi-if: false # Enforces newlines (or comments) after every multi-line if statement
     multi-func: false # Enforces newlines (or comments) after every multi-line function signature
   wsl:
     # If true append is only allowed to be cuddled if appending value is
@@ -116,7 +115,6 @@ linters:
     - bodyclose
   fast: false
 
-
 issues:
   exclude-rules:
     # Exclude some linters from running on tests files.
@@ -138,11 +136,12 @@ issues:
     - linters:
         - staticcheck
       text: "SA9003:"
-
-    # Exclude some staticcheck messages
     - linters:
         - staticcheck
       text: "SA5001:"
+    - linters:
+        - staticcheck
+      text: "SA1019:"
 
     # Exclude some staticcheck messages
     - linters:
@@ -169,7 +168,6 @@ issues:
         - varcheck
         - deadcode
       text: "`commit` is unused"
-
 
   # Independently from option `exclude` we use default exclude patterns,
   # it can be disabled by this option. To list all
