@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"strings"
-	"time"
 
 	voucher "github.com/grafeas/voucher/v2"
 	"github.com/grafeas/voucher/v2/client"
@@ -40,8 +39,4 @@ func getVoucherClient(ctx context.Context) (voucher.Interface, error) {
 		return nil, fmt.Errorf("invalid auth value: %q", defaultConfig.Auth)
 	}
 	return client.NewClientContext(ctx, defaultConfig.Server, options...)
-}
-
-func newContext() (context.Context, context.CancelFunc) {
-	return context.WithTimeout(context.Background(), time.Duration(defaultConfig.Timeout)*time.Second)
 }

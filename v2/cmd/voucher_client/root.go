@@ -1,10 +1,14 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
+	"time"
 
+	"github.com/docker/distribution/reference"
+	voucher "github.com/grafeas/voucher/v2"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -19,7 +23,7 @@ var (
 var rootCmd = &cobra.Command{
 	Use:   "voucher_client",
 	Short: "voucher_client sends images to a Voucher server to be reviewed",
-	Long: `voucher_client is a frontend for Voucher server, which allows users to send 
+	Long: `voucher_client is a frontend for Voucher server, which allows users to send
 images for analysis. It automatically resolves tags to digests when it encounters
 them.`,
 	Args: func(cmd *cobra.Command, args []string) error {
@@ -29,12 +33,72 @@ them.`,
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		if verify {
-			LookupAndVerify(args)
-			return
+		if err := clientRun(args); err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "%s\n", err)
+			os.Exit(1)
 		}
-		LookupAndCheck(args)
 	},
+}
+
+func clientRun(args []string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(defaultConfig.Timeout)*time.Second)
+	defer cancel()
+
+	client, err := getVoucherClient(ctx)
+	if err != nil {
+		return fmt.Errorf("creating client failed: %w", err)
+	}
+
+	canonicalRef, err := lookupCanonical(ctx, args[0])
+	if err != nil {
+		return fmt.Errorf("getting canonical reference failed: %w", err)
+	}
+
+	var op func(context.Context, string, reference.Canonical) (voucher.Response, error)
+	if verify {
+		op = client.Verify
+	} else {
+		op = client.Check
+	}
+
+	resp, err := op(ctx, getCheck(), canonicalRef)
+	if err != nil {
+		return fmt.Errorf("remote operation failed: %w", err)
+	}
+	fmt.Println(formatResponse(&resp))
+
+	if !resp.Success {
+		return fmt.Errorf("image failed to pass required check(s)")
+	}
+
+	return nil
+}
+
+// formatResponse returns the response as a string.
+func formatResponse(resp *voucher.Response) string {
+	output := ""
+	if resp.Success {
+		fmt.Println("image is approved")
+	} else {
+		fmt.Println("image was rejected")
+	}
+	for _, result := range resp.Results {
+		if result.Success {
+			output += fmt.Sprintf("   ✓ passed %s", result.Name)
+			if !result.Attested {
+				output += ", but wasn't attested"
+			}
+		} else {
+			output += fmt.Sprintf("   ✗ failed %s", result.Name)
+		}
+
+		if "" != result.Err {
+			output += fmt.Sprintf(", err: %s", result.Err)
+		}
+		output += "\n"
+	}
+
+	return output
 }
 
 // init initializes the configuration and the flags.
