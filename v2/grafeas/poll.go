@@ -6,7 +6,7 @@ import (
 
 	"github.com/docker/distribution/reference"
 	voucher "github.com/grafeas/voucher/v2"
-	"github.com/grafeas/voucher/v2/docker/uri"
+	"github.com/grafeas/voucher/v2/container/gcr"
 	"github.com/grafeas/voucher/v2/grafeas/objects"
 )
 
@@ -61,7 +61,7 @@ func pollForDiscoveries(ctx context.Context, c *Client, ref reference.Reference)
 }
 
 func getVulnerabilityDiscoveries(ctx context.Context, g *Client, ref reference.Reference) (items []objects.Occurrence, err error) {
-	project, err := uri.ReferenceToProjectName(ref)
+	project, err := gcr.ReferenceToProjectName(ref)
 	if nil != err {
 		return nil, err
 	}

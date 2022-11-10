@@ -12,7 +12,7 @@ import (
 	grafeas "google.golang.org/genproto/googleapis/grafeas/v1"
 
 	voucher "github.com/grafeas/voucher/v2"
-	"github.com/grafeas/voucher/v2/docker/uri"
+	"github.com/grafeas/voucher/v2/container/gcr"
 )
 
 const (
@@ -34,9 +34,7 @@ func vulnerabilityFilter(ref reference.Reference) string {
 func getVulnerabilityDiscoveries(ctx context.Context, client *grafeasv1.Client, ref reference.Reference) ([]*grafeas.DiscoveryOccurrence, error) {
 	occurrences := make([]*grafeas.DiscoveryOccurrence, 0, 50)
 
-	var err error
-
-	project, err := uri.ReferenceToProjectName(ref)
+	project, err := gcr.ReferenceToProjectName(ref)
 	if nil != err {
 		return nil, err
 	}

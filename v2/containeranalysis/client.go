@@ -14,7 +14,7 @@ import (
 
 	voucher "github.com/grafeas/voucher/v2"
 	"github.com/grafeas/voucher/v2/attestation"
-	"github.com/grafeas/voucher/v2/docker/uri"
+	"github.com/grafeas/voucher/v2/container/gcr"
 	"github.com/grafeas/voucher/v2/repository"
 	"github.com/grafeas/voucher/v2/signer"
 )
@@ -121,7 +121,7 @@ func (g *Client) GetVulnerabilities(ctx context.Context, ref reference.Canonical
 		return []voucher.Vulnerability{}, err
 	}
 
-	project, err := uri.ReferenceToProjectName(ref)
+	project, err := gcr.ReferenceToProjectName(ref)
 	if nil != err {
 		return []voucher.Vulnerability{}, err
 	}
@@ -160,7 +160,7 @@ func (g *Client) Close() {
 func (g *Client) GetBuildDetail(ctx context.Context, ref reference.Canonical) (repository.BuildDetail, error) {
 	var err error
 
-	project, err := uri.ReferenceToProjectName(ref)
+	project, err := gcr.ReferenceToProjectName(ref)
 	if err != nil {
 		return repository.BuildDetail{}, err
 	}

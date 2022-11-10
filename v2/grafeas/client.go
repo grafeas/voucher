@@ -8,7 +8,7 @@ import (
 	"github.com/docker/distribution/reference"
 	voucher "github.com/grafeas/voucher/v2"
 	"github.com/grafeas/voucher/v2/attestation"
-	"github.com/grafeas/voucher/v2/docker/uri"
+	"github.com/grafeas/voucher/v2/container/gcr"
 	"github.com/grafeas/voucher/v2/grafeas/objects"
 	"github.com/grafeas/voucher/v2/repository"
 	"github.com/grafeas/voucher/v2/signer"
@@ -100,7 +100,7 @@ func (g *Client) GetVulnerabilities(ctx context.Context, ref reference.Canonical
 		return []voucher.Vulnerability{}, err
 	}
 
-	project, err := uri.ReferenceToProjectName(ref)
+	project, err := gcr.ReferenceToProjectName(ref)
 	if nil != err {
 		return []voucher.Vulnerability{}, err
 	}
@@ -132,7 +132,7 @@ func (g *Client) Close() {}
 
 // GetBuildDetail gets BuildDetails for the passed image.
 func (g *Client) GetBuildDetail(ctx context.Context, ref reference.Canonical) (repository.BuildDetail, error) {
-	project, err := uri.ReferenceToProjectName(ref)
+	project, err := gcr.ReferenceToProjectName(ref)
 	if nil != err {
 		return repository.BuildDetail{}, err
 	}

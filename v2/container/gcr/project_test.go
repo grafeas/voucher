@@ -1,9 +1,10 @@
-package uri
+package gcr_test
 
 import (
 	"testing"
 
 	"github.com/docker/distribution/reference"
+	"github.com/grafeas/voucher/v2/container/gcr"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -21,7 +22,7 @@ func TestReferenceToProjectName(t *testing.T) {
 			ref, err := reference.Parse(img)
 			require.NoError(t, err)
 
-			project, err := ReferenceToProjectName(ref)
+			project, err := gcr.ReferenceToProjectName(ref)
 			if expectedProject != "" {
 				assert.NoError(t, err)
 				assert.Equal(t, expectedProject, project)
