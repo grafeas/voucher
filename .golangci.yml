@@ -42,9 +42,6 @@ linters-settings:
     # put imports beginning with prefix after 3rd-party packages;
     # it's a comma-separated list of prefixes
     local-prefixes: github.com/grafeas/voucher
-  golint:
-    # minimal confidence for issues, default is 0.8
-    min-confidence: 0.8
   govet:
     # report about shadowed variables
     check-shadowing: true
@@ -109,7 +106,6 @@ linters:
   enable:
     - megacheck
     - govet
-    - golint
     - ineffassign
     - misspell
     - gocyclo
@@ -150,7 +146,7 @@ issues:
 
     # Exclude some staticcheck messages
     - linters:
-        - errcheck 
+        - errcheck
       text: "Error return value of `viper.BindPFlag`"
 
     # Exclude lll issues for long lines with go:generate
@@ -161,14 +157,6 @@ issues:
     - linters:
         - errcheck
       text: "^Error return value of `.*\\.Close` is not checked"
-
-    - linters:
-        - golint 
-      text: "^exported .* should have comment.*or be unexported"
-
-    - linters:
-        - golint 
-      text: "KeysById"
 
     - linters:
         - unused
