@@ -8,21 +8,6 @@ import (
 	digest "github.com/opencontainers/go-digest"
 )
 
-// GetTokenURI gets the token URI for the passed repository.
-func GetTokenURI(ref reference.Named) string {
-	hostname := reference.Domain(ref)
-	repository := reference.Path(ref)
-
-	query := url.Values{}
-	query.Set("service", hostname)
-	query.Set("scope", "repository:"+repository+":*")
-
-	u := createURL(ref, "token")
-	u.RawQuery = query.Encode()
-
-	return u.String()
-}
-
 // GetBlobURI gets a blob URI based on the passed repository and
 // digest.
 func GetBlobURI(ref reference.Named, digest digest.Digest) string {

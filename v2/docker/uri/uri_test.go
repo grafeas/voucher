@@ -14,14 +14,11 @@ const (
 	testDigest      = "sha256:cb749360c5198a55859a7f335de3cf4e2f64b60886a2098684a2f9c7ffca81f2"
 	testBlobURL     = "https://" + testHostname + "/v2/" + testProject + "/blobs/" + testDigest
 	testManifestURL = "https://" + testHostname + "/v2/" + testProject + "/manifests/" + testDigest
-	testTokenURL    = "https://" + testHostname + "/v2/token?scope=repository%3Atest%2Fproject%3A%2A&service=gcr.io"
 )
 
 func TestGetBaseURI(t *testing.T) {
 	named, err := reference.ParseNamed(testHostname + "/" + testProject + "@" + testDigest)
 	require.NoError(t, err, "failed to parse uri: %s", err)
-
-	assert.Equal(t, testTokenURL, GetTokenURI(named))
 
 	canonicalRef, ok := named.(reference.Canonical)
 	require.True(t, ok)
