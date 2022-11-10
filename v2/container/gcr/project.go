@@ -7,14 +7,6 @@ import (
 	"github.com/docker/distribution/reference"
 )
 
-type ErrNoProjectInReference struct {
-	ref reference.Reference
-}
-
-func (err *ErrNoProjectInReference) Error() string {
-	return fmt.Sprintf("could not find project path in reference \"%s\"", err.ref)
-}
-
 // ReferenceToProjectName returns what should be the GCR project name for an
 // image reference.
 //
@@ -31,7 +23,5 @@ func ReferenceToProjectName(ref reference.Reference) (string, error) {
 		}
 	}
 
-	return "", &ErrNoProjectInReference{
-		ref: ref,
-	}
+	return "", fmt.Errorf("could not find project path in reference %q", ref)
 }

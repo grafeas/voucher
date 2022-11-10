@@ -7,8 +7,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/docker/distribution/reference"
+	"github.com/google/go-containerregistry/pkg/v1/google"
 	voucher "github.com/grafeas/voucher/v2"
+	"github.com/grafeas/voucher/v2/container"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -44,24 +45,28 @@ func clientRun(args []string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(defaultConfig.Timeout)*time.Second)
 	defer cancel()
 
-	client, err := getVoucherClient(ctx)
-	if err != nil {
-		return fmt.Errorf("creating client failed: %w", err)
-	}
-
-	canonicalRef, err := lookupCanonical(ctx, args[0])
+	// Attempt google auth, but don't worry if it fails:
+	googleAuth, _ := google.NewEnvAuthenticator()
+	resolver := container.NewResolver(googleAuth)
+	digest, err := resolver.ToDigest(ctx, args[0])
 	if err != nil {
 		return fmt.Errorf("getting canonical reference failed: %w", err)
 	}
 
-	var op func(context.Context, string, reference.Canonical) (voucher.Response, error)
+	client, err := getVoucherClient(ctx)
+	if err != nil {
+		return fmt.Errorf("creating client failed: %w", err)
+	}
+	var op func(context.Context, string, string) (voucher.Response, error)
 	if verify {
 		op = client.Verify
+		fmt.Printf("Verifying %s\n", digest)
 	} else {
 		op = client.Check
+		fmt.Printf("Checking %s\n", digest)
 	}
 
-	resp, err := op(ctx, getCheck(), canonicalRef)
+	resp, err := op(ctx, getCheck(), digest.String())
 	if err != nil {
 		return fmt.Errorf("remote operation failed: %w", err)
 	}

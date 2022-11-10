@@ -4,12 +4,10 @@ import (
 	"context"
 	"path"
 
-	"github.com/docker/distribution/reference"
-
 	voucher "github.com/grafeas/voucher/v2"
 )
 
-func (c *Client) Verify(ctx context.Context, check string, image reference.Canonical) (voucher.Response, error) {
+func (c *Client) Verify(ctx context.Context, check string, image string) (voucher.Response, error) {
 	url := c.toVoucherVerifyURL(check)
 	resp, err := c.doVoucherRequest(ctx, url, image)
 	if err != nil {

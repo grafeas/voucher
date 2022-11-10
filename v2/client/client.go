@@ -11,7 +11,6 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/docker/distribution/reference"
 	voucher "github.com/grafeas/voucher/v2"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -145,9 +144,9 @@ func (c *Client) CopyURL() *url.URL {
 	return &urlCopy
 }
 
-func (c *Client) newVoucherRequest(ctx context.Context, url string, image reference.Canonical) (*http.Request, error) {
+func (c *Client) newVoucherRequest(ctx context.Context, url string, image string) (*http.Request, error) {
 	voucherReq := voucher.Request{
-		ImageURL: image.String(),
+		ImageURL: image,
 	}
 
 	var buf bytes.Buffer
@@ -168,7 +167,7 @@ func (c *Client) newVoucherRequest(ctx context.Context, url string, image refere
 	return req, nil
 }
 
-func (c *Client) doVoucherRequest(ctx context.Context, url string, image reference.Canonical) (*voucher.Response, error) {
+func (c *Client) doVoucherRequest(ctx context.Context, url string, image string) (*voucher.Response, error) {
 	req, err := c.newVoucherRequest(ctx, url, image)
 	if err != nil {
 		return nil, fmt.Errorf("could create voucher request: %w", err)

@@ -8,7 +8,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/docker/distribution/reference"
 	"github.com/grafeas/voucher/v2"
 	"github.com/grafeas/voucher/v2/client"
 	"github.com/stretchr/testify/assert"
@@ -57,7 +56,7 @@ func TestVoucher_Check(t *testing.T) {
 
 	c, err := client.NewClient(srv.URL)
 	require.NoError(t, err)
-	res, err := c.Check(context.Background(), "diy", canonical(t, image))
+	res, err := c.Check(context.Background(), "diy", image)
 	require.NoError(t, err)
 	assert.True(t, res.Success)
 }
@@ -72,7 +71,7 @@ func TestVoucher_CustomUserAgent(t *testing.T) {
 
 	c, err := client.NewClientContext(context.Background(), srv.URL, client.WithUserAgent(customUserAgent))
 	require.NoError(t, err)
-	res, err := c.Check(context.Background(), "diy", canonical(t, image))
+	res, err := c.Check(context.Background(), "diy", image)
 	require.NoError(t, err)
 	assert.True(t, res.Success)
 }
@@ -85,7 +84,7 @@ func TestVoucher_Verify(t *testing.T) {
 
 	c, err := client.NewClient(srv.URL)
 	require.NoError(t, err)
-	res, err := c.Verify(context.Background(), "diy", canonical(t, image))
+	res, err := c.Verify(context.Background(), "diy", image)
 	require.NoError(t, err)
 	assert.True(t, res.Success)
 }
@@ -134,12 +133,4 @@ func (v *mockVoucher) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Add("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(res)
-}
-
-func canonical(t *testing.T, image string) reference.Canonical {
-	ref, err := reference.Parse(image)
-	require.NoError(t, err)
-	canonical, ok := ref.(reference.Canonical)
-	require.True(t, ok)
-	return canonical
 }
