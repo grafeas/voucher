@@ -13,7 +13,7 @@ require (
 	github.com/Shopify/ejson v1.2.0
 	github.com/antihax/optional v1.0.0
 	github.com/bradleyfalzon/ghinstallation v1.1.1
-	github.com/docker/distribution v2.6.0-rc.1.0.20180913220339-b089e9168825+incompatible
+	github.com/docker/distribution v2.8.2-beta.1+incompatible
 	github.com/docker/docker v1.13.2-0.20170524085120-eef6495eddab
 	github.com/docker/libtrust v0.0.0-20160708172513-aabc10ec26b7
 	github.com/golang/mock v1.6.0
