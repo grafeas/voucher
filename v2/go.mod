@@ -133,5 +133,5 @@ require (
 	gopkg.in/square/go-jose.v2 v2.3.1 // indirect
 	gopkg.in/urfave/cli.v1 v1.20.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20210107172259-749611fa9fcc // indirect
+	gopkg.in/yaml.v3 v3.0.0 // indirect
 )
