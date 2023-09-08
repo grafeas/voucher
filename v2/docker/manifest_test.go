@@ -19,7 +19,8 @@ func TestRequestManifest(t *testing.T) {
 	manifest, err := RequestManifest(client, ref)
 	require.NoError(t, err)
 
-	schema2Manifest := schema2.ToManifest(manifest)
+	schema2Manifest, err := schema2.ToManifest(client, ref, manifest)
+	require.NoError(t, err)
 
 	assert.Equal(
 		t,
@@ -53,5 +54,24 @@ func TestRateLimitedBadManifest(t *testing.T) {
 	assert.Equal(t,
 		NewManifestErrorWithRequest("200 OK", []byte(vtesting.RateLimitOutput+"\n")),
 		err,
+	)
+}
+
+func TestRequestManifestList(t *testing.T) {
+	ref := vtesting.NewTestManifestListReference(t)
+
+	client, server := vtesting.PrepareDockerTest(t, ref)
+	defer server.Close()
+
+	manifest, err := RequestManifest(client, ref)
+	require.NoError(t, err)
+
+	schema2Manifest, err := schema2.ToManifest(client, ref, manifest)
+	require.NoError(t, err)
+
+	assert.Equal(
+		t,
+		vtesting.NewTestManifest().Manifest,
+		schema2Manifest,
 	)
 }

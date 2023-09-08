@@ -31,5 +31,5 @@ func TestGetBaseURI(t *testing.T) {
 	assert.Equal(t, hostname, "gcr.io")
 	assert.Equal(t, path, testProject)
 	assert.Equal(t, testBlobURL, GetBlobURI(canonicalRef, canonicalRef.Digest()))
-	assert.Equal(t, testManifestURL, GetManifestURI(canonicalRef))
+	assert.Equal(t, testManifestURL, GetDigestManifestURI(canonicalRef))
 }
