@@ -54,7 +54,7 @@ func (a *testAuth) ToClient(ctx context.Context, image reference.Named) (*http.C
 }
 
 func (a *testAuth) IsForDomain(image reference.Named) bool {
-	return "localhost" == reference.Domain(image)
+	return reference.Domain(image) == "localhost"
 }
 
 // NewAuth creates a new Auth suitable for testing with.
