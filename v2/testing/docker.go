@@ -23,6 +23,7 @@ type dockerAPIMock struct {
 	privateKey libtrust.PrivateKey
 }
 
+//nolint:gocyclo
 // ServeHTTP implements the http.Handler interface, responding to valid requests with good data, and
 // invalid requests with garbage data.
 func (mock *dockerAPIMock) ServeHTTP(writer http.ResponseWriter, req *http.Request) {
