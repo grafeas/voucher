@@ -4,6 +4,7 @@ import (
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/manifest"
 	"github.com/docker/distribution/manifest/manifestlist"
+	"github.com/docker/distribution/manifest/ocischema"
 	"github.com/docker/distribution/manifest/schema1"
 	"github.com/docker/distribution/manifest/schema2"
 	"github.com/docker/libtrust"
@@ -79,6 +80,42 @@ func NewTestManifestList() *manifestlist.ManifestList {
 			},
 		},
 	}
+}
+
+func NewTestOCIManifest() *ocischema.DeserializedManifest {
+	manifest := ocischema.Manifest{
+		Config: distribution.Descriptor{
+			MediaType: "application/vnd.oci.image.config.v1+json",
+			Digest:    "sha256:0fddd6ec43ab484d35772852bbeefbc825bc2b9846d121f1e87da42cfef62e00",
+			Size:      12834,
+		},
+		Layers: []distribution.Descriptor{
+			{
+				MediaType: "application/vnd.oci.image.layer.v1.tar+gzip",
+				Digest:    "sha256:31e352740f534f9ad170f75378a84fe453d6156e40700b882d737a8f4a6988a3",
+				Size:      3397879,
+			},
+			{
+				MediaType: "application/vnd.oci.image.layer.v1.tar+gzip",
+				Digest:    "sha256:a909a6dccb2a6d84f4f5aefc708bf3ffcc5d43ef0281708c595f1d3f126d395d",
+				Size:      2014277,
+			},
+			{
+				MediaType: "application/vnd.oci.image.layer.v1.tar+gzip",
+				Digest:    "sha256:4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1",
+				Size:      32,
+			},
+		},
+	}
+
+	manifest.SchemaVersion = 2
+	manifest.MediaType = ocischema.SchemaVersion.MediaType
+
+	newManifest, err := ocischema.FromStruct(manifest)
+	if err != nil {
+		panic("failed to generate new OCI manifest")
+	}
+	return newManifest
 }
 
 // NewTestRootManifest creates a test schema2 manifest for our mock Docker API, which points to an image whose user is configured to be root

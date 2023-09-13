@@ -11,9 +11,9 @@ import (
 )
 
 func TestRequestConfig(t *testing.T) {
-	ref := vtesting.NewTestReference(t)
+	ref := vtesting.NewTestOCIReference(t)
 
-	manifest := vtesting.NewTestManifest()
+	manifest := vtesting.NewTestOCIManifest()
 
 	client, server := vtesting.PrepareDockerTest(t, ref)
 	defer server.Close()

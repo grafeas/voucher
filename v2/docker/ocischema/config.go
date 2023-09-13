@@ -21,7 +21,7 @@ type v2Blob struct {
 // Returns an ImageConfig or an error.
 func RequestConfig(client *http.Client, ref reference.Canonical, manifest distribution.Manifest) (*dockerTypes.ExecConfig, error) {
 	if !IsManifest(manifest) {
-		return nil, errors.New("cannot request schema2 config for non-schema2 manifest")
+		return nil, errors.New("cannot request oci schema2 config for non-oci schema2 manifest")
 	}
 
 	v2Manifest, err := ToManifest(client, ref, manifest)

@@ -16,6 +16,15 @@ func NewTestReference(t *testing.T) reference.Canonical {
 	return parseReference(t, "localhost/path/to/image@sha256:b148c8af52ba402ed7dd98d73f5a41836ece508d1f4704b274562ac0c9b3b7da")
 }
 
+// NewTestOCIReference a new oci reference to be used for testing oci image manifests.
+// The returned reference is assumed to exist, and is assumed to have valid configuration
+// and layers.
+func NewTestOCIReference(t *testing.T) reference.Canonical {
+	t.Helper()
+
+	return parseReference(t, "localhost/path/to/image-oci@sha256:bbc57559ea5f6d7359f53c92bdfd386df0b1b0384591a24b7a6cf40b77343a4a")
+}
+
 // NewTestManifestListReference creates a new reference to be used throughout the docker tests.
 // The returned reference is assumed to be a manifest list, with images for multiple platforms.
 func NewTestManifestListReference(t *testing.T) reference.Canonical {

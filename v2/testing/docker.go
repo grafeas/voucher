@@ -61,6 +61,14 @@ func (mock *dockerAPIMock) ServeHTTP(writer http.ResponseWriter, req *http.Reque
 	case "/v2/path/to/image/manifests/sha256:fefafefa52ba402ed7dd98d73f5a41836ece508d1f4704b274562ac0c9b3b7da":
 		jsonRespond(writer, manifestlist.MediaTypeManifestList, NewTestManifestList())
 		return
+	case "/v2/path/to/image-oci/manifests/latest", "/v2/path/to/image-oci/manifests/sha256:bbc57559ea5f6d7359f53c92bdfd386df0b1b0384591a24b7a6cf40b77343a4a":
+		writer.Header().Set("Docker-Content-Digest", "sha256:bbc57559ea5f6d7359f53c92bdfd386df0b1b0384591a24b7a6cf40b77343a4a")
+		mimeType, raw, _ := NewTestOCIManifest().Payload()
+		rawRespond(writer, mimeType, string(raw))
+		return
+	case "/v2/path/to/image-oci/blobs/sha256:0fddd6ec43ab484d35772852bbeefbc825bc2b9846d121f1e87da42cfef62e00":
+		jsonRespond(writer, schema2.MediaTypeImageConfig, NewTestNobodyImageConfig())
+		return
 	}
 
 	http.Error(writer, fmt.Sprintf("failed to handle request: %s", req.URL.Path), 500)
