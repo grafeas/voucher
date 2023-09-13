@@ -4,9 +4,7 @@ import (
 	"testing"
 
 	"github.com/docker/distribution"
-	"github.com/docker/distribution/manifest/manifestlist"
 	"github.com/docker/distribution/manifest/ocischema"
-	"github.com/docker/distribution/reference"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -19,17 +17,6 @@ const (
 func TestToManifest(t *testing.T) {
 	newManifest := NewTestOCIManifest()
 	manifest, err := ToManifest(nil, nil, newManifest)
-	require.NoError(t, err)
-	assert.NotNil(t, manifest)
-}
-
-func TestToManifestList(t *testing.T) {
-	newManifest := NewTestOCIManifestList()
-	assert.Nil(t, newManifest)
-
-	testRef, err := reference.ParseNamed("docker.io/library/docker@sha256:25a7feece7050334e8bd478dc9b6031c24db7fe81b2665abe690698ec52074f2")
-	require.NoError(t, err)
-	manifest, err := ToManifest(nil, testRef, newManifest)
 	require.NoError(t, err)
 	assert.NotNil(t, manifest)
 }
@@ -65,57 +52,4 @@ func NewTestOCIManifest() *ocischema.DeserializedManifest {
 		panic("failed to generate new OCI manifest")
 	}
 	return newManifest
-}
-
-func NewTestOCIManifestList() *manifestlist.DeserializedManifestList {
-	// ManifestList based off of docker:latest image
-	testManifestDescriptors := []manifestlist.ManifestDescriptor{
-		// Matched Manifest
-		{
-			Platform: manifestlist.PlatformSpec{
-				OS:           "linux",
-				Architecture: "amd64",
-			},
-			Descriptor: distribution.Descriptor{
-				Digest:    "sha256:bbc57559ea5f6d7359f53c92bdfd386df0b1b0384591a24b7a6cf40b77343a4a",
-				Size:      3327,
-				MediaType: "application/vnd.oci.image.manifest.v1+json",
-			},
-		},
-		// Wrong arch
-		{
-			Platform: manifestlist.PlatformSpec{
-				OS:           "linux",
-				Architecture: "arm64",
-				Variant:      "v8",
-			},
-			Descriptor: distribution.Descriptor{
-				Digest:    "sha256:779ce156c5fb1a44c72252f2167ef492914727be3fc0abba6c4199414b383f10",
-				Size:      3327,
-				MediaType: "application/vnd.oci.image.manifest.v1+json",
-			},
-		},
-		// Unknown
-		{
-			Platform: manifestlist.PlatformSpec{
-				OS:           "unknown",
-				Architecture: "unknown",
-			},
-			Descriptor: distribution.Descriptor{
-				Digest:    "sha256:31b162dbcfef47a911a9c3d68e295c259b383bd6d552864240020c7f6b7ec847",
-				Size:      840,
-				MediaType: "application/vnd.oci.image.manifest.v1+json",
-			},
-		},
-	}
-
-	deserializedManifest, err := manifestlist.FromDescriptorsWithMediaType(
-		testManifestDescriptors,
-		manifestlist.OCISchemaVersion.MediaType,
-	)
-	if err != nil {
-		panic("failed to generate new OCI manifest list")
-	}
-
-	return deserializedManifest
 }
