@@ -7,6 +7,7 @@ import (
 	"github.com/docker/distribution/reference"
 	dockerTypes "github.com/docker/docker/api/types"
 
+	"github.com/grafeas/voucher/v2/docker/ocischema"
 	"github.com/grafeas/voucher/v2/docker/schema1"
 	"github.com/grafeas/voucher/v2/docker/schema2"
 )
@@ -26,6 +27,8 @@ func RequestImageConfig(client *http.Client, ref reference.Canonical) (ImageConf
 		config, err = schema1.RequestConfig(client, ref, manifest)
 	case schema2.IsManifest(manifest):
 		config, err = schema2.RequestConfig(client, ref, manifest)
+	case ocischema.IsManifest(manifest):
+		config, err = ocischema.RequestConfig(client, ref, manifest)
 	default:
 		err = errors.New("image does not have any configuration")
 	}
