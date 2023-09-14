@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/docker/distribution/manifest/ocischema"
 	"github.com/docker/distribution/manifest/schema1"
 	"github.com/docker/distribution/manifest/schema2"
 	"github.com/docker/distribution/reference"
@@ -22,6 +23,7 @@ func GetDigestFromTagged(client *http.Client, image reference.NamedTagged) (dige
 		return blank, err
 	}
 
+	request.Header.Add("Accept", ocischema.SchemaVersion.MediaType)
 	request.Header.Add("Accept", schema2.MediaTypeManifest)
 	request.Header.Add("Accept", schema1.MediaTypeManifest)
 	request.Header.Add("Accept", schema1.MediaTypeSignedManifest)
