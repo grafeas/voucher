@@ -16,8 +16,14 @@ import (
 // IsManifest returns true if the passed manifest is a schema2 manifest.
 func IsManifest(m distribution.Manifest) bool {
 	switch m.(type) {
-	case *ocischema.DeserializedManifest, manifestlist.DeserializedManifestList:
+	case *ocischema.DeserializedManifest:
 		return true
+	case *manifestlist.DeserializedManifestList:
+		mType, _, _ := m.Payload()
+		if mType == manifestlist.OCISchemaVersion.MediaType {
+			return true
+		}
+		return false
 	default:
 		return false
 	}
@@ -61,7 +67,7 @@ func resolveManifestFromList(client *http.Client, ref reference.Named, mfs *mani
 		if err != nil {
 			return ocischema.Manifest{}, fmt.Errorf("preparing request to fetch manifest from list: %w", err)
 		}
-		req.Header.Add("Accept", manifestlist.OCISchemaVersion.MediaType)
+		req.Header.Add("Accept", ocischema.SchemaVersion.MediaType)
 
 		resp, err := client.Do(req)
 		if err != nil {

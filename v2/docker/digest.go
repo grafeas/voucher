@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/docker/distribution/manifest/manifestlist"
 	"github.com/docker/distribution/manifest/ocischema"
 	"github.com/docker/distribution/manifest/schema1"
 	"github.com/docker/distribution/manifest/schema2"
@@ -24,6 +25,8 @@ func GetDigestFromTagged(client *http.Client, image reference.NamedTagged) (dige
 	}
 
 	request.Header.Add("Accept", ocischema.SchemaVersion.MediaType)
+	request.Header.Add("Accept", manifestlist.OCISchemaVersion.MediaType)
+	request.Header.Add("Accept", manifestlist.MediaTypeManifestList)
 	request.Header.Add("Accept", schema2.MediaTypeManifest)
 	request.Header.Add("Accept", schema1.MediaTypeManifest)
 	request.Header.Add("Accept", schema1.MediaTypeSignedManifest)
@@ -39,7 +42,7 @@ func GetDigestFromTagged(client *http.Client, image reference.NamedTagged) (dige
 	}
 
 	imageDigest := digest.Digest(resp.Header.Get("Docker-Content-Digest"))
-	if "" == string(imageDigest) {
+	if string(imageDigest) == "" {
 		return blank, errors.New("empty digest returned for image")
 	}
 

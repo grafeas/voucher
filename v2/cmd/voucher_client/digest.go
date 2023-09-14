@@ -31,6 +31,7 @@ func getCanonicalReference(client *http.Client, ref reference.Reference) (refere
 		if nil != err {
 			return nil, fmt.Errorf("making canonical reference failed: %s", err)
 		}
+
 		return canonicalRef, nil
 	}
 	return nil, fmt.Errorf("reference cannot be converted to a canonical reference")
