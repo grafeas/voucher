@@ -8,7 +8,6 @@ import (
 
 	"github.com/docker/distribution"
 	"github.com/docker/distribution/manifest/manifestlist"
-	"github.com/docker/distribution/manifest/schema2"
 	v2 "github.com/docker/distribution/manifest/schema2"
 	"github.com/docker/distribution/reference"
 	"github.com/grafeas/voucher/v2/docker/uri"
@@ -17,8 +16,14 @@ import (
 // IsManifest returns true if the passed manifest is a schema2 manifest.
 func IsManifest(m distribution.Manifest) bool {
 	switch m.(type) {
-	case *v2.DeserializedManifest, *manifestlist.DeserializedManifestList:
+	case *v2.DeserializedManifest:
 		return true
+	case *manifestlist.DeserializedManifestList:
+		mType, _, _ := m.Payload()
+		if mType == manifestlist.MediaTypeManifestList {
+			return true
+		}
+		return false
 	default:
 		return false
 	}
@@ -62,7 +67,7 @@ func resolveManifestFromList(client *http.Client, ref reference.Named, mfs *mani
 		if err != nil {
 			return v2.Manifest{}, fmt.Errorf("preparing request to fetch manifest from list: %w", err)
 		}
-		req.Header.Add("Accept", schema2.MediaTypeManifest)
+		req.Header.Add("Accept", v2.MediaTypeManifest)
 
 		resp, err := client.Do(req)
 		if err != nil {
