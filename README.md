@@ -1,7 +1,15 @@
 ![Tests](https://github.com/grafeas/voucher/workflows/Test/badge.svg)
 [![Go Report Card](https://goreportcard.com/badge/github.com/grafeas/voucher)](https://goreportcard.com/report/github.com/grafeas/voucher)
 
-# voucher
+# [ARCHIVED] Voucher
+
+> [!WARNING]
+> **Deprecation Notice**
+>
+> This project has been archived and is no longer under active maintenance. It
+> constitutes a historical record of the codebase as it existed on
+> November 6, 2026. While the codebase remains accessible for reference, further
+> contributions and ongoing support will not be provided.
 
 **Table of Contents**
 
